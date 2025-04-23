@@ -1,12 +1,18 @@
 package com.ugrasu.bordexback.dto.slim;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.ugrasu.bordexback.dto.validation.OnCreate;
+import com.ugrasu.bordexback.dto.validation.OnUpdate;
+import jakarta.validation.constraints.Null;
 import lombok.Value;
 
-/**
- * DTO for {@link com.ugrasu.bordexback.entity.UserBoardRole}
- */
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserBoardRoleSlimDto {
+
+    @Null(
+            message = "ID задается системой",
+            groups = {OnCreate.class, OnUpdate.class}
+    )
+    Long id;
 }

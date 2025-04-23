@@ -9,8 +9,8 @@ import com.ugrasu.bordexback.repository.BoardRepository;
 import com.ugrasu.bordexback.repository.TaskRepository;
 import com.ugrasu.bordexback.repository.UserBoardRoleRepository;
 import com.ugrasu.bordexback.repository.UserRepository;
-import com.ugrasu.bordexback.utli.BoardDataUtil;
-import com.ugrasu.bordexback.utli.UserDataUtil;
+import com.ugrasu.bordexback.utli.DataGenerator;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Import;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
 @Import(PostgreTestcontainerConfig.class)
@@ -52,65 +53,85 @@ public class UserBoardRoleIntegrationTest {
     @Test
     @DisplayName("Сохранить userBoardRole")
     public void shouldSaveUserBoardRole() {
-        User user = UserDataUtil.getSimpleUser();
+        User user = DataGenerator.getSimpleUser();
         user = userRepository.save(user);
-        Board board = BoardDataUtil.getSimpleBoard();
-        board.setOwner(user);
+        Board board = DataGenerator.getSimpleBoard(user);
         board = boardRepository.save(board);
-        Set<BoardRole> boardRoles = Set.of(BoardRole.EMPLOYEE);
+        UserBoardRole toSave = DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.VIEWER);
 
 
-        UserBoardRole save = userBoardRoleService.save(user.getId(), board.getId(), boardRoles);
+        UserBoardRole save = userBoardRoleService.save(user.getId(), board.getId(), toSave);
         UserBoardRole found = userBoardRoleService.findOne(save.getId());
+
 
         assertThat(found.getBoard()).isEqualTo(board);
         assertThat(found.getId()).isEqualTo(save.getId());
-        assertThat(found.getBoardRoles()).isEqualTo(boardRoles);
+        assertThat(found.getBoardRoles().size()).isEqualTo(1);
+        assertThat(found.getBoardRoles().contains(BoardRole.VIEWER)).isTrue();
         assertThat(found.getUser()).isEqualTo(user);
     }
 
     @Test
     @DisplayName("Обновить userBoardRole")
     public void shouldPatchUserBoardRole() {
-        User user = UserDataUtil.getSimpleUser();
+        User user = DataGenerator.getSimpleUser();
         user = userRepository.save(user);
-        Board board = BoardDataUtil.getSimpleBoard();
-        board.setOwner(user);
+        Board board = DataGenerator.getSimpleBoard(user);
         board = boardRepository.save(board);
-        Set<BoardRole> boardRoles = Set.of(BoardRole.EMPLOYEE);
-        Set<BoardRole> newBoardRoles = Set.of(BoardRole.EMPLOYEE, BoardRole.DEVELOPER);
+        UserBoardRole toSave = DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.VIEWER);
+        UserBoardRole toUpdate = DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.VIEWER, BoardRole.DEVELOPER);
 
-
-        UserBoardRole save = userBoardRoleService.save(user.getId(), board.getId(), boardRoles);
-        userBoardRoleService.patch(user.getId(), board.getId(), newBoardRoles);
+        UserBoardRole save = userBoardRoleService.save(user.getId(), board.getId(), toSave);
+        userBoardRoleService.patch(user.getId(), board.getId(), toUpdate);
         UserBoardRole found = userBoardRoleService.findOne(save.getId());
 
         assertThat(found.getBoard()).isEqualTo(board);
         assertThat(found.getId()).isEqualTo(save.getId());
-        assertThat(found.getBoardRoles()).isEqualTo(newBoardRoles);
+        assertThat(found.getBoardRoles().size()).isEqualTo(2);
+        assertThat(found.getBoardRoles().contains(BoardRole.VIEWER)).isTrue();
+        assertThat(found.getBoardRoles().contains(BoardRole.DEVELOPER)).isTrue();
         assertThat(found.getUser()).isEqualTo(user);
     }
 
     @Test
     @DisplayName("Удалить userBoardRole")
     public void shouldDeleteUserBoardRole() {
-        User user = UserDataUtil.getSimpleUser();
+        User user = DataGenerator.getSimpleUser();
         user = userRepository.save(user);
-        Board board = BoardDataUtil.getSimpleBoard();
+        Board board = DataGenerator.getSimpleBoard();
         board.setOwner(user);
         board = boardRepository.save(board);
-        Set<BoardRole> boardRoles = Set.of(BoardRole.EMPLOYEE, BoardRole.DEVELOPER, BoardRole.MANAGER);
-        Set<BoardRole> outputRoles = Set.of(BoardRole.EMPLOYEE, BoardRole.DEVELOPER);
+        UserBoardRole toSave = DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.VIEWER, BoardRole.DEVELOPER, BoardRole.MANAGER);
+        Set<BoardRole> outputRoles = Set.of(BoardRole.VIEWER, BoardRole.DEVELOPER);
 
 
-        UserBoardRole save = userBoardRoleService.save(user.getId(), board.getId(), boardRoles);
-        userBoardRoleService.delete(user.getId(), board.getId(), Set.of(BoardRole.MANAGER));
+        UserBoardRole save = userBoardRoleService.save(user.getId(), board.getId(), toSave);
+        userBoardRoleService.deleteBoardRole(user.getId(), board.getId(), BoardRole.MANAGER);
         UserBoardRole found = userBoardRoleService.findOne(save.getId());
+
 
         assertThat(found.getBoard()).isEqualTo(board);
         assertThat(found.getId()).isEqualTo(save.getId());
         assertThat(found.getBoardRoles()).isEqualTo(outputRoles);
         assertThat(found.getUser()).isEqualTo(user);
+    }
+
+    @Test
+    @DisplayName("Удалить userBoardRole все роли")
+    public void shouldDeleteUserBoardRoleAllRoles() {
+        User user = DataGenerator.getSimpleUser();
+        user = userRepository.save(user);
+        Board board = DataGenerator.getSimpleBoard();
+        board.setOwner(user);
+        board = boardRepository.save(board);
+        UserBoardRole toSave = DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.VIEWER, BoardRole.DEVELOPER, BoardRole.MANAGER);
+
+
+        UserBoardRole save = userBoardRoleService.save(user.getId(), board.getId(), toSave);
+        userBoardRoleService.deleteAll(user.getId(), board.getId());
+
+        assertThatThrownBy(() -> userBoardRoleService.findOne(save.getId()))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
 

@@ -1,10 +1,10 @@
 package com.ugrasu.bordexback.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@FilterDef(name = "notDeletedFilter")
+@Filter(name = "notDeletedFilter", condition = "deleted IS false")
 public class BaseEntity implements Serializable {
 
     @Id
@@ -22,13 +24,13 @@ public class BaseEntity implements Serializable {
     @EqualsAndHashCode.Exclude
     protected Long id;
 
-    @Column(name = "create_at")
+    @Column(name = "created_at", nullable = false, updatable = false)
     @EqualsAndHashCode.Exclude
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
-    @Column(name = "update_at")
+    @Column(name = "updated_at", nullable = false)
     @EqualsAndHashCode.Exclude
-    private LocalDateTime updateAt;
+    private LocalDateTime updatedAt;
 
     @Column(name = "deleted", nullable = false)
     @EqualsAndHashCode.Exclude
@@ -36,13 +38,12 @@ public class BaseEntity implements Serializable {
 
     @PrePersist
     protected void onCreate() {
-        createAt = LocalDateTime.now();
-        updateAt = createAt;
+        createdAt = LocalDateTime.now();
+        updatedAt = createdAt;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updateAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
-
 }

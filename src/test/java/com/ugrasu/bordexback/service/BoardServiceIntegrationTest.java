@@ -9,9 +9,7 @@ import com.ugrasu.bordexback.repository.BoardRepository;
 import com.ugrasu.bordexback.repository.TaskRepository;
 import com.ugrasu.bordexback.repository.UserBoardRoleRepository;
 import com.ugrasu.bordexback.repository.UserRepository;
-import com.ugrasu.bordexback.utli.BoardDataUtil;
-import com.ugrasu.bordexback.utli.TaskDataUtil;
-import com.ugrasu.bordexback.utli.UserDataUtil;
+import com.ugrasu.bordexback.utli.DataGenerator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,8 +51,8 @@ public class BoardServiceIntegrationTest {
     @Test
     @DisplayName("Сохранить board")
     public void shouldSaveBoardWithOwner() {
-        Board simpleBoard = BoardDataUtil.getSimpleBoard();
-        User owner = UserDataUtil.getSimpleUser();
+        Board simpleBoard = DataGenerator.getSimpleBoard();
+        User owner = DataGenerator.getSimpleUser();
         owner = userRepository.save(owner);
 
 
@@ -72,13 +70,13 @@ public class BoardServiceIntegrationTest {
     public void shouldUpdateBoardNameAndDescription() {
         String updatedName = "New name";
         String updateDescription = "New description";
-        Board simpleBoard = BoardDataUtil.getSimpleBoard();
-        User owner = UserDataUtil.getSimpleUser();
+        Board simpleBoard = DataGenerator.getSimpleBoard();
+        User owner = DataGenerator.getSimpleUser();
         owner = userRepository.save(owner);
 
 
         Board saved = boardService.save(simpleBoard, owner);
-        Board updated = BoardDataUtil.getSimpleBoard();
+        Board updated = DataGenerator.getSimpleBoard();
         updated.setName(updatedName);
         updated.setDescription(updateDescription);
         Board patched = boardService.patch(saved.getId(), updated);
@@ -95,13 +93,13 @@ public class BoardServiceIntegrationTest {
     @DisplayName("Сохранить board, затем обновить scope")
     public void shouldUpdateScope() {
         Scope updateScopePrivate = Scope.PRIVATE;
-        Board simpleBoard = BoardDataUtil.getSimpleBoard();
-        User owner = UserDataUtil.getSimpleUser();
+        Board simpleBoard = DataGenerator.getSimpleBoard();
+        User owner = DataGenerator.getSimpleUser();
         owner = userRepository.save(owner);
 
 
         Board saved = boardService.save(simpleBoard, owner);
-        Board toPatch = BoardDataUtil.getSimpleBoard();
+        Board toPatch = DataGenerator.getSimpleBoard();
         toPatch.setScope(updateScopePrivate);
         Board patched = boardService.patch(saved.getId(), toPatch);
 
@@ -116,16 +114,16 @@ public class BoardServiceIntegrationTest {
     @Test
     @DisplayName("Сохранить board, затем обновить owner")
     public void shouldUpdateOwner() {
-        Board simpleBoard = BoardDataUtil.getSimpleBoard();
-        User oldOwner = UserDataUtil.getSimpleUser();
+        Board simpleBoard = DataGenerator.getSimpleBoard();
+        User oldOwner = DataGenerator.getSimpleUser();
         oldOwner = userRepository.save(oldOwner);
-        User newOwner = UserDataUtil.getSimpleUser();
+        User newOwner = DataGenerator.getSimpleUser();
         newOwner.setEmail("new Email");
         newOwner = userRepository.save(newOwner);
 
 
         Board saved = boardService.save(simpleBoard, oldOwner);
-        Board updated = BoardDataUtil.getSimpleBoard();
+        Board updated = DataGenerator.getSimpleBoard();
         updated.setOwner(newOwner);
         Board patched = boardService.patch(saved.getId(), updated);
 
@@ -139,11 +137,11 @@ public class BoardServiceIntegrationTest {
     @Test
     @DisplayName("Сохранить board, затем удалить")
     public void shouldDeleteBoard() {
-        Board simpleBoard = BoardDataUtil.getSimpleBoard();
-        User owner = UserDataUtil.getSimpleUser();
+        Board simpleBoard = DataGenerator.getSimpleBoard();
+        User owner = DataGenerator.getSimpleUser();
         owner = userRepository.save(owner);
-        Task firstTask = TaskDataUtil.getSimpleTask();
-        Task secondTask = TaskDataUtil.getSimpleTask();
+        Task firstTask = DataGenerator.getSimpleTask();
+        Task secondTask = DataGenerator.getSimpleTask();
 
 
         Board saved = boardService.save(simpleBoard, owner);

@@ -10,8 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
-
 @Service
 @RequiredArgsConstructor
 public class UserBoardRoleService {
@@ -29,28 +27,35 @@ public class UserBoardRoleService {
                 .orElseThrow(() -> new EntityNotFoundException("User board role with id %s not found".formatted(id)));
     }
 
-    public UserBoardRole save(Long boardId, Long userId, Set<BoardRole> boardRoles) {
+    public UserBoardRole save(Long boardId, Long userId, UserBoardRole newUserBoardRole) {
         UserBoardRole userBoardRole = new UserBoardRole();
         userBoardRole.setBoard(boardService.findOne(boardId));
         userBoardRole.setUser(userService.findOne(userId));
-        userBoardRole.setBoardRoles(boardRoles);
+        userBoardRole.setBoardRoles(newUserBoardRole.getBoardRoles());
         return userBoardRoleRepository.save(userBoardRole);
     }
 
-    public UserBoardRole patch(Long boardId, Long userId, Set<BoardRole> boardRoles) {
+    public UserBoardRole patch(Long boardId, Long userId, UserBoardRole newUserBoardRole) {
         UserBoardRole userBoardRole = userBoardRoleRepository.findByUser_IdAndBoard_Id(userId, boardId)
                 .orElseThrow(() -> new EntityNotFoundException("User board role with user id %s not found".formatted(userId)));
-        userBoardRole.setBoardRoles(boardRoles);
+        userBoardRole.setBoardRoles(newUserBoardRole.getBoardRoles());
         return userBoardRoleRepository.save(userBoardRole);
     }
 
     @Transactional
-    public void delete(Long boardId, Long userId, Set<BoardRole> boardRolesToRemove) {
+    public void deleteBoardRole(Long userId, Long boardId, BoardRole boardRole) {
         UserBoardRole userBoardRole = userBoardRoleRepository.findByUser_IdAndBoard_Id(userId, boardId)
-                .orElseThrow(() -> new EntityNotFoundException("User board role with user id %s not found".formatted(userId)));
-        userBoardRole.getBoardRoles().removeAll(boardRolesToRemove);
-        userBoardRoleRepository.save(userBoardRole);
+                .orElseThrow(() -> new EntityNotFoundException("UserBoardRole not found"));
+        userBoardRole.getBoardRoles().remove(boardRole);
+        if (userBoardRole.getBoardRoles().isEmpty()) {
+            userBoardRoleRepository.delete(userBoardRole);
+        } else {
+            userBoardRoleRepository.save(userBoardRole);
+        }
     }
 
 
+    public void deleteAll(Long userId, Long boardId) {
+        userBoardRoleRepository.deleteByUser_IdAndBoard_Id(userId, boardId);
+    }
 }

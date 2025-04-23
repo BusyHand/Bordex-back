@@ -10,9 +10,7 @@ import com.ugrasu.bordexback.repository.BoardRepository;
 import com.ugrasu.bordexback.repository.TaskRepository;
 import com.ugrasu.bordexback.repository.UserBoardRoleRepository;
 import com.ugrasu.bordexback.repository.UserRepository;
-import com.ugrasu.bordexback.utli.BoardDataUtil;
-import com.ugrasu.bordexback.utli.TaskDataUtil;
-import com.ugrasu.bordexback.utli.UserDataUtil;
+import com.ugrasu.bordexback.utli.DataGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,12 +52,12 @@ public class TaskServiceIntegrationTest {
     @Test
     @DisplayName("Сохранить task")
     public void shouldSaveUser() {
-        User owner = UserDataUtil.getSimpleUser();
+        User owner = DataGenerator.getSimpleUser();
         owner = userRepository.save(owner);
-        Board board = BoardDataUtil.getSimpleBoard();
+        Board board = DataGenerator.getSimpleBoard();
         board.setOwner(owner);
         board = boardRepository.save(board);
-        Task task = TaskDataUtil.getSimpleTask();
+        Task task = DataGenerator.getSimpleTask();
 
         Task saved = taskService.save(board.getId(), task, owner);
 
@@ -73,13 +71,13 @@ public class TaskServiceIntegrationTest {
     @Test
     @DisplayName("Обновить task")
     public void shouldUpdateTask() {
-        User owner = UserDataUtil.getSimpleUser();
+        User owner = DataGenerator.getSimpleUser();
         owner = userRepository.save(owner);
-        Board board = BoardDataUtil.getSimpleBoard();
+        Board board = DataGenerator.getSimpleBoard();
         board.setOwner(owner);
         board = boardRepository.save(board);
-        Task task = TaskDataUtil.getSimpleTask();
-        Task taskToUpdate = TaskDataUtil.getSimpleTask();
+        Task task = DataGenerator.getSimpleTask();
+        Task taskToUpdate = DataGenerator.getSimpleTask();
         taskToUpdate.setName("new Name");
         taskToUpdate.setDescription("new Description");
         taskToUpdate.setPriority(Priority.LOW);
@@ -101,12 +99,12 @@ public class TaskServiceIntegrationTest {
     @Test
     @DisplayName("Удалить task")
     public void shouldDeleteTask() {
-        User owner = UserDataUtil.getSimpleUser();
+        User owner = DataGenerator.getSimpleUser();
         owner = userRepository.save(owner);
-        Board board = BoardDataUtil.getSimpleBoard();
+        Board board = DataGenerator.getSimpleBoard();
         board.setOwner(owner);
         board = boardRepository.save(board);
-        Task task = TaskDataUtil.getSimpleTask();
+        Task task = DataGenerator.getSimpleTask();
         Task saved = taskService.save(board.getId(), task, owner);
 
         taskService.delete(saved.getId());

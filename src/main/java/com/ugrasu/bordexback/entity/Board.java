@@ -42,7 +42,7 @@ public class Board extends BaseEntity {
     Set<User> boardUsers = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "board", orphanRemoval = true)
-    private Set<UserBoardRole> userBoardRoles = new LinkedHashSet<>();
+     Set<UserBoardRole> userBoardRoles = new LinkedHashSet<>();
 
 
     @Override

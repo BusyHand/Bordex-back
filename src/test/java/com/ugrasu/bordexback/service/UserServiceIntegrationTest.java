@@ -9,9 +9,7 @@ import com.ugrasu.bordexback.repository.BoardRepository;
 import com.ugrasu.bordexback.repository.TaskRepository;
 import com.ugrasu.bordexback.repository.UserBoardRoleRepository;
 import com.ugrasu.bordexback.repository.UserRepository;
-import com.ugrasu.bordexback.utli.BoardDataUtil;
-import com.ugrasu.bordexback.utli.TaskDataUtil;
-import com.ugrasu.bordexback.utli.UserDataUtil;
+import com.ugrasu.bordexback.utli.DataGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,7 +51,7 @@ public class UserServiceIntegrationTest {
     @Test
     @DisplayName("Сохранить user")
     public void shouldSaveUser() {
-        User user = UserDataUtil.getSimpleUser();
+        User user = DataGenerator.getSimpleUser();
 
         User save = userService.save(user);
 
@@ -67,14 +65,14 @@ public class UserServiceIntegrationTest {
     @Test
     @DisplayName("Обновить user")
     public void shouldPatchUser() {
-        User user = UserDataUtil.getSimpleUser();
+        User user = DataGenerator.getSimpleUser();
         String newEmail = "New email";
         String newPassword = "New password";
         String newFirstName = "New first name";
         String newLastName = "New last name";
         String newUsername = "New username";
         Set<Role> newRoles = Set.of(Role.USER, Role.ADMIN);
-        User userToPatch = UserDataUtil.getSimpleUser();
+        User userToPatch = DataGenerator.getSimpleUser();
         userToPatch.setEmail(newEmail);
         userToPatch.setPassword(newPassword);
         userToPatch.setFirstName(newFirstName);
@@ -99,11 +97,11 @@ public class UserServiceIntegrationTest {
     @Test
     @DisplayName("Удалить user")
     public void shouldDeleteUser() {
-        User user = UserDataUtil.getSimpleUser();
-        Task task = TaskDataUtil.getSimpleTask();
+        User user = DataGenerator.getSimpleUser();
+        Task task = DataGenerator.getSimpleTask();
         User saveUser = userService.save(user);
         task.setOwner(saveUser);
-        Board board = BoardDataUtil.getSimpleBoard();
+        Board board = DataGenerator.getSimpleBoard();
         board.setOwner(saveUser);
         task.setBoard(board);
         Board savedBoard = boardRepository.save(board);

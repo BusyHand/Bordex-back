@@ -10,5 +10,4 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface UserMapper extends Mappable<User, UserDto, UserSlimDto> {
-
 }

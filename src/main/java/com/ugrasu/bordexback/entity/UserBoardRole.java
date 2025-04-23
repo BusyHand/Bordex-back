@@ -28,13 +28,13 @@ public class UserBoardRole extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id")
-    private Board board;
+    Board board;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "board_role")
     @CollectionTable(name = "board_role", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(value = EnumType.STRING)
-    Set<BoardRole> boardRoles = new LinkedHashSet<>(List.of(BoardRole.EMPLOYEE));
+    Set<BoardRole> boardRoles = new LinkedHashSet<>(List.of(BoardRole.VIEWER));
 
     @Override
     public final boolean equals(Object o) {
