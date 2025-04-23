@@ -2,8 +2,6 @@ package com.ugrasu.bordexback.service;
 
 import com.ugrasu.bordexback.entity.Board;
 import com.ugrasu.bordexback.entity.User;
-import com.ugrasu.bordexback.entity.UserBoardRole;
-import com.ugrasu.bordexback.entity.enums.BoardRole;
 import com.ugrasu.bordexback.mapper.impl.BoardMapper;
 import com.ugrasu.bordexback.repository.BoardRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -12,13 +10,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
-
 @Service
 @RequiredArgsConstructor
 public class BoardService {
 
-    private final UserBoardRoleService userBoardRoleService;
     private final BoardRepository boardRepository;
     private final BoardMapper boardMapper;
 
@@ -34,9 +29,6 @@ public class BoardService {
     public Board save(Board board, User owner) {
         board.setId(null);
         board.setOwner(owner);
-        board = boardRepository.save(board);
-        UserBoardRole userBoardRole = userBoardRoleService.save(owner.getId(), board.getId(), Set.of(BoardRole.MANAGER, BoardRole.EMPLOYEE, BoardRole.DEVELOPER));
-        board.setUserBoardRoles(Set.of(userBoardRole));
         return boardRepository.save(board);
     }
 

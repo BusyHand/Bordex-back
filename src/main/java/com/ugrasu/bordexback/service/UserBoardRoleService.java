@@ -1,12 +1,8 @@
 package com.ugrasu.bordexback.service;
 
-import com.ugrasu.bordexback.entity.Board;
-import com.ugrasu.bordexback.entity.User;
 import com.ugrasu.bordexback.entity.UserBoardRole;
 import com.ugrasu.bordexback.entity.enums.BoardRole;
-import com.ugrasu.bordexback.repository.BoardRepository;
 import com.ugrasu.bordexback.repository.UserBoardRoleRepository;
-import com.ugrasu.bordexback.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,8 +17,8 @@ import java.util.Set;
 public class UserBoardRoleService {
 
     private final UserBoardRoleRepository userBoardRoleRepository;
-    private final BoardRepository boardRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
+    private final BoardService boardService;
 
     public Page<UserBoardRole> findAll(Pageable pageable) {
         return userBoardRoleRepository.findAll(pageable);
@@ -33,21 +29,10 @@ public class UserBoardRoleService {
                 .orElseThrow(() -> new EntityNotFoundException("User board role with id %s not found".formatted(id)));
     }
 
-    private User getUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User with id %s not found".formatted(userId)));
-
-    }
-
-    private Board getBoard(Long boardId) {
-        return boardRepository.findById(boardId)
-                .orElseThrow(() -> new EntityNotFoundException("Board with this %s id not found".formatted(boardId)));
-    }
-
     public UserBoardRole save(Long boardId, Long userId, Set<BoardRole> boardRoles) {
         UserBoardRole userBoardRole = new UserBoardRole();
-        userBoardRole.setBoard(getBoard(boardId));
-        userBoardRole.setUser(getUser(userId));
+        userBoardRole.setBoard(boardService.findOne(boardId));
+        userBoardRole.setUser(userService.findOne(userId));
         userBoardRole.setBoardRoles(boardRoles);
         return userBoardRoleRepository.save(userBoardRole);
     }
