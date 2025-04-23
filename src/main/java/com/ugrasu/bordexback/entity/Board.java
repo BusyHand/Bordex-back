@@ -41,6 +41,10 @@ public class Board extends BaseEntity {
     @ManyToMany(mappedBy = "userBoards")
     Set<User> boardUsers = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "board", orphanRemoval = true)
+    private Set<UserBoardRole> userBoardRoles = new LinkedHashSet<>();
+
+
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

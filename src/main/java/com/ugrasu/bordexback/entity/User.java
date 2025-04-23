@@ -40,7 +40,7 @@ public class User extends BaseEntity {
     @Column(name = "block")
     boolean block = false;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "role")
     @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "owner_id"))
     @Enumerated(value = EnumType.STRING)

@@ -74,9 +74,6 @@ public class UserServiceIntegrationTest {
         String newLastName = "New last name";
         String newUsername = "New username";
         Set<Role> newRoles = Set.of(Role.USER, Role.ADMIN);
-
-
-        User save = userService.save(user);
         User userToPatch = UserDataUtil.getSimpleUser();
         userToPatch.setEmail(newEmail);
         userToPatch.setPassword(newPassword);
@@ -84,6 +81,9 @@ public class UserServiceIntegrationTest {
         userToPatch.setLastName(newLastName);
         userToPatch.setUsername(newUsername);
         userToPatch.setRoles(newRoles);
+
+
+        User save = userService.save(user);
         User patched = userService.patch(save.getId(), userToPatch);
 
 
@@ -107,7 +107,6 @@ public class UserServiceIntegrationTest {
         board.setOwner(saveUser);
         task.setBoard(board);
         Board savedBoard = boardRepository.save(board);
-        taskRepository.save(task);
         Task savedTask = taskRepository.save(task);
 
         userService.delete(saveUser.getId());

@@ -19,15 +19,19 @@ public class BaseEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Exclude
     protected Long id;
 
     @Column(name = "create_at")
+    @EqualsAndHashCode.Exclude
     private LocalDateTime createAt;
 
     @Column(name = "update_at")
+    @EqualsAndHashCode.Exclude
     private LocalDateTime updateAt;
 
     @Column(name = "deleted", nullable = false)
+    @EqualsAndHashCode.Exclude
     private boolean deleted = false;
 
     @PrePersist
