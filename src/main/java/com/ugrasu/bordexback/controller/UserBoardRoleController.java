@@ -32,7 +32,7 @@ public class UserBoardRoleController {
     }
 
     @GetMapping("/{id}")
-    public UserBoardRoleDto findById(@PathVariable Long id) {
+    public UserBoardRoleDto findById(@PathVariable("id") Long id) {
         UserBoardRole userBoardRole = userBoardRoleService.findOne(id);
         return userBoardRoleMapper.toDto(userBoardRole);
     }

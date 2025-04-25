@@ -1,8 +1,8 @@
-FROM eclipse-temurin:17-jdk-alpine
+FROM eclipse-temurin:17.0.2_8-jdk
 
 VOLUME /tmp
 
-RUN adduser -S spring
+RUN adduser --system --no-create-home spring
 USER spring
 
 WORKDIR /app

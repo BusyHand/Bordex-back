@@ -36,7 +36,7 @@ public class UserController {
 
     @Operation(summary = "Получить пользователя по ID", description = "Возвращает пользователя по его идентификатору")
     @GetMapping("/{id}")
-    public UserDto findById(@PathVariable Long id) {
+    public UserDto findById(@PathVariable("id") Long id) {
         User user = userService.findOne(id);
         return userMapper.toDto(user);
     }
@@ -52,7 +52,7 @@ public class UserController {
     @Operation(summary = "Обновить пользователя", description = "Частично обновляет данные пользователя по ID")
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserDto update(@PathVariable Long id, @Validated(OnUpdate.class) @RequestBody UserDto userDto) {
+    public UserDto update(@PathVariable("id") Long id, @Validated(OnUpdate.class) @RequestBody UserDto userDto) {
         User user = userMapper.toEntity(userDto);
         User patched = userService.patch(id, user);
         return userMapper.toDto(patched);
@@ -61,7 +61,7 @@ public class UserController {
     @Operation(summary = "Удалить пользователя", description = "Удаляет пользователя по его идентификатору")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable("id") Long id) {
         userService.delete(id);
     }
 }

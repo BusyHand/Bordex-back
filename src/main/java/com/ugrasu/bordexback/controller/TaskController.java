@@ -35,7 +35,7 @@ public class TaskController {
 
     @Operation(summary = "Получить задачу по ID", description = "Возвращает задачу по её идентификатору")
     @GetMapping("/{id}")
-    public TaskDto findById(@PathVariable Long id) {
+    public TaskDto findById(@PathVariable("id") Long id) {
         Task task = taskService.findOne(id);
         return taskMapper.toDto(task);
     }
@@ -53,7 +53,7 @@ public class TaskController {
     @Operation(summary = "Обновить задачу", description = "Частично обновляет данные задачи по ID")
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public TaskDto update(@PathVariable Long id, @Validated(OnUpdate.class) @RequestBody TaskDto taskDto) {
+    public TaskDto update(@PathVariable("id") Long id, @Validated(OnUpdate.class) @RequestBody TaskDto taskDto) {
         Task task = taskMapper.toEntity(taskDto);
         Task patched = taskService.patch(id, task);
         return taskMapper.toDto(patched);
@@ -62,7 +62,7 @@ public class TaskController {
     @Operation(summary = "Удалить задачу", description = "Удаляет задачу по её идентификатору")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable("id") Long id) {
         taskService.delete(id);
     }
 }

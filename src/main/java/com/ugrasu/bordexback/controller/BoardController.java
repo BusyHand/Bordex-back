@@ -36,7 +36,7 @@ public class BoardController {
 
     @Operation(summary = "Получить доску по ID", description = "Возвращает доску по её идентификатору")
     @GetMapping("/{id}")
-    public BoardDto findById(@PathVariable Long id) {
+    public BoardDto findById(@PathVariable("id") Long id) {
         Board board = boardService.findOne(id);
         return boardMapper.toDto(board);
     }
@@ -52,7 +52,7 @@ public class BoardController {
     @Operation(summary = "Обновить доску", description = "Частично обновляет данные доски по ID")
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public BoardDto update(@PathVariable Long id, @Validated(OnUpdate.class) @RequestBody BoardDto boardDto) {
+    public BoardDto update(@PathVariable("id") Long id, @Validated(OnUpdate.class) @RequestBody BoardDto boardDto) {
         Board board = boardMapper.toEntity(boardDto);
         Board patched = boardService.patch(id, board);
         return boardMapper.toDto(patched);
@@ -61,7 +61,7 @@ public class BoardController {
     @Operation(summary = "Удалить доску", description = "Удаляет доску по её идентификатору")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable("id") Long id) {
         boardService.delete(id);
     }
 }
