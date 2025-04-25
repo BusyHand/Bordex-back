@@ -10,11 +10,14 @@ import com.ugrasu.bordexback.entity.enums.Scope;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Value;
 
 import java.util.Set;
 
-@Value
+@Data
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Полная информация о доске")
 public class BoardDto {
