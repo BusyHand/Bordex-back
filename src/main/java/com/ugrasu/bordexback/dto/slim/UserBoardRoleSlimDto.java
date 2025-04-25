@@ -6,9 +6,11 @@ import com.ugrasu.bordexback.dto.validation.OnUpdate;
 import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserBoardRoleSlimDto {

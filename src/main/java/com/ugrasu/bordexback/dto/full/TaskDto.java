@@ -15,11 +15,13 @@ import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 
 import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Полная информация о задаче")
