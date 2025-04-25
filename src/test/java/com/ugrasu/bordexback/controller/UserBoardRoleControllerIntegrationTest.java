@@ -96,11 +96,10 @@ public class UserBoardRoleControllerIntegrationTest {
     void shouldSaveUserBoardRole() throws Exception {
         User user = userRepository.save(DataGenerator.getSimpleUser());
         Board board = boardRepository.save(DataGenerator.getSimpleBoard(user));
-
         UserBoardRoleDto dto = new UserBoardRoleDto(
                 null,
-                DataGenerator.getSimpleUserSlimDto(user),
-                DataGenerator.getSimpleBoardSlimDto(board),
+                null,
+                null,
                 Set.of(BoardRole.VIEWER)
         );
 
@@ -111,18 +110,16 @@ public class UserBoardRoleControllerIntegrationTest {
                 .andExpect(jsonPath("$.boardRoles[0]").value("VIEWER"));
     }
 
-
     @Test
     @DisplayName("PATCH /api/users/boards/roles/{user-id}/{board-id} обновляет роль")
     void shouldPatchUserBoardRole() throws Exception {
         User user = userRepository.save(DataGenerator.getSimpleUser());
         Board board = boardRepository.save(DataGenerator.getSimpleBoard(user));
         userBoardRoleRepository.save(DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.VIEWER));
-
         UserBoardRoleDto updatedDto = new UserBoardRoleDto(
                 null,
-                DataGenerator.getSimpleUserSlimDto(user),
-                DataGenerator.getSimpleBoardSlimDto(board),
+                null,
+                null,
                 Set.of(BoardRole.MANAGER)
         );
 

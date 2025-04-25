@@ -2,6 +2,8 @@ package com.ugrasu.bordexback.controller;
 
 
 import com.ugrasu.bordexback.dto.full.UserBoardRoleDto;
+import com.ugrasu.bordexback.dto.validation.OnCreate;
+import com.ugrasu.bordexback.dto.validation.OnUpdate;
 import com.ugrasu.bordexback.entity.UserBoardRole;
 import com.ugrasu.bordexback.entity.enums.BoardRole;
 import com.ugrasu.bordexback.mapper.impl.UserBoardRoleMapper;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -38,7 +41,7 @@ public class UserBoardRoleController {
     @ResponseStatus(HttpStatus.CREATED)
     public UserBoardRoleDto save(@PathVariable("user-id") Long userId,
                                  @PathVariable("board-id") Long boardId,
-                                 @RequestBody UserBoardRoleDto userBoardRoleDto) {
+                                 @Validated(OnCreate.class) @RequestBody UserBoardRoleDto userBoardRoleDto) {
         UserBoardRole userBoardRole = userBoardRoleMapper.toEntity(userBoardRoleDto);
         userBoardRole = userBoardRoleService.save(userId, boardId, userBoardRole);
         return userBoardRoleMapper.toDto(userBoardRole);
@@ -48,7 +51,7 @@ public class UserBoardRoleController {
     @ResponseStatus(HttpStatus.OK)
     public UserBoardRoleDto update(@PathVariable("user-id") Long userId,
                                    @PathVariable("board-id") Long boardId,
-                                   @RequestBody UserBoardRoleDto userBoardRoleDto) {
+                                   @Validated(OnUpdate.class) @RequestBody UserBoardRoleDto userBoardRoleDto) {
         UserBoardRole userBoardRole = userBoardRoleMapper.toEntity(userBoardRoleDto);
         UserBoardRole patched = userBoardRoleService.patch(userId, boardId, userBoardRole);
         return userBoardRoleMapper.toDto(patched);
@@ -68,5 +71,4 @@ public class UserBoardRoleController {
                        @PathVariable("board-id") Long boardId) {
         userBoardRoleService.deleteAll(userId, boardId);
     }
-
 }

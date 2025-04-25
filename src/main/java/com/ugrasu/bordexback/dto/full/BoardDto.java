@@ -7,6 +7,7 @@ import com.ugrasu.bordexback.dto.slim.UserSlimDto;
 import com.ugrasu.bordexback.dto.validation.OnCreate;
 import com.ugrasu.bordexback.dto.validation.OnUpdate;
 import com.ugrasu.bordexback.entity.enums.Scope;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Value;
@@ -15,12 +16,14 @@ import java.util.Set;
 
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "Полная информация о доске")
 public class BoardDto {
 
     @Null(
             message = "Пользователь не имеет права задавать id",
             groups = {OnCreate.class, OnUpdate.class}
     )
+    @Schema(description = "Идентификатор доски", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
     Long id;
 
     @NotNull(
@@ -41,6 +44,7 @@ public class BoardDto {
             message = "Имя не может быть пустым",
             groups = OnCreate.class
     )
+    @Schema(description = "Название доски", example = "Проект A")
     String name;
 
     @NotNull(
@@ -61,19 +65,37 @@ public class BoardDto {
             message = "Описание не может быть пустым",
             groups = OnCreate.class
     )
+    @Schema(description = "Описание доски", example = "Описание проекта A")
     String description;
 
+    @Schema(description = "Уровень доступа к доске", example = "PRIVATE")
     Scope scope;
 
-    @Valid
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = {OnCreate.class, OnUpdate.class}
+    )
+    @Schema(description = "Владелец доски")
     UserSlimDto owner;
 
-    @Valid
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = {OnCreate.class, OnUpdate.class}
+    )
+    @Schema(description = "Список задач на доске")
     Set<TaskSlimDto> tasks;
 
-    @Valid
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = {OnCreate.class, OnUpdate.class}
+    )
+    @Schema(description = "Пользователи, привязанные к доске")
     Set<UserSlimDto> boardUsers;
 
-    @Valid
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = {OnCreate.class, OnUpdate.class}
+    )
+    @Schema(description = "Роли пользователей на доске")
     Set<UserBoardRoleSlimDto> userBoardRoles;
 }

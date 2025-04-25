@@ -48,7 +48,4 @@ public class BoardSlimDto {
             groups = OnCreate.class
     )
     Scope scope;
-
-
-
 }

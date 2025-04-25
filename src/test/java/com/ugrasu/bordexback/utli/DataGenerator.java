@@ -99,11 +99,11 @@ public class DataGenerator {
                 "User",
                 "testuser@example.com",
                 Set.of(Role.USER),
-                Set.of(),
-                Set.of(),
-                Set.of(),
-                Set.of(),
-                Set.of()
+                null,
+                null,
+                null,
+                null,
+                null
         );
     }
 

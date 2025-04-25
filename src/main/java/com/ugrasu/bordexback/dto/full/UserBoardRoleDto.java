@@ -6,6 +6,7 @@ import com.ugrasu.bordexback.dto.slim.UserSlimDto;
 import com.ugrasu.bordexback.dto.validation.OnCreate;
 import com.ugrasu.bordexback.dto.validation.OnUpdate;
 import com.ugrasu.bordexback.entity.enums.BoardRole;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
@@ -16,26 +17,30 @@ import java.util.Set;
 
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "Роль пользователя на доске")
 public class UserBoardRoleDto {
 
     @Null(
             message = "ID нельзя задавать вручную",
             groups = {OnCreate.class, OnUpdate.class}
     )
+    @Schema(description = "Идентификатор", example = "5", accessMode = Schema.AccessMode.READ_ONLY)
     Long id;
 
     @Valid
-    @NotNull(
-            message = "Пользователь обязателен",
-            groups = OnCreate.class
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = {OnCreate.class, OnUpdate.class}
     )
+    @Schema(description = "Пользователь")
     UserSlimDto user;
 
     @Valid
-    @NotNull(
-            message = "Доска обязательна",
-            groups = OnCreate.class
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = {OnCreate.class, OnUpdate.class}
     )
+    @Schema(description = "Доска")
     BoardSlimDto board;
 
     @NotNull(
@@ -47,5 +52,6 @@ public class UserBoardRoleDto {
             message = "Должна быть хотя бы одна роль",
             groups = OnCreate.class
     )
+    @Schema(description = "Список ролей", example = "[\"READER\", \"WRITER\"]")
     Set<BoardRole> boardRoles;
 }
