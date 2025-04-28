@@ -5,7 +5,6 @@ import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.mapper.impl.TaskMapper;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
-import com.ugrasu.bordexback.rest.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,8 +19,6 @@ public class TaskService {
     private final BoardService boardService;
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
-    private final UserRepository userRepository;
-    private final UserService userService;
 
     public Page<Task> findAll(Specification<Task> specification, Pageable pageable) {
         return taskRepository.findAll(specification, pageable);

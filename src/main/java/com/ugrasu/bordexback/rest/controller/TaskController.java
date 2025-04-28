@@ -67,8 +67,8 @@ public class TaskController {
     @ResponseStatus(HttpStatus.OK)
     public TaskDto assignUser(@PathVariable("task-id") Long taskId,
                               @PathVariable("user-id") Long userId) {
-        taskService.assignUser(taskId, userId);
-        TaskDto dto = taskMapper.toDto(taskService.findOne(taskId));
+        Task task = taskService.assignUser(taskId, userId);
+        TaskDto dto = taskMapper.toDto(task);
         boardWebSocketService.sendBoardTaskUpdate(dto);
         return dto;
     }
@@ -76,9 +76,9 @@ public class TaskController {
     @PatchMapping("/{task-id}/unassign-user/{user-id}")
     @ResponseStatus(HttpStatus.OK)
     public TaskDto unassignUser(@PathVariable("task-id") Long taskId,
-                              @PathVariable("user-id") Long userId) {
-        taskService.unassignUser(taskId, userId);
-        TaskDto dto = taskMapper.toDto(taskService.findOne(taskId));
+                                @PathVariable("user-id") Long userId) {
+        Task task = taskService.unassignUser(taskId, userId);
+        TaskDto dto = taskMapper.toDto(task);
         boardWebSocketService.sendBoardTaskUpdate(dto);
         return dto;
     }
