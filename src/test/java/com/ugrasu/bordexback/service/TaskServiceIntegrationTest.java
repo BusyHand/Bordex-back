@@ -1,15 +1,16 @@
 package com.ugrasu.bordexback.service;
 
 import com.ugrasu.bordexback.config.PostgreTestcontainerConfig;
-import com.ugrasu.bordexback.entity.Board;
-import com.ugrasu.bordexback.entity.Task;
-import com.ugrasu.bordexback.entity.User;
-import com.ugrasu.bordexback.entity.enums.Priority;
-import com.ugrasu.bordexback.entity.enums.Status;
-import com.ugrasu.bordexback.repository.BoardRepository;
-import com.ugrasu.bordexback.repository.TaskRepository;
-import com.ugrasu.bordexback.repository.UserBoardRoleRepository;
-import com.ugrasu.bordexback.repository.UserRepository;
+import com.ugrasu.bordexback.rest.entity.Board;
+import com.ugrasu.bordexback.rest.entity.Task;
+import com.ugrasu.bordexback.rest.entity.User;
+import com.ugrasu.bordexback.rest.entity.enums.Priority;
+import com.ugrasu.bordexback.rest.entity.enums.Status;
+import com.ugrasu.bordexback.rest.repository.BoardRepository;
+import com.ugrasu.bordexback.rest.repository.TaskRepository;
+import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
+import com.ugrasu.bordexback.rest.repository.UserRepository;
+import com.ugrasu.bordexback.rest.service.TaskService;
 import com.ugrasu.bordexback.utli.DataGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

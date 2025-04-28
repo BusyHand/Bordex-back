@@ -18,17 +18,6 @@ services:
       start_period: 10s
       retries: 5
 
-  bordex-back:
-    image: busylefthand2009/bordex-back:1.0
-    restart: "no"
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bordex
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres_secret
 
 volumes:
   postgres_data:

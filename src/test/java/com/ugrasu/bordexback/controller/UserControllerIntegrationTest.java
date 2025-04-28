@@ -2,12 +2,12 @@ package com.ugrasu.bordexback.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugrasu.bordexback.config.PostgreTestcontainerConfig;
-import com.ugrasu.bordexback.dto.full.UserDto;
-import com.ugrasu.bordexback.entity.User;
-import com.ugrasu.bordexback.repository.BoardRepository;
-import com.ugrasu.bordexback.repository.TaskRepository;
-import com.ugrasu.bordexback.repository.UserBoardRoleRepository;
-import com.ugrasu.bordexback.repository.UserRepository;
+import com.ugrasu.bordexback.rest.dto.full.UserDto;
+import com.ugrasu.bordexback.rest.entity.User;
+import com.ugrasu.bordexback.rest.repository.BoardRepository;
+import com.ugrasu.bordexback.rest.repository.TaskRepository;
+import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
+import com.ugrasu.bordexback.rest.repository.UserRepository;
 import com.ugrasu.bordexback.utli.DataGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

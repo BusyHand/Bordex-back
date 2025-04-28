@@ -1,14 +1,15 @@
 package com.ugrasu.bordexback.service;
 
 import com.ugrasu.bordexback.config.PostgreTestcontainerConfig;
-import com.ugrasu.bordexback.entity.Board;
-import com.ugrasu.bordexback.entity.User;
-import com.ugrasu.bordexback.entity.UserBoardRole;
-import com.ugrasu.bordexback.entity.enums.BoardRole;
-import com.ugrasu.bordexback.repository.BoardRepository;
-import com.ugrasu.bordexback.repository.TaskRepository;
-import com.ugrasu.bordexback.repository.UserBoardRoleRepository;
-import com.ugrasu.bordexback.repository.UserRepository;
+import com.ugrasu.bordexback.rest.entity.Board;
+import com.ugrasu.bordexback.rest.entity.User;
+import com.ugrasu.bordexback.rest.entity.UserBoardRole;
+import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
+import com.ugrasu.bordexback.rest.repository.BoardRepository;
+import com.ugrasu.bordexback.rest.repository.TaskRepository;
+import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
+import com.ugrasu.bordexback.rest.repository.UserRepository;
+import com.ugrasu.bordexback.rest.service.UserBoardRoleService;
 import com.ugrasu.bordexback.utli.DataGenerator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +62,7 @@ public class UserBoardRoleIntegrationTest {
 
 
         UserBoardRole save = userBoardRoleService.save(user.getId(), board.getId(), toSave);
-        UserBoardRole found = userBoardRoleService.findOne(save.getId());
+        UserBoardRole found = userBoardRoleService.findOne(user.getId(), board.getId());
 
 
         assertThat(found.getBoard()).isEqualTo(board);
@@ -83,7 +84,7 @@ public class UserBoardRoleIntegrationTest {
 
         UserBoardRole save = userBoardRoleService.save(user.getId(), board.getId(), toSave);
         userBoardRoleService.patch(user.getId(), board.getId(), toUpdate);
-        UserBoardRole found = userBoardRoleService.findOne(save.getId());
+        UserBoardRole found = userBoardRoleService.findOne(user.getId(), board.getId());
 
         assertThat(found.getBoard()).isEqualTo(board);
         assertThat(found.getId()).isEqualTo(save.getId());
@@ -107,7 +108,7 @@ public class UserBoardRoleIntegrationTest {
 
         UserBoardRole save = userBoardRoleService.save(user.getId(), board.getId(), toSave);
         userBoardRoleService.deleteBoardRole(user.getId(), board.getId(), BoardRole.MANAGER);
-        UserBoardRole found = userBoardRoleService.findOne(save.getId());
+        UserBoardRole found = userBoardRoleService.findOne(user.getId(), board.getId());
 
 
         assertThat(found.getBoard()).isEqualTo(board);
@@ -120,17 +121,17 @@ public class UserBoardRoleIntegrationTest {
     @DisplayName("Удалить userBoardRole все роли")
     public void shouldDeleteUserBoardRoleAllRoles() {
         User user = DataGenerator.getSimpleUser();
-        user = userRepository.save(user);
+        User savedUser = userRepository.save(user);
         Board board = DataGenerator.getSimpleBoard();
         board.setOwner(user);
-        board = boardRepository.save(board);
+        Board savedBoard = boardRepository.save(board);
         UserBoardRole toSave = DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.VIEWER, BoardRole.DEVELOPER, BoardRole.MANAGER);
 
 
         UserBoardRole save = userBoardRoleService.save(user.getId(), board.getId(), toSave);
         userBoardRoleService.deleteAll(user.getId(), board.getId());
 
-        assertThatThrownBy(() -> userBoardRoleService.findOne(save.getId()))
+        assertThatThrownBy(() -> userBoardRoleService.findOne(savedUser.getId(), savedBoard.getId()))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 

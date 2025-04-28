@@ -1,15 +1,15 @@
 package com.ugrasu.bordexback.utli;
 
-import com.ugrasu.bordexback.dto.full.BoardDto;
-import com.ugrasu.bordexback.dto.full.TaskDto;
-import com.ugrasu.bordexback.dto.full.UserDto;
-import com.ugrasu.bordexback.dto.slim.BoardSlimDto;
-import com.ugrasu.bordexback.dto.slim.UserSlimDto;
-import com.ugrasu.bordexback.entity.Board;
-import com.ugrasu.bordexback.entity.Task;
-import com.ugrasu.bordexback.entity.User;
-import com.ugrasu.bordexback.entity.UserBoardRole;
-import com.ugrasu.bordexback.entity.enums.*;
+import com.ugrasu.bordexback.rest.dto.full.BoardDto;
+import com.ugrasu.bordexback.rest.dto.full.TaskDto;
+import com.ugrasu.bordexback.rest.dto.full.UserDto;
+import com.ugrasu.bordexback.rest.dto.slim.BoardSlimDto;
+import com.ugrasu.bordexback.rest.dto.slim.UserSlimDto;
+import com.ugrasu.bordexback.rest.entity.Board;
+import com.ugrasu.bordexback.rest.entity.Task;
+import com.ugrasu.bordexback.rest.entity.User;
+import com.ugrasu.bordexback.rest.entity.UserBoardRole;
+import com.ugrasu.bordexback.rest.entity.enums.*;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDateTime;
@@ -79,65 +79,50 @@ public class DataGenerator {
     }
 
     public BoardDto getSimpleBoardDto() {
-        return new BoardDto(
-                null,
-                "Name",
-                "description",
-                Scope.PUBLIC,
-                null,
-                null,
-                null,
-                null
-        );
+        BoardDto board = new BoardDto();
+        board.setName("Test board");
+        board.setDescription("Test description board");
+        board.setScope(Scope.PUBLIC);
+        return board;
     }
 
     public static UserDto getSimpleUserDto() {
-        return new UserDto(
-                null,
-                "testuser",
-                "Test",
-                "User",
-                "testuser@example.com",
-                Set.of(Role.USER),
-                null,
-                null,
-                null,
-                null,
-                null
-        );
+        UserDto user = new UserDto();
+        user.setUsername("testuser");
+        user.setFirstName("FirstName");
+        user.setLastName("LastName");
+        user.setEmail("test@example.com");
+        user.setRoles(Set.of(Role.USER));
+        return user;
     }
 
     public static TaskDto getSimpleTaskDto() {
-        return new TaskDto(
-                null,
-                "Test Task",
-                "Test description",
-                Status.NEW,
-                Priority.MEDIUM,
-                LocalDateTime.now().plusDays(3),
-                null,
-                null
-        );
+        TaskDto taskDto = new TaskDto();
+        taskDto.setName("Test Task");
+        taskDto.setDescription("Test description");
+        taskDto.setStatus(Status.NEW);
+        taskDto.setPriority(Priority.MEDIUM);
+        taskDto.setDeadline(LocalDateTime.now().plusDays(1));
+        return taskDto;
     }
 
     public UserSlimDto getSimpleUserSlimDto(User user) {
-        return new UserSlimDto(
-                user.getId(),
-                user.getUsername(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                user.getRoles()
-        );
+        UserSlimDto userSlimDto = new UserSlimDto();
+        userSlimDto.setId(user.getId());
+        userSlimDto.setUsername(user.getUsername());
+        userSlimDto.setFirstName(user.getFirstName());
+        userSlimDto.setLastName(user.getLastName());
+        userSlimDto.setEmail(user.getEmail());
+        return userSlimDto;
+
     }
 
     public BoardSlimDto getSimpleBoardSlimDto(Board board) {
-        return new BoardSlimDto(
-                board.getId(),
-                board.getName(),
-                board.getDescription(),
-                board.getScope()
-        );
+        BoardSlimDto boardSlimDto = new BoardSlimDto();
+        boardSlimDto.setId(board.getId());
+        boardSlimDto.setName(board.getName());
+        boardSlimDto.setScope(board.getScope());
+        return boardSlimDto;
     }
 
 }
