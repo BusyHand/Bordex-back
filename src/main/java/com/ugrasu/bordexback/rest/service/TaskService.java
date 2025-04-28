@@ -13,8 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
-
 @Service
 @RequiredArgsConstructor
 public class TaskService {
@@ -41,30 +39,27 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public Task assignUser(Long userId, Long taskId) {
-        Task task = findOne(taskId);
-        User assigneeUser = userService.findOne(userId);
-        task.getAssignees().add(assigneeUser);
-        assigneeUser.getAssigneesTask().add(task);
-        return taskRepository.save(task);
+    public Task assignUser(Long taskId, Long userId) {
+        if (!taskRepository.existsByTaskIdAndUserId(taskId, userId)) {
+            taskRepository.assignUserToTask(taskId, userId);
+        }
+        return findOne(taskId);
     }
 
-    public Task unassignUser(Long userId, Long taskId) {
-        Task task = findOne(taskId);
-        User assigneeUser = userService.findOne(userId);
-        task.getAssignees().remove(assigneeUser);
-        assigneeUser.getAssigneesTask().remove(task);
-        return taskRepository.save(task);
+
+    public Task unassignUser(Long taskId, Long userId) {
+        if (taskRepository.existsByTaskIdAndUserId(taskId, userId)) {
+            taskRepository.unassignUserFromTask(taskId, userId);
+        }
+        return findOne(taskId);
     }
 
     public Task patch(Long taskId, Task newTask) {
         Task oldTask = findOne(taskId);
-        Set<User> assignees = oldTask.getAssignees();
         Task updatedTask = taskMapper.partialUpdate(newTask, oldTask);
-        updatedTask.getAssignees().addAll(assignees);
-        assignees.forEach(user -> user.getAssigneesTask().add(updatedTask));
         return taskRepository.save(updatedTask);
     }
+
 
     public void delete(Long id) {
         taskRepository.deleteById(id);

@@ -49,8 +49,6 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", orphanRemoval = true)
     Set<UserBoardRole> userBoardRoles = new LinkedHashSet<>();
 
-
-
     @OneToMany(mappedBy = "owner", orphanRemoval = true)
     Set<Task> owner_tasks = new LinkedHashSet<>();
 

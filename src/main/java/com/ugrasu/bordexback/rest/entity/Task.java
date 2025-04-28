@@ -54,11 +54,12 @@ public class Task extends BaseEntity {
     @Column(name = "tag")
     Tag tag;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(name = "tasks_users",
             joinColumns = @JoinColumn(name = "task_id"),
             inverseJoinColumns = @JoinColumn(name = "users_id"))
     Set<User> assignees = new LinkedHashSet<>();
+
 
     @Override
     public final boolean equals(Object o) {

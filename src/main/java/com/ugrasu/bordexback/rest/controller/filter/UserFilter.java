@@ -4,13 +4,16 @@ import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.entity.enums.Role;
 import org.springframework.data.jpa.domain.Specification;
 
-public record UserFilter(String username, String email, Role role, Boolean block) {
+import java.util.List;
+
+public record UserFilter(String username, String email, Role role, Boolean block, List<Long> boardIds) {
 
     public Specification<User> toSpecification() {
         return Specification.where(usernameSpec())
                 .and(emailSpec())
                 .and(roleSpec())
-                .and(blockSpec());
+                .and(blockSpec())
+                .and(userBoardsIdInSpec());
     }
 
     private Specification<User> usernameSpec() {
@@ -35,5 +38,11 @@ public record UserFilter(String username, String email, Role role, Boolean block
         return (root, query, cb) -> block != null
                 ? cb.equal(root.get("block"), block)
                 : null;
+    }
+
+    private Specification<User> userBoardsIdInSpec() {
+        return ((root, query, cb) -> boardIds != null
+                ? root.get("userBoards").get("id").in(boardIds)
+                : null);
     }
 }
