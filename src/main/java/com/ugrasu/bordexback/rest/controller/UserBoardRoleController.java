@@ -1,16 +1,15 @@
 package com.ugrasu.bordexback.rest.controller;
 
-
 import com.ugrasu.bordexback.rest.controller.filter.UserBoardRoleFilter;
-import com.ugrasu.bordexback.rest.dto.full.UserBoardRoleDto;
-import com.ugrasu.bordexback.rest.dto.validation.OnCreate;
-import com.ugrasu.bordexback.rest.dto.validation.OnUpdate;
+import com.ugrasu.bordexback.rest.controller.validation.OnCreate;
+import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
+import com.ugrasu.bordexback.rest.dto.web.full.UserBoardRoleDto;
 import com.ugrasu.bordexback.rest.entity.UserBoardRole;
 import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
 import com.ugrasu.bordexback.rest.mapper.impl.UserBoardRoleMapper;
 import com.ugrasu.bordexback.rest.service.UserBoardRoleService;
-import com.ugrasu.bordexback.websocket.BoardWebSocketService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -21,6 +20,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(
+        name = "Роли пользователей на досках",
+        description = "Управление ролями пользователей на досках"
+)
 @RestController
 @RequestMapping("/api/users/boards/roles")
 @RequiredArgsConstructor
@@ -29,11 +32,11 @@ public class UserBoardRoleController {
     private final UserBoardRoleService userBoardRoleService;
     private final UserBoardRoleMapper userBoardRoleMapper;
 
-    //todo dev purpose
-    private final BoardWebSocketService boardWebSocketService;
-
+    @Operation(
+            summary = "Получить список ролей пользователей на досках",
+            description = "Возвращает постраничный список ролей с фильтрацией по userId, boardId и boardRole"
+    )
     @GetMapping
-    @Operation(summary = "Получить список ролей пользователей на досках", description = "Возвращает постраничный список ролей с фильтрацией по userId, boardId, и boardRole")
     public PagedModel<UserBoardRoleDto> findAll(@ParameterObject @ModelAttribute UserBoardRoleFilter filter,
                                                 @ParameterObject Pageable pageable) {
         Specification<UserBoardRole> specification = filter.toSpecification();
@@ -42,19 +45,24 @@ public class UserBoardRoleController {
         return new PagedModel<>(userBoardRoleDtos);
     }
 
+    @Operation(
+            summary = "Создать роль пользователя на доске",
+            description = "Добавляет роль для пользователя на указанной доске"
+    )
     @PostMapping("/{user-id}/{board-id}")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserBoardRoleDto save(@PathVariable("user-id") Long userId,
-                                 @PathVariable("board-id") Long boardId,
-                                 @Validated(OnCreate.class) @RequestBody UserBoardRoleDto userBoardRoleDto) {
+    public UserBoardRoleDto create(@PathVariable("user-id") Long userId,
+                                   @PathVariable("board-id") Long boardId,
+                                   @Validated(OnCreate.class) @RequestBody UserBoardRoleDto userBoardRoleDto) {
         var userBoardRole = userBoardRoleMapper.toEntity(userBoardRoleDto);
         var saved = userBoardRoleService.save(userId, boardId, userBoardRole);
-
-        var dto = userBoardRoleMapper.toDto(saved);
-        boardWebSocketService.sendBoardRoleUpdate(dto);
-        return dto;
+        return userBoardRoleMapper.toDto(saved);
     }
 
+    @Operation(
+            summary = "Обновить роль пользователя на доске",
+            description = "Изменяет существующую роль пользователя на доске"
+    )
     @PatchMapping("/{user-id}/{board-id}")
     @ResponseStatus(HttpStatus.OK)
     public UserBoardRoleDto update(@PathVariable("user-id") Long userId,
@@ -62,28 +70,29 @@ public class UserBoardRoleController {
                                    @Validated(OnUpdate.class) @RequestBody UserBoardRoleDto userBoardRoleDto) {
         var userBoardRole = userBoardRoleMapper.toEntity(userBoardRoleDto);
         var patched = userBoardRoleService.patch(userId, boardId, userBoardRole);
-
-        var dto = userBoardRoleMapper.toDto(patched);
-        boardWebSocketService.sendBoardRoleUpdate(dto);
-        return dto;
+        return userBoardRoleMapper.toDto(patched);
     }
 
+    @Operation(
+            summary = "Удалить конкретную роль пользователя на доске",
+            description = "Удаляет указанную роль пользователя с доски"
+    )
     @DeleteMapping("/{user-id}/{board-id}/{board-role}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteRole(@PathVariable("user-id") Long userId,
                            @PathVariable("board-id") Long boardId,
                            @PathVariable("board-role") BoardRole boardRole) {
-        UserBoardRole one = userBoardRoleService.findOne(userId, boardId);
         userBoardRoleService.deleteBoardRole(userId, boardId, boardRole);
-        boardWebSocketService.sendBoardRoleDelete(userBoardRoleMapper.toDto(one));
     }
 
+    @Operation(
+            summary = "Удалить все роли пользователя на доске",
+            description = "Удаляет все роли пользователя на указанной доске"
+    )
     @DeleteMapping("/{user-id}/{board-id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("user-id") Long userId,
                        @PathVariable("board-id") Long boardId) {
-        UserBoardRole one = userBoardRoleService.findOne(userId, boardId);
         userBoardRoleService.deleteAll(userId, boardId);
-        boardWebSocketService.sendBoardRoleDelete(userBoardRoleMapper.toDto(one));
     }
 }

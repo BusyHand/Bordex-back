@@ -1,9 +1,21 @@
 package com.ugrasu.bordexback.rest.controller.filter;
 
 import com.ugrasu.bordexback.rest.entity.Board;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import org.springframework.data.jpa.domain.Specification;
 
-public record BoardFilter(Long ownerId, String name, String description) {
+@Data
+public class BoardFilter {
+
+    @Schema(description = "ID владельца доски")
+    private Long ownerId;
+
+    @Schema(description = "Название доски (поиск по подстроке)")
+    private String name;
+
+    @Schema(description = "Описание доски (поиск по подстроке)")
+    private String description;
 
     public Specification<Board> toSpecification() {
         return Specification.where(ownerIdSpec())

@@ -5,6 +5,8 @@ import com.ugrasu.bordexback.rest.entity.enums.Priority;
 import com.ugrasu.bordexback.rest.entity.enums.Status;
 import com.ugrasu.bordexback.rest.entity.enums.Tag;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
@@ -25,15 +27,25 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Task extends BaseEntity {
 
-    @Column(name = "name", nullable = false)
+    @Column(
+            name = "name",
+            nullable = false
+    )
     String name;
 
     @Column(name = "description")
     String description;
 
-    @Column(name = "status", nullable = false)
+    @Column(
+            name = "status",
+            nullable = false
+    )
     @Enumerated(value = EnumType.STRING)
     Status status = Status.NEW;
+
+    @Min(1)
+    @Column(name = "colum_row_number")
+    Long columRowNumber;
 
     @Column(name = "priority")
     @Enumerated(value = EnumType.STRING)
@@ -43,21 +55,34 @@ public class Task extends BaseEntity {
     LocalDateTime deadline;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = false)
+    @JoinColumn(
+            name = "owner_id",
+            nullable = false
+    )
     User owner;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id", nullable = false)
+    @JoinColumn(
+            name = "board_id",
+            nullable = false
+    )
     Board board;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tag")
     Tag tag;
 
+    @Max(100)
+    @Min(0)
+    @Column(name = "progress")
+    Integer progress = 0;
+
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
-    @JoinTable(name = "tasks_users",
+    @JoinTable(
+            name = "tasks_users",
             joinColumns = @JoinColumn(name = "task_id"),
-            inverseJoinColumns = @JoinColumn(name = "users_id"))
+            inverseJoinColumns = @JoinColumn(name = "users_id")
+    )
     Set<User> assignees = new LinkedHashSet<>();
 
 

@@ -1,5 +1,6 @@
 package com.ugrasu.bordexback.rest.entity;
 
+import com.ugrasu.bordexback.notification.entity.Notification;
 import com.ugrasu.bordexback.rest.entity.enums.Scope;
 import jakarta.persistence.*;
 import lombok.*;
@@ -43,6 +44,12 @@ public class Board extends BaseEntity {
 
     @OneToMany(mappedBy = "board", orphanRemoval = true)
      Set<UserBoardRole> userBoardRoles = new LinkedHashSet<>();
+
+    @OneToMany(
+            mappedBy = "board",
+            orphanRemoval = true
+    )
+    private Set<Notification> notifications = new LinkedHashSet<>();
 
 
     @Override

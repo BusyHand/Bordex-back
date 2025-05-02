@@ -1,10 +1,10 @@
 package com.ugrasu.bordexback.utli;
 
-import com.ugrasu.bordexback.rest.dto.full.BoardDto;
-import com.ugrasu.bordexback.rest.dto.full.TaskDto;
-import com.ugrasu.bordexback.rest.dto.full.UserDto;
-import com.ugrasu.bordexback.rest.dto.slim.BoardSlimDto;
-import com.ugrasu.bordexback.rest.dto.slim.UserSlimDto;
+import com.ugrasu.bordexback.rest.dto.web.full.BoardDto;
+import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
+import com.ugrasu.bordexback.rest.dto.web.full.UserDto;
+import com.ugrasu.bordexback.rest.dto.web.slim.BoardSlimDto;
+import com.ugrasu.bordexback.rest.dto.web.slim.UserSlimDto;
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;

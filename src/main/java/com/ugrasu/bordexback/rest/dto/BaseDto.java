@@ -1,8 +1,8 @@
 package com.ugrasu.bordexback.rest.dto;
 
 
-import com.ugrasu.bordexback.rest.dto.validation.OnCreate;
-import com.ugrasu.bordexback.rest.dto.validation.OnUpdate;
+import com.ugrasu.bordexback.rest.controller.validation.OnCreate;
+import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
 import jakarta.validation.constraints.Null;
 import lombok.AccessLevel;
 import lombok.Data;

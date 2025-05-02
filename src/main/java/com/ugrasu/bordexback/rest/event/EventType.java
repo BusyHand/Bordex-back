@@ -1,0 +1,30 @@
+package com.ugrasu.bordexback.rest.event;
+
+public enum EventType {
+
+    //TASK
+    TASK_CREATED,
+    TASK_UPDATED,
+    TASK_DELETED,
+    TASK_ASSIGNED,
+    TASK_UNASSIGNED,
+
+    //BOARD
+    BOARD_CREATED,
+    BOARD_UPDATED,
+    BOARD_DELETED,
+    BOARD_ASSIGNED,
+    BOARD_UNASSIGNED,
+    BOARD_SCOPE_CHANGED,
+
+    //BOARD ROLE
+    BOARD_ROLE_CREATED,
+    BOARD_ROLE_UPDATED,
+    BOARD_ROLE_DELETED,
+
+    //USER
+    USER_UPDATE,
+    USER_DELETED,
+    USER_CREATE,
+
+}

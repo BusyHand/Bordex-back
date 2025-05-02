@@ -12,6 +12,7 @@ import com.ugrasu.bordexback.rest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,18 +31,25 @@ public class DataLoader implements CommandLineRunner {
     private final UserBoardRoleRepository userBoardRoleRepository;
 
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
         List<User> users = getUsers(20);
         users = userRepository.saveAll(users);
 
-        Board board1 = getBoard(users.get(0));
-        Board board2 = getBoard(users.get(1));
+        Board board1 = getBoard(users.get(0), "Доска номер один", "Описание доски номер один");
+        Board board2 = getBoard(users.get(1), "Доска номер два", "Описание доски номер два");
 
         Board savedBoard1 = boardRepository.save(board1);
         Board savedBoard2 = boardRepository.save(board2);
 
-        List<User> firstUsers = users.stream().limit(10).toList();
-        List<User> secondUsers = users.stream().skip(10).limit(10).toList();
+        List<User> firstUsers = users.stream()
+                .limit(10)
+                .toList();
+
+        List<User> secondUsers = new ArrayList<>(users.stream()
+                .skip(10)
+                .limit(10)
+                .toList());
 
         savedBoard1.setBoardUsers(new HashSet<>(firstUsers));
         savedBoard2.setBoardUsers(new HashSet<>(secondUsers));
@@ -49,6 +57,7 @@ public class DataLoader implements CommandLineRunner {
         firstUsers.forEach(user -> user.getUserBoards().add(savedBoard1));
         secondUsers.forEach(user -> user.getUserBoards().add(savedBoard2));
 
+        secondUsers.remove(users.get(0));
         userRepository.saveAll(firstUsers);
         userRepository.saveAll(secondUsers);
 
@@ -60,6 +69,12 @@ public class DataLoader implements CommandLineRunner {
 
         taskRepository.saveAll(tasks1);
         taskRepository.saveAll(tasks2);
+
+        User me = userRepository.findById(1L).get();
+        Board board = boardRepository.findById(2L).get();
+        me.getUserBoards().add(board);
+        userRepository.save(me);
+
     }
 
     private void createUserBoardRoles(List<User> users, Board board) {
@@ -88,6 +103,7 @@ public class DataLoader implements CommandLineRunner {
             task.setDeadline(LocalDateTime.now().plusDays(1));
             task.setDescription("admin task");
             task.setTag(getRandomEnum(Tag.class));
+            task.setProgress(getRandom(0, 100));
             tasks.add(task);
         }
         return tasks;
@@ -129,12 +145,12 @@ public class DataLoader implements CommandLineRunner {
         return users;
     }
 
-    private Board getBoard(User owner) {
+    private Board getBoard(User owner, String name, String description) {
         Board board = new Board();
         board.setOwner(owner);
         board.setScope(getRandomEnum(Scope.class));
-        board.setName("Test Board");
-        board.setDescription("Этот текст видят только педики");
+        board.setName(name);
+        board.setDescription(description);
         return board;
     }
 }
