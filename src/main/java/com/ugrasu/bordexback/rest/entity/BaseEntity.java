@@ -16,7 +16,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @FilterDef(name = "notDeletedFilter")
-@Filter(name = "notDeletedFilter", condition = "deleted IS false")
+@Filter(
+        name = "notDeletedFilter",
+        condition = "deleted IS false"
+)
 public class BaseEntity implements Serializable {
 
     @Id
@@ -24,15 +27,25 @@ public class BaseEntity implements Serializable {
     @EqualsAndHashCode.Exclude
     protected Long id;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(
+            name = "created_at",
+            nullable = false,
+            updatable = false
+    )
     @EqualsAndHashCode.Exclude
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(
+            name = "updated_at",
+            nullable = false
+    )
     @EqualsAndHashCode.Exclude
     private LocalDateTime updatedAt;
 
-    @Column(name = "deleted", nullable = false)
+    @Column(
+            name = "deleted",
+            nullable = false
+    )
     @EqualsAndHashCode.Exclude
     private boolean deleted = false;
 

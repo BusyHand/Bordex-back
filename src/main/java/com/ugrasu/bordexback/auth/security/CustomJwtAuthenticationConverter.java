@@ -1,4 +1,4 @@
-package com.ugrasu.bordexback.auth.config;
+package com.ugrasu.bordexback.auth.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;

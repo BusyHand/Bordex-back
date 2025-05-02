@@ -1,6 +1,6 @@
 package com.ugrasu.bordexback.auth.controller;
 
-import com.ugrasu.bordexback.auth.config.AuthenficatedUser;
+import com.ugrasu.bordexback.auth.security.AuthenficatedUser;
 import com.ugrasu.bordexback.auth.dto.AuthDto;
 import com.ugrasu.bordexback.auth.dto.Tokens;
 import com.ugrasu.bordexback.auth.dto.validation.OnLogin;

@@ -1,6 +1,6 @@
 package com.ugrasu.bordexback.auth.service;
 
-import com.ugrasu.bordexback.auth.config.TokenProvider;
+import com.ugrasu.bordexback.auth.security.TokenProvider;
 import com.ugrasu.bordexback.auth.dto.Tokens;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.repository.UserRepository;

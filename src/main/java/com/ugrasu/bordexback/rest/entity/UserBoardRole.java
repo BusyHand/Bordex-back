@@ -1,5 +1,6 @@
 package com.ugrasu.bordexback.rest.entity;
 
+import com.ugrasu.bordexback.notification.entity.Notification;
 import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,9 +33,18 @@ public class UserBoardRole extends BaseEntity {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "board_role")
-    @CollectionTable(name = "board_role", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(
+            name = "board_role",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
     @Enumerated(value = EnumType.STRING)
     Set<BoardRole> boardRoles = new LinkedHashSet<>(List.of(BoardRole.VIEWER));
+
+    @OneToMany(
+            mappedBy = "userBoardRole",
+            orphanRemoval = true
+    )
+    Set<Notification> notifications = new LinkedHashSet<>();
 
     @Override
     public final boolean equals(Object o) {

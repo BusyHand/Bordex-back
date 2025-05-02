@@ -60,7 +60,6 @@ public class Board extends BaseEntity {
     )
     Set<Notification> notifications = new LinkedHashSet<>();
 
-
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

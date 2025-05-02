@@ -1,6 +1,7 @@
 package com.ugrasu.bordexback.rest.entity;
 
 
+import com.ugrasu.bordexback.notification.entity.Notification;
 import com.ugrasu.bordexback.rest.entity.enums.Priority;
 import com.ugrasu.bordexback.rest.entity.enums.Status;
 import com.ugrasu.bordexback.rest.entity.enums.Tag;
@@ -84,6 +85,12 @@ public class Task extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "users_id")
     )
     Set<User> assignees = new LinkedHashSet<>();
+
+    @OneToMany(
+            mappedBy = "task",
+            orphanRemoval = true
+    )
+    Set<Notification> notifications = new LinkedHashSet<>();
 
 
     @Override

@@ -1,10 +1,10 @@
 package com.ugrasu.bordexback.notification.entity;
 
-import com.ugrasu.bordexback.rest.event.EventType;
 import com.ugrasu.bordexback.rest.entity.BaseEntity;
-import com.ugrasu.bordexback.rest.entity.Board;
-import com.ugrasu.bordexback.rest.entity.User;
-import jakarta.persistence.*;
+import com.ugrasu.bordexback.rest.event.EventType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
@@ -24,10 +24,6 @@ public class Notification extends BaseEntity {
 
     @Column(name = "description")
     String description;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id")
-    Board board;
 
     EventType eventType;
 

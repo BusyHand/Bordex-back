@@ -1,4 +1,4 @@
-package com.ugrasu.bordexback.auth.config;
+package com.ugrasu.bordexback.auth.security;
 
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.service.UserService;

@@ -23,7 +23,10 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User extends BaseEntity {
 
-    @Column(name = "username", nullable = false)
+    @Column(
+            name = "username",
+            nullable = false
+    )
     String username;
 
     @Column(name = "password")
@@ -35,7 +38,11 @@ public class User extends BaseEntity {
     @Column(name = "last_name")
     String lastName;
 
-    @Column(name = "email", unique = true, nullable = false)
+    @Column(
+            name = "email",
+            unique = true,
+            nullable = false
+    )
     String email;
 
     @Column(name = "block")
@@ -43,37 +50,53 @@ public class User extends BaseEntity {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "role")
-    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "owner_id"))
+    @CollectionTable(
+            name = "user_role",
+            joinColumns = @JoinColumn(name = "owner_id")
+    )
     @Enumerated(value = EnumType.STRING)
     Set<Role> roles = new LinkedHashSet<>(List.of(Role.USER));
 
-    @OneToMany(mappedBy = "user", orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "user",
+            orphanRemoval = true
+    )
     Set<UserBoardRole> userBoardRoles = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "owner", orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "owner",
+            orphanRemoval = true
+    )
     Set<Task> owner_tasks = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "owner", orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "owner",
+            orphanRemoval = true
+    )
     Set<Board> boards = new LinkedHashSet<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "user_boards",
-            joinColumns = @JoinColumn(name = "user_id", unique = false),
-            inverseJoinColumns = @JoinColumn(name = "board_id", unique = false))
+    @JoinTable(
+            name = "user_boards",
+            joinColumns = @JoinColumn(
+                    name = "user_id",
+                    unique = false
+            ),
+            inverseJoinColumns = @JoinColumn(
+                    name = "board_id",
+                    unique = false
+            )
+    )
     Set<Board> userBoards = new LinkedHashSet<>();
 
     @ManyToMany(mappedBy = "assignees")
-    private Set<Task> assigneesTask = new LinkedHashSet<>();
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "notification_id")
-    private Notification notification;
+    Set<Task> assigneesTask = new LinkedHashSet<>();
 
     @OneToMany(
-            mappedBy = "consumer",
+            mappedBy = "user",
             orphanRemoval = true
     )
-    private Set<Notification> notifications = new LinkedHashSet<>();
+    Set<Notification> notifications = new LinkedHashSet<>();
 
     @Override
     public final boolean equals(Object o) {

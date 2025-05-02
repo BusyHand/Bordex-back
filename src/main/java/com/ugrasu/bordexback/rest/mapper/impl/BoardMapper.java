@@ -9,18 +9,27 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.ReportingPolicy;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(
+        unmappedTargetPolicy = ReportingPolicy.IGNORE,
+        componentModel = MappingConstants.ComponentModel.SPRING
+)
 public interface BoardMapper extends WebMappable<Board, BoardDto, BoardSlimDto> {
 
-    @Mapping(target = "tasksCount", expression = "java(countTasks(board))")
-    @Mapping(target = "membersCount", expression = "java(countMembers(board))")
+    @Mapping(
+            target = "tasksCount",
+            expression = "java(countTasks(board))"
+    )
+    @Mapping(
+            target = "membersCount",
+            expression = "java(countMembers(board))"
+    )
     BoardDto toDto(Board board);
 
     default Long countTasks(Board board) {
-        return (long) board.getTasks().size();
+        return board.getTasks() != null ? (long) board.getTasks().size() : 0L;
     }
 
     default Long countMembers(Board board) {
-        return (long) board.getBoardUsers().size();
+        return board.getBoardUsers() != null ? (long) board.getBoardUsers().size() : 0L;
     }
 }

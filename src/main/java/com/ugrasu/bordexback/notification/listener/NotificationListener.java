@@ -1,18 +1,13 @@
 package com.ugrasu.bordexback.notification.listener;
 
-import com.ugrasu.bordexback.notification.dto.NotificationDto;
+import com.ugrasu.bordexback.notification.entity.Notification;
 import com.ugrasu.bordexback.notification.mapper.NotificationMapper;
-import com.ugrasu.bordexback.rest.dto.event.TaskEventDto;
-import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
-import com.ugrasu.bordexback.rest.event.EventType;
+import com.ugrasu.bordexback.notification.service.NotificationService;
 import com.ugrasu.bordexback.rest.event.TaskEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
-import static com.ugrasu.bordexback.rest.event.EventType.TASK_DELETED;
-import static com.ugrasu.bordexback.rest.event.EventType.TASK_UNASSIGNED;
 
 @Async
 @Component
@@ -20,10 +15,12 @@ import static com.ugrasu.bordexback.rest.event.EventType.TASK_UNASSIGNED;
 public class NotificationListener {
 
     private final NotificationMapper notificationMapper;
+    private final NotificationService notificationService;
 
     @EventListener
     public void handleTaskEvent(TaskEvent taskEvent) {
-        NotificationDto notificationDto = notificationMapper.toNotification(taskEvent);
-
+        Notification notification = notificationMapper.toEntity(taskEvent.getTaskEventDto());
+        notification.setEventType(taskEvent.getEventType());
+        notificationService.save(notification);
     }
 }
