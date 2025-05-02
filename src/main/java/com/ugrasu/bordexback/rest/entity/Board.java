@@ -33,23 +33,32 @@ public class Board extends BaseEntity {
     Scope scope = Scope.PUBLIC;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = false)
+    @JoinColumn(
+            name = "owner_id",
+            nullable = false
+    )
     User owner;
-
-    @OneToMany(mappedBy = "board", orphanRemoval = true)
-    Set<Task> tasks = new LinkedHashSet<>();
-
-    @ManyToMany(mappedBy = "userBoards")
-    Set<User> boardUsers = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "board", orphanRemoval = true)
-     Set<UserBoardRole> userBoardRoles = new LinkedHashSet<>();
 
     @OneToMany(
             mappedBy = "board",
             orphanRemoval = true
     )
-    private Set<Notification> notifications = new LinkedHashSet<>();
+    Set<Task> tasks = new LinkedHashSet<>();
+
+    @OneToMany(
+            mappedBy = "board",
+            orphanRemoval = true
+    )
+    Set<UserBoardRole> userBoardRoles = new LinkedHashSet<>();
+
+    @ManyToMany(mappedBy = "userBoards")
+    Set<User> boardUsers = new LinkedHashSet<>();
+
+    @OneToMany(
+            mappedBy = "board",
+            orphanRemoval = true
+    )
+    Set<Notification> notifications = new LinkedHashSet<>();
 
 
     @Override

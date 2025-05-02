@@ -9,8 +9,7 @@ import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
-import com.ugrasu.bordexback.rest.service.UserService;
-import com.ugrasu.bordexback.utli.DataGenerator;
+import com.ugrasu.bordexback.util.DataGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,20 +49,6 @@ public class UserServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("Сохранить user")
-    public void shouldSaveUser() {
-        User user = DataGenerator.getSimpleUser();
-
-        User save = userService.save(user);
-
-        assertThat(save.getEmail()).isEqualTo(user.getEmail());
-        assertThat(save.getPassword()).isEqualTo(user.getPassword());
-        assertThat(save.getFirstName()).isEqualTo(user.getFirstName());
-        assertThat(save.getLastName()).isEqualTo(user.getLastName());
-        assertThat(save.getUsername()).isEqualTo(user.getUsername());
-    }
-
-    @Test
     @DisplayName("Обновить user")
     public void shouldPatchUser() {
         User user = DataGenerator.getSimpleUser();
@@ -82,7 +67,7 @@ public class UserServiceIntegrationTest {
         userToPatch.setRoles(newRoles);
 
 
-        User save = userService.save(user);
+        User save = userRepository.save(user);
         User patched = userService.patch(save.getId(), userToPatch);
 
 
@@ -100,7 +85,7 @@ public class UserServiceIntegrationTest {
     public void shouldDeleteUser() {
         User user = DataGenerator.getSimpleUser();
         Task task = DataGenerator.getSimpleTask();
-        User saveUser = userService.save(user);
+        User saveUser = userRepository.save(user);
         task.setOwner(saveUser);
         Board board = DataGenerator.getSimpleBoard();
         board.setOwner(saveUser);

@@ -8,7 +8,7 @@ import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
-import com.ugrasu.bordexback.utli.DataGenerator;
+import com.ugrasu.bordexback.util.DataGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -71,18 +71,6 @@ public class UserControllerIntegrationTest {
         mockMvc.perform(get("/api/users/" + user.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId()));
-    }
-
-    @Test
-    @DisplayName("POST /api/users сохраняет нового пользователя")
-    void shouldSaveUser() throws Exception {
-        UserDto userDto = DataGenerator.getSimpleUserDto();
-
-        mockMvc.perform(post("/api/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userDto)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.username").value(userDto.getUsername()));
     }
 
     @Test

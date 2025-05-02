@@ -41,6 +41,7 @@ public class UserBoardRoleService {
                 userBoardRoleRepository.save(userBoardRole));
     }
 
+    @Transactional
     public UserBoardRole patch(Long boardId, Long userId, UserBoardRole newUserBoardRole) {
         UserBoardRole userBoardRole = findOne(boardId, userId);
         userBoardRole.setBoardRoles(newUserBoardRole.getBoardRoles());
@@ -57,13 +58,13 @@ public class UserBoardRoleService {
         } else {
             userBoardRoleRepository.save(userBoardRole);
         }
-        //todo
+        eventPublisher.publish(BOARD_ROLE_DELETED, userBoardRole);
     }
 
-
-    public UserBoardRole deleteAll(Long userId, Long boardId) {
-        return eventPublisher.publish(BOARD_ROLE_DELETED,
-                userBoardRoleRepository.deleteByUser_IdAndBoard_Id(userId, boardId)
-                        .orElseThrow(() -> new EntityNotFoundException("User board role with user id %s and board id %s not found".formatted(userId, boardId))));
+    @Transactional
+    public void deleteAll(Long userId, Long boardId) {
+        UserBoardRole boardRole = findOne(userId, boardId);
+        userBoardRoleRepository.deleteByUser_IdAndBoard_Id(userId, boardId);
+        eventPublisher.publish(BOARD_ROLE_DELETED, boardRole);
     }
 }

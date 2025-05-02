@@ -9,10 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import static com.ugrasu.bordexback.rest.event.EventType.*;
+import static com.ugrasu.bordexback.rest.event.EventType.USER_DELETED;
+import static com.ugrasu.bordexback.rest.event.EventType.USER_UPDATE;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +21,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
     private final EventPublisher eventPublisher;
 
     public Page<User> findAll(Specification<User> specification, Pageable pageable) {
@@ -37,12 +37,7 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("User with this %s username not found".formatted(username)));
     }
 
-    public User save(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return eventPublisher.publish(USER_CREATE,
-                userRepository.save(user));
-    }
-
+    @Transactional
     public User patch(Long id, User newUser) {
         User oldUser = findOne(id);
         User updatedUser = userMapper.partialUpdate(newUser, oldUser);
@@ -50,9 +45,10 @@ public class UserService {
                 userRepository.save(updatedUser));
     }
 
-    public User delete(Long id) {
-        return eventPublisher.publish(USER_DELETED,
-                userRepository.deleteUserById(id)
-                        .orElseThrow(() -> new EntityNotFoundException("User with this %s id not found".formatted(id))));
+    @Transactional
+    public void delete(Long id) {
+        User userToDelete = findOne(id);
+        userRepository.deleteUserById(id);
+        eventPublisher.publish(USER_DELETED, userToDelete);
     }
 }

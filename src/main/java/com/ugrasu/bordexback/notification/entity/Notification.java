@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "boards")
+@Table(name = "notifications")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Notification extends BaseEntity {
 
@@ -24,10 +24,6 @@ public class Notification extends BaseEntity {
 
     @Column(name = "description")
     String description;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    User consumer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id")

@@ -1,4 +1,4 @@
-package com.ugrasu.bordexback.utli;
+package com.ugrasu.bordexback.util;
 
 import com.ugrasu.bordexback.rest.dto.web.full.BoardDto;
 import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
@@ -13,6 +13,7 @@ import com.ugrasu.bordexback.rest.entity.enums.*;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @UtilityClass
@@ -63,7 +64,7 @@ public class DataGenerator {
         return UserBoardRole.builder()
                 .user(user)
                 .board(board)
-                .boardRoles(Set.of(roles))
+                .boardRoles(new HashSet<>(Set.of(roles)))
                 .build();
     }
 

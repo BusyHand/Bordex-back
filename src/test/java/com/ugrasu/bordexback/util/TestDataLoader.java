@@ -1,4 +1,4 @@
-package com.ugrasu.bordexback.rest.runner;
+package com.ugrasu.bordexback.util;
 
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.Task;
@@ -10,7 +10,6 @@ import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,36 +20,28 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-
 @Component
 @RequiredArgsConstructor
-public class DataLoader implements CommandLineRunner {
+public class TestDataLoader {
 
     private final UserRepository userRepository;
     private final BoardRepository boardRepository;
     private final TaskRepository taskRepository;
     private final UserBoardRoleRepository userBoardRoleRepository;
 
-    @Override
     @Transactional
-    public void run(String... args) throws Exception {
-        List<User> users = getUsers(20);
+    public void load() {
+        List<User> users = getUsers(2);
         users = userRepository.saveAll(users);
 
-        Board board1 = getBoard(users.get(0), "Доска номер один", "Описание доски номер один");
-        Board board2 = getBoard(users.get(1), "Доска номер два", "Описание доски номер два");
+        Board board1 = getBoard(users.get(0), "Test Board 1", "Description 1");
+        Board board2 = getBoard(users.get(1), "Test Board 2", "Description 2");
 
         Board savedBoard1 = boardRepository.save(board1);
         Board savedBoard2 = boardRepository.save(board2);
 
-        List<User> firstUsers = users.stream()
-                .limit(10)
-                .toList();
-
-        List<User> secondUsers = new ArrayList<>(users.stream()
-                .skip(10)
-                .limit(10)
-                .toList());
+        List<User> firstUsers = new ArrayList<>(users.subList(0, 1));
+        List<User> secondUsers = new ArrayList<>(users.subList(1, 2));
 
         savedBoard1.setBoardUsers(new HashSet<>(firstUsers));
         savedBoard2.setBoardUsers(new HashSet<>(secondUsers));
@@ -58,7 +49,6 @@ public class DataLoader implements CommandLineRunner {
         firstUsers.forEach(user -> user.getUserBoards().add(savedBoard1));
         secondUsers.forEach(user -> user.getUserBoards().add(savedBoard2));
 
-        secondUsers.remove(users.get(0));
         userRepository.saveAll(firstUsers);
         userRepository.saveAll(secondUsers);
 
@@ -70,62 +60,51 @@ public class DataLoader implements CommandLineRunner {
 
         taskRepository.saveAll(tasks1);
         taskRepository.saveAll(tasks2);
-
-        User me = userRepository.findById(1L).get();
-        Board board = boardRepository.findById(2L).get();
-        me.getUserBoards().add(board);
-        userRepository.save(me);
     }
 
     private void createUserBoardRoles(List<User> users, Board board) {
-        List<UserBoardRole> userBoardRoles = new ArrayList<>();
+        List<UserBoardRole> roles = new ArrayList<>();
         for (User user : users) {
-            UserBoardRole userBoardRole = UserBoardRole.builder()
+            roles.add(UserBoardRole.builder()
                     .user(user)
                     .board(board)
-                    .boardRoles(Set.of(BoardRole.VIEWER, BoardRole.MANAGER))
-                    .build();
-            userBoardRoles.add(userBoardRole);
+                    .boardRoles(new HashSet<>(Set.of(BoardRole.VIEWER, BoardRole.MANAGER)))
+                    .build());
         }
-        userBoardRoleRepository.saveAll(userBoardRoles);
+        userBoardRoleRepository.saveAll(roles);
     }
 
     private List<Task> getTasks(List<User> users, Board board) {
         List<Task> tasks = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 2; i++) {
             Task task = new Task();
             task.setBoard(board);
-            task.setOwner(users.get(getRandom(0, users.size() - 1)));
-            task.setAssignees(getAssignes(users));
-            task.setPriority(getRandomEnum(Priority.class));
-            task.setStatus(getRandomEnum(Status.class));
+            task.setOwner(users.get(random(0, users.size() - 1)));
+            task.setAssignees(getAssignees(users));
+            task.setPriority(randomEnum(Priority.class));
+            task.setStatus(randomEnum(Status.class));
             task.setName("Task " + (i + 1));
             task.setDeadline(LocalDateTime.now().plusDays(1));
-            task.setDescription("admin task");
-            task.setTag(getRandomEnum(Tag.class));
-            task.setProgress(getRandom(0, 100));
+            task.setDescription("Test task");
+            task.setTag(randomEnum(Tag.class));
+            task.setProgress(random(0, 100));
             tasks.add(task);
         }
         return tasks;
     }
 
-    private <T extends Enum<T>> T getRandomEnum(Class<T> enumClass) {
-        T[] enumConstants = enumClass.getEnumConstants();
-        return enumConstants[getRandom(0, enumConstants.length - 1)];
-    }
-
-    private Set<User> getAssignes(List<User> users) {
+    private Set<User> getAssignees(List<User> users) {
         Set<User> assignees = new HashSet<>();
-        assignees.add(users.get(getRandom(0, users.size() - 1)));
-        User nextUser;
-        do {
-            nextUser = users.get(getRandom(0, users.size() - 1));
-        } while (assignees.contains(nextUser));
-        assignees.add(nextUser);
+        assignees.add(users.get(0));
         return assignees;
     }
 
-    private int getRandom(int min, int max) {
+    private <T extends Enum<T>> T randomEnum(Class<T> enumClass) {
+        T[] values = enumClass.getEnumConstants();
+        return values[random(0, values.length - 1)];
+    }
+
+    private int random(int min, int max) {
         return ThreadLocalRandom.current().nextInt(min, max + 1);
     }
 
@@ -133,13 +112,11 @@ public class DataLoader implements CommandLineRunner {
         List<User> users = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             User user = new User();
-            user.setUsername("user" + (i + 1));
-            user.setFirstName("firstname" + (i + 1));
-            user.setLastName("lastname" + (i + 1));
-            user.setEmail("user" + (i + 1) + "@gmail.com");
-            Set<Role> roles = new HashSet<>();
-            roles.add(getRandomEnum(Role.class));
-            user.setRoles(roles);
+            user.setUsername("test_user_" + i);
+            user.setFirstName("First" + i);
+            user.setLastName("Last" + i);
+            user.setEmail("user" + i + "@test.com");
+            user.setRoles(new HashSet<>(Set.of(randomEnum(Role.class))));
             users.add(user);
         }
         return users;
@@ -148,7 +125,7 @@ public class DataLoader implements CommandLineRunner {
     private Board getBoard(User owner, String name, String description) {
         Board board = new Board();
         board.setOwner(owner);
-        board.setScope(getRandomEnum(Scope.class));
+        board.setScope(randomEnum(Scope.class));
         board.setName(name);
         board.setDescription(description);
         return board;

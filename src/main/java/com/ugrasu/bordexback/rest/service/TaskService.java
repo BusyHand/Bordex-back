@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.ugrasu.bordexback.rest.event.EventType.*;
 
@@ -55,6 +56,7 @@ public class TaskService {
         return eventPublisher.publish(TASK_UNASSIGNED, findOne(taskId), unassignUserId);
     }
 
+    @Transactional
     public Task patch(Long taskId, Task newTask) {
         Task oldTask = findOne(taskId);
         Task updatedTask = taskMapper.partialUpdate(newTask, oldTask);
@@ -62,10 +64,10 @@ public class TaskService {
         return eventPublisher.publish(TASK_UPDATED, savedUpdatedTask);
     }
 
-    public Task delete(Long id) {
-        return eventPublisher.publish(TASK_DELETED,
-                taskRepository.deleteTaskById(id)
-                        .orElseThrow(() -> new EntityNotFoundException("Task with id %s not found".formatted(id))));
-
+    @Transactional
+    public void delete(Long id) {
+        Task taskToDelete = findOne(id);
+        taskRepository.deleteTaskById(id);
+        eventPublisher.publish(TASK_DELETED, taskToDelete);
     }
 }

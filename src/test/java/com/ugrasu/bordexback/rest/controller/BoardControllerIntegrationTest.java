@@ -2,13 +2,14 @@ package com.ugrasu.bordexback.rest.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugrasu.bordexback.config.PostgreTestcontainerConfig;
+import com.ugrasu.bordexback.config.TestConfigurationSecurity;
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
-import com.ugrasu.bordexback.utli.DataGenerator;
+import com.ugrasu.bordexback.util.DataGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,13 +22,14 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(PostgreTestcontainerConfig.class)
+@Import({TestConfigurationSecurity.class, PostgreTestcontainerConfig.class})
 public class BoardControllerIntegrationTest {
 
     @Autowired

@@ -14,5 +14,5 @@ public interface UserBoardRoleRepository extends JpaRepository<UserBoardRole, Lo
 
     @Transactional
     @Modifying
-    Optional<UserBoardRole> deleteByUser_IdAndBoard_Id(Long userId, Long boardId);
+    void deleteByUser_IdAndBoard_Id(Long userId, Long boardId);
 }

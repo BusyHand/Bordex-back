@@ -42,6 +42,7 @@ public class BoardService {
                 boardRepository.save(board));
     }
 
+    @Transactional
     public Board patch(Long oldBoardId, Board newBoard) {
         Board oldBoard = findOne(oldBoardId);
         Board updatedBoard = boardMapper.partialUpdate(newBoard, oldBoard);
@@ -64,8 +65,7 @@ public class BoardService {
             board.setOwner(null);
         }
 
-        return eventPublisher.publish(BOARD_DELETED,
-                boardRepository.deleteBoardById(board.getId())
-                        .orElseThrow(() -> new EntityNotFoundException("Board with id %s not found".formatted(board.getId()))));
+        boardRepository.delete(board);
+        return eventPublisher.publish(BOARD_DELETED, board);
     }
 }

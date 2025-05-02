@@ -55,7 +55,7 @@ public class UserBoardRoleController {
                                    @PathVariable("board-id") Long boardId,
                                    @Validated(OnCreate.class) @RequestBody UserBoardRoleDto userBoardRoleDto) {
         var userBoardRole = userBoardRoleMapper.toEntity(userBoardRoleDto);
-        var saved = userBoardRoleService.save(userId, boardId, userBoardRole);
+        var saved = userBoardRoleService.save(boardId, userId, userBoardRole);
         return userBoardRoleMapper.toDto(saved);
     }
 

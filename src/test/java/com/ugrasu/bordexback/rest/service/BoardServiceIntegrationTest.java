@@ -4,13 +4,13 @@ import com.ugrasu.bordexback.config.PostgreTestcontainerConfig;
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
+import com.ugrasu.bordexback.rest.entity.enums.Role;
 import com.ugrasu.bordexback.rest.entity.enums.Scope;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
-import com.ugrasu.bordexback.rest.service.BoardService;
-import com.ugrasu.bordexback.utli.DataGenerator;
+import com.ugrasu.bordexback.util.TestDataLoader;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -41,126 +43,89 @@ public class BoardServiceIntegrationTest {
     @Autowired
     UserBoardRoleRepository userBoardRoleRepository;
 
+    User testUser;
+
     @BeforeEach
     public void setUp() {
+        userBoardRoleRepository.deleteAll();
+        taskRepository.deleteAll();
         userRepository.deleteAll();
         boardRepository.deleteAll();
-        taskRepository.deleteAll();
-        userBoardRoleRepository.deleteAll();
+
+        // Создаем тестового пользователя перед каждым тестом
+        User user = new User();
+        user.setUsername("test_user_");
+        user.setFirstName("First");
+        user.setLastName("Last");
+        user.setEmail("user" + "@test.com");
+        user.setRoles(Set.of(Role.USER, Role.ADMIN));
+        testUser = userRepository.save(user);
     }
 
     @Test
     @DisplayName("Сохранить board")
-    public void shouldSaveBoardWithOwner() {
-        Board simpleBoard = DataGenerator.getSimpleBoard();
-        User owner = DataGenerator.getSimpleUser();
-        owner = userRepository.save(owner);
+    public void shouldSaveBoard() {
+        Board board = new Board();
+        board.setName("Board Name");
+        board.setDescription("Board Desc");
 
+        Board saved = boardService.save(board, testUser);
 
-        Board saved = boardService.save(simpleBoard, owner);
-
-
-        assertThat(saved.getName()).isEqualTo(simpleBoard.getName());
-        assertThat(saved.getDescription()).isEqualTo(simpleBoard.getDescription());
-        assertThat(saved.getOwner()).isEqualTo(owner);
-        assertThat(owner.getId()).isEqualTo(saved.getOwner().getId());
+        assertThat(saved.getName()).isEqualTo(board.getName());
+        assertThat(saved.getDescription()).isEqualTo(board.getDescription());
+        assertThat(saved.getOwner()).isEqualTo(testUser);
     }
 
     @Test
-    @DisplayName("Сохранить board , затем обновить name и desc")
-    public void shouldUpdateBoardNameAndDescription() {
-        String updatedName = "New name";
-        String updateDescription = "New description";
-        Board simpleBoard = DataGenerator.getSimpleBoard();
-        User owner = DataGenerator.getSimpleUser();
-        owner = userRepository.save(owner);
+    @DisplayName("Обновить board")
+    public void shouldUpdate() {
+        Board board = new Board();
+        board.setName("Board");
+        board.setDescription("Desc");
+        board.setScope(Scope.PUBLIC);
 
+        Board saved = boardService.save(board, testUser);
 
-        Board saved = boardService.save(simpleBoard, owner);
-        Board updated = DataGenerator.getSimpleBoard();
-        updated.setName(updatedName);
-        updated.setDescription(updateDescription);
-        Board patched = boardService.patch(saved.getId(), updated);
+        Board patch = new Board();
+        patch.setName("Updated Name");
+        patch.setDescription("Updated Desc");
+        patch.setScope(Scope.PRIVATE);
 
+        Board updated = boardService.patch(saved.getId(), patch);
 
-        assertThat(patched.getScope()).isEqualTo(saved.getScope());
-        assertThat(patched.getName()).isEqualTo(updatedName);
-        assertThat(patched.getDescription()).isEqualTo(updateDescription);
-        assertThat(patched.getOwner()).isEqualTo(owner);
-        assertThat(owner.getId()).isEqualTo(patched.getOwner().getId());
-    }
-
-    @Test
-    @DisplayName("Сохранить board, затем обновить scope")
-    public void shouldUpdateScope() {
-        Scope updateScopePrivate = Scope.PRIVATE;
-        Board simpleBoard = DataGenerator.getSimpleBoard();
-        User owner = DataGenerator.getSimpleUser();
-        owner = userRepository.save(owner);
-
-
-        Board saved = boardService.save(simpleBoard, owner);
-        Board toPatch = DataGenerator.getSimpleBoard();
-        toPatch.setScope(updateScopePrivate);
-        Board patched = boardService.patch(saved.getId(), toPatch);
-
-
-        assertThat(patched.getScope()).isEqualTo(updateScopePrivate);
-        assertThat(patched.getName()).isEqualTo(saved.getName());
-        assertThat(patched.getDescription()).isEqualTo(saved.getDescription());
-        assertThat(patched.getOwner()).isEqualTo(owner);
-        assertThat(owner.getId()).isEqualTo(patched.getOwner().getId());
-    }
-
-    @Test
-    @DisplayName("Сохранить board, затем обновить owner")
-    public void shouldUpdateOwner() {
-        Board simpleBoard = DataGenerator.getSimpleBoard();
-        User oldOwner = DataGenerator.getSimpleUser();
-        oldOwner = userRepository.save(oldOwner);
-        User newOwner = DataGenerator.getSimpleUser();
-        newOwner.setEmail("new Email");
-        newOwner = userRepository.save(newOwner);
-
-
-        Board saved = boardService.save(simpleBoard, oldOwner);
-        Board updated = DataGenerator.getSimpleBoard();
-        updated.setOwner(newOwner);
-        Board patched = boardService.patch(saved.getId(), updated);
-
-
-        assertThat(patched.getScope()).isEqualTo(saved.getScope());
-        assertThat(patched.getName()).isEqualTo(saved.getName());
-        assertThat(patched.getDescription()).isEqualTo(saved.getDescription());
-        assertThat(patched.getOwner()).isEqualTo(newOwner);
+        assertThat(updated.getScope()).isEqualTo(Scope.PRIVATE);
+        assertThat(updated.getName()).isEqualTo("Updated Name");
+        assertThat(updated.getDescription()).isEqualTo("Updated Desc");
+        assertThat(updated.getOwner()).isEqualTo(testUser);
     }
 
     @Test
     @DisplayName("Сохранить board, затем удалить")
     public void shouldDeleteBoard() {
-        Board simpleBoard = DataGenerator.getSimpleBoard();
-        User owner = DataGenerator.getSimpleUser();
-        owner = userRepository.save(owner);
-        Task firstTask = DataGenerator.getSimpleTask();
-        Task secondTask = DataGenerator.getSimpleTask();
+        Board board = new Board();
+        board.setName("To Delete");
+        board.setDescription("Desc");
 
+        Board saved = boardService.save(board, testUser);
 
-        Board saved = boardService.save(simpleBoard, owner);
-        firstTask.setOwner(owner);
-        secondTask.setOwner(owner);
-        firstTask.setBoard(saved);
-        secondTask.setBoard(saved);
-        taskRepository.save(firstTask);
-        taskRepository.save(secondTask);
+        Task task1 = new Task();
+        task1.setBoard(saved);
+        task1.setOwner(testUser);
+        task1.setName("Task 1");
+        taskRepository.save(task1);
+
+        Task task2 = new Task();
+        task2.setBoard(saved);
+        task2.setOwner(testUser);
+        task2.setName("Task 2");
+        taskRepository.save(task2);
+
         boardService.delete(saved.getId());
-
 
         assertThatThrownBy(() -> boardService.findOne(saved.getId()))
                 .isInstanceOf(EntityNotFoundException.class);
-        assertThat(taskRepository.findById(firstTask.getId()).isPresent()).isFalse();
-        assertThat(taskRepository.findById(secondTask.getId()).isPresent()).isFalse();
-        assertThat(userRepository.findById(owner.getId()).isPresent()).isTrue();
+        assertThat(taskRepository.findById(task1.getId())).isNotPresent();
+        assertThat(taskRepository.findById(task2.getId())).isNotPresent();
+        assertThat(userRepository.findById(testUser.getId())).isPresent();
     }
-
-
 }

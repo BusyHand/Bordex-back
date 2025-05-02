@@ -8,6 +8,7 @@ import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.entity.UserBoardRole;
+import com.ugrasu.bordexback.rest.mapper.impl.TaskMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

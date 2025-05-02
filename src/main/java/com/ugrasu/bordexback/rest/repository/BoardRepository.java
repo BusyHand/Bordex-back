@@ -12,5 +12,5 @@ import javax.swing.text.html.Option;
 import java.util.Optional;
 
 public interface BoardRepository extends JpaRepository<Board, Long>, JpaSpecificationExecutor<Board> {
-    Optional<Board> deleteBoardById(Long id);
+    void deleteBoardById(Long id);
 }
