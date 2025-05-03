@@ -8,6 +8,7 @@ import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.entity.UserBoardRole;
+import com.ugrasu.bordexback.rest.event.EventType;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -23,13 +24,13 @@ public interface EventMapper {
             target = "tagColor",
             expression = "java(task.getTag() != null ? task.getTag().getColor() : null)"
     )
-    TaskEventDto toEventDto(Task task);
+    TaskEventDto toEventDto(Task task, EventType eventType);
 
-    BoardEventDto toEventDto(Board board);
+    BoardEventDto toEventDto(Board board, EventType eventType);
 
-    UserEventDto toEventDto(User user);
+    UserEventDto toEventDto(User user, EventType eventType);
 
-    UserBoardRoleEventDto toEventDto(UserBoardRole userBoardRole);
+    UserBoardRoleEventDto toEventDto(UserBoardRole userBoardRole, EventType eventType);
 
 
 }

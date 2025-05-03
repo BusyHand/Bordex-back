@@ -73,8 +73,7 @@ public class DataLoader implements CommandLineRunner {
 
         User me = userRepository.findById(1L).get();
         Board board = boardRepository.findById(2L).get();
-        me.getUserBoards().add(board);
-        userRepository.save(me);
+        board.getBoardUsers().add(me);
     }
 
     private void createUserBoardRoles(List<User> users, Board board) {
@@ -100,7 +99,7 @@ public class DataLoader implements CommandLineRunner {
             task.setPriority(getRandomEnum(Priority.class));
             task.setStatus(getRandomEnum(Status.class));
             task.setName("Task " + (i + 1));
-            task.setDeadline(LocalDateTime.now().plusDays(1));
+            task.setDeadline(LocalDateTime.now().plusDays(getRandom(0, 3)));
             task.setDescription("admin task");
             task.setTag(getRandomEnum(Tag.class));
             task.setProgress(getRandom(0, 100));

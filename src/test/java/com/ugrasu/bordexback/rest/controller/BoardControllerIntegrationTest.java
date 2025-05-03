@@ -2,7 +2,6 @@ package com.ugrasu.bordexback.rest.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugrasu.bordexback.config.PostgreTestcontainerConfig;
-import com.ugrasu.bordexback.config.TestConfigurationSecurity;
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
@@ -29,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import({TestConfigurationSecurity.class, PostgreTestcontainerConfig.class})
+@Import(PostgreTestcontainerConfig.class)
 public class BoardControllerIntegrationTest {
 
     @Autowired
@@ -62,9 +61,7 @@ public class BoardControllerIntegrationTest {
         userRepository.save(simpleUser);
         boardRepository.save(DataGenerator.getSimpleBoard(simpleUser));
 
-        mockMvc.perform(get("/api/boards"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)));
+        mockMvc.perform(get("/api/boards")).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
     }
 
     @Test
@@ -74,9 +71,7 @@ public class BoardControllerIntegrationTest {
         userRepository.save(simpleUser);
         Board board = boardRepository.save(DataGenerator.getSimpleBoard(simpleUser));
 
-        mockMvc.perform(get("/api/boards/" + board.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(board.getId()));
+        mockMvc.perform(get("/api/boards/" + board.getId())).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(board.getId()));
     }
 
     //TODO with log user
@@ -116,9 +111,7 @@ public class BoardControllerIntegrationTest {
         userRepository.save(simpleUser);
         Board board = boardRepository.save(DataGenerator.getSimpleBoard(simpleUser));
 
-        mockMvc.perform(delete("/api/boards/" + board.getId())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/boards/" + board.getId()).contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
 
         assertThat(boardRepository.findById(board.getId())).isEmpty();
     }

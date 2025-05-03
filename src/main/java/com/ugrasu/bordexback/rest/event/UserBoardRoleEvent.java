@@ -8,11 +8,9 @@ import org.springframework.context.ApplicationEvent;
 public class UserBoardRoleEvent extends ApplicationEvent {
 
     private final UserBoardRoleEventDto userBoardRoleEventDto;
-    private final EventType eventType;
 
-    public UserBoardRoleEvent(Object source, EventType eventType, UserBoardRoleEventDto userBoardRoleEventDto) {
+    public UserBoardRoleEvent(Object source, UserBoardRoleEventDto userBoardRoleEventDto) {
         super(source);
         this.userBoardRoleEventDto = userBoardRoleEventDto;
-        this.eventType = eventType;
     }
 }

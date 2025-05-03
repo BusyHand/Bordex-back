@@ -86,13 +86,6 @@ public class Task extends BaseEntity {
     )
     Set<User> assignees = new LinkedHashSet<>();
 
-    @OneToMany(
-            mappedBy = "task",
-            orphanRemoval = true
-    )
-    Set<Notification> notifications = new LinkedHashSet<>();
-
-
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

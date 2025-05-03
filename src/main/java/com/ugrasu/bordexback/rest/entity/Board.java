@@ -1,6 +1,5 @@
 package com.ugrasu.bordexback.rest.entity;
 
-import com.ugrasu.bordexback.notification.entity.Notification;
 import com.ugrasu.bordexback.rest.entity.enums.Scope;
 import jakarta.persistence.*;
 import lombok.*;
@@ -51,14 +50,14 @@ public class Board extends BaseEntity {
     )
     Set<UserBoardRole> userBoardRoles = new LinkedHashSet<>();
 
-    @ManyToMany(mappedBy = "userBoards")
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "user_boards",
+            joinColumns = @JoinColumn(name = "board_id"),
+            inverseJoinColumns = @JoinColumn(name = "users_id")
+    )
     Set<User> boardUsers = new LinkedHashSet<>();
 
-    @OneToMany(
-            mappedBy = "board",
-            orphanRemoval = true
-    )
-    Set<Notification> notifications = new LinkedHashSet<>();
 
     @Override
     public final boolean equals(Object o) {

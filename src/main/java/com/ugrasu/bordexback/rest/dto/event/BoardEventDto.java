@@ -3,10 +3,15 @@ package com.ugrasu.bordexback.rest.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ugrasu.bordexback.rest.dto.BaseDto;
+import com.ugrasu.bordexback.rest.dto.web.full.UserDto;
 import com.ugrasu.bordexback.rest.dto.web.slim.UserSlimDto;
+import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.entity.enums.Scope;
+import com.ugrasu.bordexback.rest.event.EventType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -29,5 +34,9 @@ public class BoardEventDto extends BaseDto {
     Long tasksCount;
 
     Long membersCount;
+
+    Set<UserEventDto> boardUsers;
+
+    EventType eventType;
 
 }

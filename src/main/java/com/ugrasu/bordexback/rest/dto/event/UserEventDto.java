@@ -4,6 +4,7 @@ package com.ugrasu.bordexback.rest.dto.event;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ugrasu.bordexback.rest.dto.BaseDto;
 import com.ugrasu.bordexback.rest.entity.enums.Role;
+import com.ugrasu.bordexback.rest.event.EventType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -28,5 +29,7 @@ public class UserEventDto extends BaseDto {
     String email;
 
     Set<Role> roles;
+
+    EventType eventType;
 
 }

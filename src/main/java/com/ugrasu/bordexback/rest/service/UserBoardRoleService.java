@@ -32,6 +32,7 @@ public class UserBoardRoleService {
                 .orElseThrow(() -> new EntityNotFoundException("User board role with user id %s and board id %s not found".formatted(userId, boardId)));
     }
 
+    //todo
     public UserBoardRole save(Long boardId, Long userId, UserBoardRole newUserBoardRole) {
         UserBoardRole userBoardRole = new UserBoardRole();
         userBoardRole.setBoard(boardService.findOne(boardId));

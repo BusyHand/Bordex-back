@@ -3,7 +3,10 @@ package com.ugrasu.bordexback.auth.dto;
 import com.ugrasu.bordexback.auth.dto.validation.OnLogin;
 import com.ugrasu.bordexback.auth.dto.validation.OnRegister;
 import com.ugrasu.bordexback.rest.entity.enums.Role;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -39,7 +42,7 @@ public class AuthDto {
     String firstName;
 
     @NotBlank(
-            message = "Имя пользователя не может быть пустым",
+            message = "Фамилия пользователя не может быть пустым",
             groups = {OnRegister.class}
     )
     @Size(

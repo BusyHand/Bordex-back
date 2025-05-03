@@ -38,6 +38,7 @@ public class BoardService {
     public Board save(Board board, User owner) {
         board.setId(null);
         board.setOwner(owner);
+        board.setBoardUsers(Set.of(owner));
         return eventPublisher.publish(BOARD_CREATED,
                 boardRepository.save(board));
     }
@@ -51,8 +52,9 @@ public class BoardService {
     }
 
     @Transactional
-    public Board delete(Long id) {
+    public void delete(Long id) {
         Board board = findOne(id);
+        eventPublisher.publish(BOARD_DELETED, board);
         Set<User> boardUsers = new HashSet<>(board.getBoardUsers());
         for (User user : boardUsers) {
             user.getUserBoards().remove(board);
@@ -66,6 +68,5 @@ public class BoardService {
         }
 
         boardRepository.delete(board);
-        return eventPublisher.publish(BOARD_DELETED, board);
     }
 }

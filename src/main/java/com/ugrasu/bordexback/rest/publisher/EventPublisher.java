@@ -26,29 +26,29 @@ public class EventPublisher {
     }
 
     public Task publish(EventType eventType, Task task, long... unassignUserId) {
-        TaskEventDto taskEventDto = eventMapper.toEventDto(task);
+        TaskEventDto taskEventDto = eventMapper.toEventDto(task, eventType);
         if (unassignUserId != null && unassignUserId.length > 0) {
             taskEventDto.setUnassignUserId(unassignUserId[0]);
         }
-        publish(new TaskEvent(this, eventType, taskEventDto));
+        publish(new TaskEvent(this, taskEventDto));
         return task;
     }
 
     public Board publish(EventType eventType, Board board) {
-        BoardEventDto boardEventDto = eventMapper.toEventDto(board);
-        publish(new BoardEvent(this, eventType, boardEventDto));
+        BoardEventDto boardEventDto = eventMapper.toEventDto(board, eventType);
+            publish(new BoardEvent(this, boardEventDto));
         return board;
     }
 
     public User publish(EventType eventType, User user) {
-        UserEventDto userEventDto = eventMapper.toEventDto(user);
-        publish(new UserEvent(this, eventType, userEventDto));
+        UserEventDto userEventDto = eventMapper.toEventDto(user, eventType);
+        publish(new UserEvent(this, userEventDto));
         return user;
     }
 
     public UserBoardRole publish(EventType eventType, UserBoardRole userBoardRole) {
-        var userBoardRoleEventDto = eventMapper.toEventDto(userBoardRole);
-        publish(new UserBoardRoleEvent(this, eventType, userBoardRoleEventDto));
+        var userBoardRoleEventDto = eventMapper.toEventDto(userBoardRole, eventType);
+        publish(new UserBoardRoleEvent(this, userBoardRoleEventDto));
         return userBoardRole;
     }
 }

@@ -1,9 +1,10 @@
 package com.ugrasu.bordexback.auth.service;
 
-import com.ugrasu.bordexback.auth.security.TokenProvider;
 import com.ugrasu.bordexback.auth.dto.Tokens;
+import com.ugrasu.bordexback.auth.security.TokenProvider;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
+import jakarta.persistence.EntityExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,6 +35,9 @@ public class AuthService {
     }
 
     public User register(User user) {
+        if (userRepository.existsUserByUsernameOrEmail(user.getUsername(), user.getEmail())) {
+            throw new EntityExistsException("User with username or email already exists");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }

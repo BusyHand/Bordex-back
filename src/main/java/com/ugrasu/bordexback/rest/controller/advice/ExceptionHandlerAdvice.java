@@ -84,6 +84,4 @@ public class ExceptionHandlerAdvice {
     public ResponseEntity<?> handleEntityAlreadyExist(EntityExistsException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
     }
-
-
 }

@@ -8,6 +8,7 @@ import com.ugrasu.bordexback.rest.dto.web.slim.UserSlimDto;
 import com.ugrasu.bordexback.rest.entity.enums.Priority;
 import com.ugrasu.bordexback.rest.entity.enums.Status;
 import com.ugrasu.bordexback.rest.entity.enums.Tag;
+import com.ugrasu.bordexback.rest.event.EventType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -47,6 +48,8 @@ public class TaskEventDto extends BaseDto {
     Set<UserSlimDto> assignees;
 
     Long unassignUserId;
+
+    EventType eventType;
 
 
 }

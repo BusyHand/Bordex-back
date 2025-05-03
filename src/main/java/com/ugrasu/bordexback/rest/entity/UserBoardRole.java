@@ -40,12 +40,6 @@ public class UserBoardRole extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     Set<BoardRole> boardRoles = new LinkedHashSet<>(List.of(BoardRole.VIEWER));
 
-    @OneToMany(
-            mappedBy = "userBoardRole",
-            orphanRemoval = true
-    )
-    Set<Notification> notifications = new LinkedHashSet<>();
-
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

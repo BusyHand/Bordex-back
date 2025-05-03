@@ -8,11 +8,9 @@ import org.springframework.context.ApplicationEvent;
 public class UserEvent extends ApplicationEvent {
 
     private final UserEventDto userEventDto;
-    private final EventType eventType;
 
-    public UserEvent(Object source, EventType eventType, UserEventDto userEventDto) {
+    public UserEvent(Object source, UserEventDto userEventDto) {
         super(source);
         this.userEventDto = userEventDto;
-        this.eventType = eventType;
     }
 }

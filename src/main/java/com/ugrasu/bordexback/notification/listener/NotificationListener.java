@@ -17,10 +17,20 @@ public class NotificationListener {
     private final NotificationMapper notificationMapper;
     private final NotificationService notificationService;
 
+
+    //todo to user
+    // (назначили таск,
+    // сняли с таск,
+    // изменение таски к которой приписан,
+    // довили в доску по username,
+    // удалили с доски,
+    // сменили роль в доске)
     @EventListener
     public void handleTaskEvent(TaskEvent taskEvent) {
         Notification notification = notificationMapper.toEntity(taskEvent.getTaskEventDto());
-        notification.setEventType(taskEvent.getEventType());
+        notification.setTitle("TITLE");
+        notification.setContent("CONTENT");
+        notification.setLink("LINK");
         notificationService.save(notification);
     }
 }

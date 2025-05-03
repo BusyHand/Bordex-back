@@ -3,14 +3,13 @@ package com.ugrasu.bordexback.notification.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ugrasu.bordexback.rest.dto.BaseDto;
-import com.ugrasu.bordexback.rest.dto.web.full.BoardDto;
-import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
-import com.ugrasu.bordexback.rest.dto.web.full.UserBoardRoleDto;
-import com.ugrasu.bordexback.rest.dto.web.full.UserDto;
 import com.ugrasu.bordexback.rest.event.EventType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -18,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @EqualsAndHashCode(callSuper = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "Полная информация о доске")
+@Schema(description = "Полная информация о уведомление")
 public class NotificationDto extends BaseDto {
 
     Long id;
@@ -27,15 +26,9 @@ public class NotificationDto extends BaseDto {
 
     String content;
 
-    UserDto author;
+    String link;
 
     EventType eventType;
 
-    BoardDto board;
-
-    TaskDto task;
-
-    UserDto user;
-
-    UserBoardRoleDto userBoardRole;
+    Set<Long> consumersIds = new LinkedHashSet<>();
 }

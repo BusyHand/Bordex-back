@@ -27,6 +27,7 @@ public enum EventType {
     USER_DELETED,
     USER_CREATE,
 
-
+    //NOTIFICATION
+    NOTIFICATION_CREATE,
 
 }

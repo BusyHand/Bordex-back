@@ -11,6 +11,7 @@ import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
 import com.ugrasu.bordexback.rest.entity.enums.Priority;
 import com.ugrasu.bordexback.rest.entity.enums.Status;
 import com.ugrasu.bordexback.rest.entity.enums.Tag;
+import com.ugrasu.bordexback.rest.event.EventType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -37,5 +38,7 @@ public class UserBoardRoleEventDto extends BaseDto {
     BoardSlimDto board;
 
     Set<BoardRole> boardRoles;
+
+    EventType eventType;
 
 }

@@ -8,11 +8,9 @@ import org.springframework.context.ApplicationEvent;
 public class TaskEvent extends ApplicationEvent {
 
     private final TaskEventDto taskEventDto;
-    private final EventType eventType;
 
-    public TaskEvent(Object source, EventType eventType, TaskEventDto task) {
+    public TaskEvent(Object source, TaskEventDto task) {
         super(source);
         this.taskEventDto = task;
-        this.eventType = eventType;
     }
 }

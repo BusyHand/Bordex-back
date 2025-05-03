@@ -1,5 +1,8 @@
 package com.ugrasu.bordexback.websocket.listener;
 
+import com.ugrasu.bordexback.notification.dto.NotificationDto;
+import com.ugrasu.bordexback.notification.dto.NotificationEventDto;
+import com.ugrasu.bordexback.notification.event.NotificationEvent;
 import com.ugrasu.bordexback.rest.dto.event.BoardEventDto;
 import com.ugrasu.bordexback.rest.dto.event.TaskEventDto;
 import com.ugrasu.bordexback.rest.dto.event.UserEventDto;
@@ -28,7 +31,7 @@ public class WebSocketServiceListener {
     public void handleTaskEvent(TaskEvent taskEvent) {
         TaskEventDto taskEventDto = taskEvent.getTaskEventDto();
         TaskDto dto = eventMapper.toDto(taskEventDto);
-        EventType eventType = taskEvent.getEventType();
+        EventType eventType = taskEventDto.getEventType();
 
         if (TASK_DELETED.equals(eventType)) {
             sender.sendDeleteTask(dto);
@@ -39,14 +42,13 @@ public class WebSocketServiceListener {
             return;
         }
         sender.sendUpdateTask(dto);
-
     }
 
     @EventListener
     public void handleUserEvent(UserEvent userEvent) {
         UserEventDto userEventDto = userEvent.getUserEventDto();
+        EventType eventType = userEventDto.getEventType();
         UserDto dto = eventMapper.toDto(userEventDto);
-        EventType eventType = userEvent.getEventType();
 
         if (USER_DELETED.equals(eventType)) {
             //todo send user delete
@@ -59,10 +61,10 @@ public class WebSocketServiceListener {
     public void handleBoardEvent(BoardEvent boardEvent) {
         BoardEventDto boardEventDto = boardEvent.getBoardEventDto();
         BoardDto dto = eventMapper.toDto(boardEventDto);
-        EventType eventType = boardEvent.getEventType();
+        EventType eventType = boardEventDto.getEventType();
 
         if (BOARD_DELETED.equals(eventType)) {
-            //TODO
+            sender.sendDeleteBoard(dto, boardEventDto.getBoardUsers());
             return;
         }
         if (BOARD_UNASSIGNED.equals(eventType)) {
@@ -73,19 +75,26 @@ public class WebSocketServiceListener {
             //TODO
             return;
         }
-        //todo
+        sender.sendUpdateBoard(dto, boardEventDto.getBoardUsers());
     }
 
     @EventListener
     public void handleUserBoardRoleEvent(UserBoardRoleEvent userBoardRoleEvent) {
         var userBoardRoleEventDto = userBoardRoleEvent.getUserBoardRoleEventDto();
         var dto = eventMapper.toDto(userBoardRoleEventDto);
-        EventType eventType = userBoardRoleEvent.getEventType();
+        EventType eventType = userBoardRoleEventDto.getEventType();
 
         if (BOARD_ROLE_DELETED.equals(eventType)) {
             //todo
             return;
         }
         //todo
+    }
+
+    @EventListener
+    public void handleTaskEvent(NotificationEvent notificationEvent) {
+        NotificationEventDto notificationEventDto = notificationEvent.getNotificationEventDto();
+        NotificationDto dto = eventMapper.toDto(notificationEventDto);
+        sender.sendNotification(dto);
     }
 }

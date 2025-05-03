@@ -75,28 +75,17 @@ public class User extends BaseEntity {
     )
     Set<Board> boards = new LinkedHashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-            name = "user_boards",
-            joinColumns = @JoinColumn(
-                    name = "user_id",
-                    unique = false
-            ),
-            inverseJoinColumns = @JoinColumn(
-                    name = "board_id",
-                    unique = false
-            )
+    @ManyToMany(
+            mappedBy = "assignees",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE}
     )
-    Set<Board> userBoards = new LinkedHashSet<>();
-
-    @ManyToMany(mappedBy = "assignees")
     Set<Task> assigneesTask = new LinkedHashSet<>();
 
-    @OneToMany(
-            mappedBy = "user",
-            orphanRemoval = true
+    @ManyToMany(
+            mappedBy = "boardUsers",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE}
     )
-    Set<Notification> notifications = new LinkedHashSet<>();
+    Set<Board> userBoards = new LinkedHashSet<>();
 
     @Override
     public final boolean equals(Object o) {

@@ -1,5 +1,7 @@
 package com.ugrasu.bordexback.websocket.sender;
 
+import com.ugrasu.bordexback.notification.dto.NotificationDto;
+import com.ugrasu.bordexback.rest.dto.event.UserEventDto;
 import com.ugrasu.bordexback.rest.dto.web.full.BoardDto;
 import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
 import com.ugrasu.bordexback.rest.dto.web.full.UserBoardRoleDto;
@@ -7,21 +9,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 public class WebSocketSender {
 
-    //todo чтобы null не мог прийти в коллекции
-
-
     private final SimpMessagingTemplate messagingTemplate;
 
-    public void sendUpdateBoard(BoardDto boardDto) {
-        messagingTemplate.convertAndSend("/topic/board/" + boardDto.getId(), boardDto);
+    public void sendNotification(NotificationDto notificationDto) {
+        Set<Long> consumersUsersId = notificationDto.getConsumersIds();
+        consumersUsersId.forEach(userId ->
+                messagingTemplate.convertAndSend("/topic/notification/user/" + userId, notificationDto));
     }
 
-    public void sendDeleteBoard(BoardDto boardDto) {
-        messagingTemplate.convertAndSend("/topic/board/" + boardDto.getId() + "/delete", boardDto);
+    public void sendUpdateBoard(BoardDto boardDto, Set<UserEventDto> boardUsers) {
+        boardUsers.forEach(boardUser -> messagingTemplate.convertAndSend("/topic/user/" + boardUser.getId() + "/board", boardDto));
+    }
+
+    public void sendDeleteBoard(BoardDto boardDto, Set<UserEventDto> boardUsers) {
+        boardUsers.forEach(boardUser -> messagingTemplate.convertAndSend("/topic/user/" + boardUser.getId() + "/board/delete", boardDto));
     }
 
     public void sendUpdateTask(TaskDto task) {
@@ -55,4 +62,5 @@ public class WebSocketSender {
         Long boardId = userBoardRole.getBoard().getId();
         messagingTemplate.convertAndSend("/topic/board/" + boardId + "/roles/delete", userBoardRole);
     }
+
 }

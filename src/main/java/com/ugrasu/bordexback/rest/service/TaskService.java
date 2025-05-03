@@ -42,6 +42,7 @@ public class TaskService {
         return eventPublisher.publish(TASK_CREATED, saved);
     }
 
+    //todo
     public Task assignUser(Long taskId, Long userId) {
         if (!taskRepository.existsByTaskIdAndUserId(taskId, userId)) {
             taskRepository.assignUserToTask(taskId, userId);
@@ -49,6 +50,7 @@ public class TaskService {
         return eventPublisher.publish(TASK_ASSIGNED, findOne(taskId));
     }
 
+    //todo
     public Task unassignUser(Long taskId, Long unassignUserId) {
         if (taskRepository.existsByTaskIdAndUserId(taskId, unassignUserId)) {
             taskRepository.unassignUserFromTask(taskId, unassignUserId);
