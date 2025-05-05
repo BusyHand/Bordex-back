@@ -1,7 +1,8 @@
-package com.ugrasu.bordexback.notification.dto;
+package com.ugrasu.bordexback.notification.dto.web;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.ugrasu.bordexback.notification.dto.event.ConsumerEventDto;
 import com.ugrasu.bordexback.rest.dto.BaseDto;
 import com.ugrasu.bordexback.rest.event.EventType;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,5 +31,4 @@ public class NotificationDto extends BaseDto {
 
     EventType eventType;
 
-    Set<Long> consumersIds = new LinkedHashSet<>();
 }

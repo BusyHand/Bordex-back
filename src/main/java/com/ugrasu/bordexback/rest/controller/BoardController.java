@@ -1,6 +1,7 @@
 package com.ugrasu.bordexback.rest.controller;
 
 
+import com.ugrasu.bordexback.auth.security.AuthenficatedUser;
 import com.ugrasu.bordexback.rest.controller.filter.BoardFilter;
 import com.ugrasu.bordexback.rest.controller.validation.OnCreate;
 import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
@@ -8,7 +9,6 @@ import com.ugrasu.bordexback.rest.dto.web.full.BoardDto;
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.mapper.impl.BoardMapper;
 import com.ugrasu.bordexback.rest.service.BoardService;
-import com.ugrasu.bordexback.rest.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,9 +35,6 @@ public class BoardController {
     private final BoardService boardService;
     private final BoardMapper boardMapper;
 
-    // todo not auth enable
-    private final UserService userService;
-
     //todo add user
     //todo delete user
 
@@ -44,6 +43,7 @@ public class BoardController {
             description = "Возвращает постраничный список досок с фильтрацией"
     )
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public PagedModel<BoardDto> findAll(@ParameterObject @ModelAttribute BoardFilter filter,
                                         @ParameterObject Pageable pageable) {
         Specification<Board> specification = filter.toSpecification();
@@ -68,9 +68,11 @@ public class BoardController {
     )
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BoardDto create(@Validated(OnCreate.class) @RequestBody BoardDto boardDto) {
+    @PreAuthorize("isAuthenticated()")
+    public BoardDto create(@AuthenticationPrincipal AuthenficatedUser authenficatedUser,
+                           @Validated(OnCreate.class) @RequestBody BoardDto boardDto) {
         Board board = boardMapper.toEntity(boardDto);
-        Board saved = boardService.save(board, userService.findOne(1L));
+        Board saved = boardService.save(board, authenficatedUser.getUserId());
         return boardMapper.toDto(saved);
     }
 
@@ -95,5 +97,4 @@ public class BoardController {
     public void delete(@PathVariable("id") Long id) {
         boardService.delete(id);
     }
-
 }

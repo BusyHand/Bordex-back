@@ -1,7 +1,7 @@
 package com.ugrasu.bordexback.notification.event;
 
 
-import com.ugrasu.bordexback.notification.dto.NotificationEventDto;
+import com.ugrasu.bordexback.notification.dto.event.NotificationEventDto;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 

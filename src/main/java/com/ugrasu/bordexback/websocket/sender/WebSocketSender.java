@@ -1,6 +1,6 @@
 package com.ugrasu.bordexback.websocket.sender;
 
-import com.ugrasu.bordexback.notification.dto.NotificationDto;
+import com.ugrasu.bordexback.notification.dto.web.NotificationDto;
 import com.ugrasu.bordexback.rest.dto.event.UserEventDto;
 import com.ugrasu.bordexback.rest.dto.web.full.BoardDto;
 import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
@@ -17,8 +17,7 @@ public class WebSocketSender {
 
     private final SimpMessagingTemplate messagingTemplate;
 
-    public void sendNotification(NotificationDto notificationDto) {
-        Set<Long> consumersUsersId = notificationDto.getConsumersIds();
+    public void sendNotification(NotificationDto notificationDto, Set<Long> consumersUsersId) {
         consumersUsersId.forEach(userId ->
                 messagingTemplate.convertAndSend("/topic/notification/user/" + userId, notificationDto));
     }
@@ -57,10 +56,4 @@ public class WebSocketSender {
         Long boardId = userBoardRole.getBoard().getId();
         messagingTemplate.convertAndSend("/topic/board/" + boardId + "/roles", userBoardRole);
     }
-
-    public void sendDeleteBoardRole(UserBoardRoleDto userBoardRole) {
-        Long boardId = userBoardRole.getBoard().getId();
-        messagingTemplate.convertAndSend("/topic/board/" + boardId + "/roles/delete", userBoardRole);
-    }
-
 }

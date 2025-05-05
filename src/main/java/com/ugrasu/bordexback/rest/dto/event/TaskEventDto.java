@@ -47,7 +47,7 @@ public class TaskEventDto extends BaseDto {
 
     Set<UserSlimDto> assignees;
 
-    Long unassignUserId;
+    UserSlimDto unassignUser;
 
     EventType eventType;
 

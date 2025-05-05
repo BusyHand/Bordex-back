@@ -3,6 +3,7 @@ package com.ugrasu.bordexback.rest.publisher;
 import com.ugrasu.bordexback.rest.dto.event.BoardEventDto;
 import com.ugrasu.bordexback.rest.dto.event.TaskEventDto;
 import com.ugrasu.bordexback.rest.dto.event.UserEventDto;
+import com.ugrasu.bordexback.rest.dto.web.slim.UserSlimDto;
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
@@ -25,10 +26,15 @@ public class EventPublisher {
         eventPublisher.publishEvent(event);
     }
 
-    public Task publish(EventType eventType, Task task, long... unassignUserId) {
+    public Task publish(EventType eventType, Task task, User... unassignUser) {
         TaskEventDto taskEventDto = eventMapper.toEventDto(task, eventType);
-        if (unassignUserId != null && unassignUserId.length > 0) {
-            taskEventDto.setUnassignUserId(unassignUserId[0]);
+        if (unassignUser != null && unassignUser.length > 0) {
+            UserSlimDto userSlimDto = new UserSlimDto();
+            userSlimDto.setUsername(unassignUser[0].getUsername());
+            userSlimDto.setEmail(unassignUser[0].getEmail());
+            userSlimDto.setFirstName(unassignUser[0].getFirstName());
+            userSlimDto.setLastName(unassignUser[0].getLastName());
+            taskEventDto.setUnassignUser(userSlimDto);
         }
         publish(new TaskEvent(this, taskEventDto));
         return task;
@@ -36,7 +42,7 @@ public class EventPublisher {
 
     public Board publish(EventType eventType, Board board) {
         BoardEventDto boardEventDto = eventMapper.toEventDto(board, eventType);
-            publish(new BoardEvent(this, boardEventDto));
+        publish(new BoardEvent(this, boardEventDto));
         return board;
     }
 

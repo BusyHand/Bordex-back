@@ -9,6 +9,10 @@ import java.util.TimeZone;
 @SpringBootApplication
 public class BordexBackApplication {
 
+    //todo доски по userId
+    //
+
+
     public static void main(String[] args) {
         SpringApplication.run(BordexBackApplication.class, args);
     }

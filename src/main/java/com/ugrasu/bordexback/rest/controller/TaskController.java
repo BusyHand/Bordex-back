@@ -1,5 +1,6 @@
 package com.ugrasu.bordexback.rest.controller;
 
+import com.ugrasu.bordexback.auth.security.AuthenficatedUser;
 import com.ugrasu.bordexback.rest.controller.filter.TaskFilter;
 import com.ugrasu.bordexback.rest.controller.validation.OnCreate;
 import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
@@ -7,7 +8,6 @@ import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
 import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.mapper.impl.TaskMapper;
 import com.ugrasu.bordexback.rest.service.TaskService;
-import com.ugrasu.bordexback.rest.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,9 +32,6 @@ public class TaskController {
 
     private final TaskService taskService;
     private final TaskMapper taskMapper;
-
-    //todo no auth enable
-    private final UserService userService;
 
     @Operation(
             summary = "Получить список задач",
@@ -63,10 +62,12 @@ public class TaskController {
     )
     @PostMapping("/{board-id}")
     @ResponseStatus(HttpStatus.CREATED)
-    public TaskDto create(@PathVariable("board-id") Long boardId,
+    @PreAuthorize("isAuthenticated()")
+    public TaskDto create(@AuthenticationPrincipal AuthenficatedUser authenficatedUser,
+                          @PathVariable("board-id") Long boardId,
                           @Validated(OnCreate.class) @RequestBody TaskDto taskDto) {
         Task task = taskMapper.toEntity(taskDto);
-        Task saved = taskService.save(boardId, task, userService.findOne(1L));
+        Task saved = taskService.save(boardId, task, authenficatedUser.getUserId());
         return taskMapper.toDto(saved);
     }
 

@@ -4,6 +4,9 @@ import com.ugrasu.bordexback.rest.entity.Board;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.CollectionUtils;
+
+import java.util.Set;
 
 @Data
 public class BoardFilter {
@@ -17,10 +20,14 @@ public class BoardFilter {
     @Schema(description = "Описание доски (поиск по подстроке)")
     private String description;
 
+    @Schema(description = "Id пользователей")
+    private Set<Long> memberIds;
+
     public Specification<Board> toSpecification() {
         return Specification.where(ownerIdSpec())
                 .and(nameSpec())
-                .and(descriptionSpec());
+                .and(descriptionSpec())
+                .and(memberIdsSpec());
     }
 
     private Specification<Board> ownerIdSpec() {
@@ -38,6 +45,12 @@ public class BoardFilter {
     private Specification<Board> descriptionSpec() {
         return (root, query, cb) -> description != null && !description.isEmpty()
                 ? cb.like(cb.lower(root.get("description")), "%" + description.toLowerCase() + "%")
+                : null;
+    }
+
+    private Specification<Board> memberIdsSpec() {
+        return (root, query, cb) -> !CollectionUtils.isEmpty(memberIds)
+                ? root.join("boardUsers").get("id").in(memberIds)
                 : null;
     }
 }

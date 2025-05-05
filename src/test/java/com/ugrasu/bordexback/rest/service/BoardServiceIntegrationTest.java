@@ -68,7 +68,7 @@ public class BoardServiceIntegrationTest {
         board.setName("Board Name");
         board.setDescription("Board Desc");
 
-        Board saved = boardService.save(board, testUser);
+        Board saved = boardService.save(board, testUser.getId());
 
         assertThat(saved.getName()).isEqualTo(board.getName());
         assertThat(saved.getDescription()).isEqualTo(board.getDescription());
@@ -83,7 +83,7 @@ public class BoardServiceIntegrationTest {
         board.setDescription("Desc");
         board.setScope(Scope.PUBLIC);
 
-        Board saved = boardService.save(board, testUser);
+        Board saved = boardService.save(board, testUser.getId());
 
         Board patch = new Board();
         patch.setName("Updated Name");
@@ -105,7 +105,7 @@ public class BoardServiceIntegrationTest {
         board.setName("To Delete");
         board.setDescription("Desc");
 
-        Board saved = boardService.save(board, testUser);
+        Board saved = boardService.save(board, testUser.getId());
 
         Task task1 = new Task();
         task1.setBoard(saved);

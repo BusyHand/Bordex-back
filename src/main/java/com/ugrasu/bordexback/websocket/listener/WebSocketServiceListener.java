@@ -1,7 +1,8 @@
 package com.ugrasu.bordexback.websocket.listener;
 
-import com.ugrasu.bordexback.notification.dto.NotificationDto;
-import com.ugrasu.bordexback.notification.dto.NotificationEventDto;
+import com.ugrasu.bordexback.notification.dto.event.ConsumerEventDto;
+import com.ugrasu.bordexback.notification.dto.event.NotificationEventDto;
+import com.ugrasu.bordexback.notification.dto.web.NotificationDto;
 import com.ugrasu.bordexback.notification.event.NotificationEvent;
 import com.ugrasu.bordexback.rest.dto.event.BoardEventDto;
 import com.ugrasu.bordexback.rest.dto.event.TaskEventDto;
@@ -16,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.ugrasu.bordexback.rest.event.EventType.*;
 
@@ -38,7 +42,7 @@ public class WebSocketServiceListener {
             return;
         }
         if (TASK_UNASSIGNED.equals(eventType)) {
-            sender.sendTaskUnassignUser(dto, taskEventDto.getUnassignUserId());
+            sender.sendTaskUnassignUser(dto, taskEventDto.getUnassignUser().getId());
             return;
         }
         sender.sendUpdateTask(dto);
@@ -82,19 +86,17 @@ public class WebSocketServiceListener {
     public void handleUserBoardRoleEvent(UserBoardRoleEvent userBoardRoleEvent) {
         var userBoardRoleEventDto = userBoardRoleEvent.getUserBoardRoleEventDto();
         var dto = eventMapper.toDto(userBoardRoleEventDto);
-        EventType eventType = userBoardRoleEventDto.getEventType();
-
-        if (BOARD_ROLE_DELETED.equals(eventType)) {
-            //todo
-            return;
-        }
-        //todo
+        sender.sendUpdateBoardRole(dto);
     }
 
     @EventListener
     public void handleTaskEvent(NotificationEvent notificationEvent) {
         NotificationEventDto notificationEventDto = notificationEvent.getNotificationEventDto();
         NotificationDto dto = eventMapper.toDto(notificationEventDto);
-        sender.sendNotification(dto);
+        Set<Long> consumersUsersId = notificationEventDto.getConsumers()
+                .stream()
+                .map(ConsumerEventDto::getUserId)
+                .collect(Collectors.toSet());
+        sender.sendNotification(dto, consumersUsersId);
     }
 }

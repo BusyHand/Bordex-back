@@ -59,7 +59,7 @@ public class TaskServiceIntegrationTest {
         board = boardRepository.save(board);
         Task task = DataGenerator.getSimpleTask();
 
-        Task saved = taskService.save(board.getId(), task, owner);
+        Task saved = taskService.save(board.getId(), task, owner.getId());
 
         assertThat(saved.getName()).isEqualTo(task.getName());
         assertThat(saved.getDescription()).isEqualTo(task.getDescription());
@@ -85,7 +85,7 @@ public class TaskServiceIntegrationTest {
         taskToUpdate.setDeadline(LocalDateTime.now().plusDays(4));
 
 
-        Task saved = taskService.save(board.getId(), task, owner);
+        Task saved = taskService.save(board.getId(), task, owner.getId());
         Task patched = taskService.patch(task.getId(), taskToUpdate);
 
         assertThat(patched.getId()).isEqualTo(saved.getId());
@@ -105,7 +105,7 @@ public class TaskServiceIntegrationTest {
         board.setOwner(owner);
         board = boardRepository.save(board);
         Task task = DataGenerator.getSimpleTask();
-        Task saved = taskService.save(board.getId(), task, owner);
+        Task saved = taskService.save(board.getId(), task, owner.getId());
 
         taskService.delete(saved.getId());
 

@@ -23,6 +23,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
     private final BoardService boardService;
+    private final UserService userService;
     private final EventPublisher eventPublisher;
 
     public Page<Task> findAll(Specification<Task> specification, Pageable pageable) {
@@ -34,7 +35,8 @@ public class TaskService {
                 .orElseThrow(() -> new EntityNotFoundException("Task with id %s not found".formatted(id)));
     }
 
-    public Task save(Long boardId, Task task, User owner) {
+    public Task save(Long boardId, Task task, Long userId) {
+        User owner = userService.findOne(userId);
         Board board = boardService.findOne(boardId);
         task.setBoard(board);
         task.setOwner(owner);
@@ -52,10 +54,11 @@ public class TaskService {
 
     //todo
     public Task unassignUser(Long taskId, Long unassignUserId) {
+        eventPublisher.publish(TASK_UNASSIGNED, findOne(taskId), userService.findOne(unassignUserId));
         if (taskRepository.existsByTaskIdAndUserId(taskId, unassignUserId)) {
             taskRepository.unassignUserFromTask(taskId, unassignUserId);
         }
-        return eventPublisher.publish(TASK_UNASSIGNED, findOne(taskId), unassignUserId);
+        return findOne(taskId);
     }
 
     @Transactional

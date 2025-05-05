@@ -1,6 +1,6 @@
 package com.ugrasu.bordexback.notification.publisher;
 
-import com.ugrasu.bordexback.notification.dto.NotificationEventDto;
+import com.ugrasu.bordexback.notification.dto.event.NotificationEventDto;
 import com.ugrasu.bordexback.notification.entity.Notification;
 import com.ugrasu.bordexback.notification.event.NotificationEvent;
 import com.ugrasu.bordexback.notification.mapper.NotificationMapper;

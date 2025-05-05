@@ -37,8 +37,8 @@ public class BoardDto extends BaseDto {
     )
     @Size(
             min = 1,
-            max = 255,
-            message = "Длина имени должна быть от 1 до 255 символов",
+            max = 30,
+            message = "Длина имени должна быть от 1 до 30 символов",
             groups = OnCreate.class
     )
     @NotEmpty(

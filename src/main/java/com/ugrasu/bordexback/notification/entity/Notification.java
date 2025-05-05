@@ -29,6 +29,12 @@ public class Notification extends BaseEntity {
 
     EventType eventType;
 
-    Set<Long> consumersIds = new LinkedHashSet<>();
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinTable(
+            name = "notifications_consumers",
+            joinColumns = @JoinColumn(name = "notification_id"),
+            inverseJoinColumns = @JoinColumn(name = "consumers_id")
+    )
+    Set<Consumer> consumers = new LinkedHashSet<>();
 
 }

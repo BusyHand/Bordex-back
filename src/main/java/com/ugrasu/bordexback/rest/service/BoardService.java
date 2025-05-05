@@ -2,6 +2,8 @@ package com.ugrasu.bordexback.rest.service;
 
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.User;
+import com.ugrasu.bordexback.rest.entity.UserBoardRole;
+import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
 import com.ugrasu.bordexback.rest.mapper.impl.BoardMapper;
 import com.ugrasu.bordexback.rest.publisher.EventPublisher;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
@@ -25,6 +27,7 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final BoardMapper boardMapper;
     private final EventPublisher eventPublisher;
+    private final UserService userService;
 
     public Page<Board> findAll(Specification<Board> specification, Pageable pageable) {
         return boardRepository.findAll(specification, pageable);
@@ -35,7 +38,9 @@ public class BoardService {
                 .orElseThrow(() -> new EntityNotFoundException("Board with id %s not found".formatted(id)));
     }
 
-    public Board save(Board board, User owner) {
+    //todo manager on save
+    public Board save(Board board, Long userId) {
+        User owner = userService.findOne(userId);
         board.setId(null);
         board.setOwner(owner);
         board.setBoardUsers(Set.of(owner));

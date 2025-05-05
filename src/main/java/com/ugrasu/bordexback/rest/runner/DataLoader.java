@@ -11,6 +11,7 @@ import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ public class DataLoader implements CommandLineRunner {
     private final BoardRepository boardRepository;
     private final TaskRepository taskRepository;
     private final UserBoardRoleRepository userBoardRoleRepository;
+    private final PasswordEncoder encoder;
 
     @Override
     @Transactional
@@ -71,18 +73,38 @@ public class DataLoader implements CommandLineRunner {
         taskRepository.saveAll(tasks1);
         taskRepository.saveAll(tasks2);
 
+
         User me = userRepository.findById(1L).get();
+        me.setPassword(encoder.encode("123456"));
+        me.setEmail("cool908yan@yandex.ru");
+        userRepository.save(me);
         Board board = boardRepository.findById(2L).get();
+        UserBoardRole userBoardRole = UserBoardRole.builder()
+                .user(me)
+                .board(board)
+                .boardRoles(Set.of(BoardRole.VIEWER, BoardRole.DEVELOPER, BoardRole.MANAGER))
+                .build();
         board.getBoardUsers().add(me);
+        userBoardRoleRepository.save(userBoardRole);
+        boardRepository.save(board);
     }
 
     private void createUserBoardRoles(List<User> users, Board board) {
         List<UserBoardRole> userBoardRoles = new ArrayList<>();
         for (User user : users) {
+            if (user.getId() == 1L) {
+                UserBoardRole userBoardRole = UserBoardRole.builder()
+                        .user(user)
+                        .board(board)
+                        .boardRoles(Set.of(BoardRole.VIEWER, BoardRole.MANAGER))
+                        .build();
+                userBoardRoles.add(userBoardRole);
+                continue;
+            }
             UserBoardRole userBoardRole = UserBoardRole.builder()
                     .user(user)
                     .board(board)
-                    .boardRoles(Set.of(BoardRole.VIEWER, BoardRole.MANAGER))
+                    .boardRoles(getSetOfRoles())
                     .build();
             userBoardRoles.add(userBoardRole);
         }
@@ -106,6 +128,17 @@ public class DataLoader implements CommandLineRunner {
             tasks.add(task);
         }
         return tasks;
+    }
+
+    private Set<BoardRole> getSetOfRoles() {
+        Set<BoardRole> boardRoles = new HashSet<>();
+        boardRoles.add(BoardRole.VIEWER);
+        BoardRole nextBoardRole;
+        do {
+            nextBoardRole = getRandomEnum(BoardRole.class);
+        } while (boardRoles.contains(nextBoardRole));
+        boardRoles.add(nextBoardRole);
+        return boardRoles;
     }
 
     private <T extends Enum<T>> T getRandomEnum(Class<T> enumClass) {
@@ -139,6 +172,7 @@ public class DataLoader implements CommandLineRunner {
             Set<Role> roles = new HashSet<>();
             roles.add(getRandomEnum(Role.class));
             user.setRoles(roles);
+            user.setPassword(encoder.encode("123456"));
             users.add(user);
         }
         return users;

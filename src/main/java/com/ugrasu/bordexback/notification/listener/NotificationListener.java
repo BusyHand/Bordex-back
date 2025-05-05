@@ -28,8 +28,8 @@ public class NotificationListener {
     @EventListener
     public void handleTaskEvent(TaskEvent taskEvent) {
         Notification notification = notificationMapper.toEntity(taskEvent.getTaskEventDto());
-        notification.setTitle("TITLE");
-        notification.setContent("CONTENT");
+        notification.setTitle("Заголовок");
+        notification.setContent("Описание");
         notification.setLink("LINK");
         notificationService.save(notification);
     }

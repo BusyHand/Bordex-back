@@ -1,4 +1,4 @@
-package com.ugrasu.bordexback.notification.dto;
+package com.ugrasu.bordexback.notification.dto.event;
 
 import com.ugrasu.bordexback.rest.event.EventType;
 import lombok.AccessLevel;
@@ -27,7 +27,7 @@ public class NotificationEventDto {
 
     EventType eventType;
 
-    Set<Long> consumersIds = new LinkedHashSet<>();
+    Set<ConsumerEventDto> consumers = new LinkedHashSet<>();
 
     LocalDateTime createdAt;
 

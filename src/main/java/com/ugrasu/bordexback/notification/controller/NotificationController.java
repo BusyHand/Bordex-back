@@ -1,7 +1,7 @@
 package com.ugrasu.bordexback.notification.controller;
 
 import com.ugrasu.bordexback.notification.controller.filter.NotificationFilter;
-import com.ugrasu.bordexback.notification.dto.NotificationDto;
+import com.ugrasu.bordexback.notification.dto.web.NotificationDto;
 import com.ugrasu.bordexback.notification.entity.Notification;
 import com.ugrasu.bordexback.notification.mapper.NotificationMapper;
 import com.ugrasu.bordexback.notification.service.NotificationService;

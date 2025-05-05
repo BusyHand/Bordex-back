@@ -1,16 +1,20 @@
 package com.ugrasu.bordexback.auth.controller;
 
-import com.ugrasu.bordexback.auth.security.AuthenficatedUser;
 import com.ugrasu.bordexback.auth.dto.AuthDto;
 import com.ugrasu.bordexback.auth.dto.Tokens;
 import com.ugrasu.bordexback.auth.dto.validation.OnLogin;
 import com.ugrasu.bordexback.auth.dto.validation.OnRegister;
 import com.ugrasu.bordexback.auth.mapper.AuthMapper;
+import com.ugrasu.bordexback.auth.security.AuthenficatedUser;
 import com.ugrasu.bordexback.auth.service.AuthService;
 import com.ugrasu.bordexback.rest.dto.web.full.UserDto;
 import com.ugrasu.bordexback.rest.entity.User;
+import com.ugrasu.bordexback.rest.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +26,7 @@ public class AuthController {
 
     private final AuthMapper authMapper;
     private final AuthService authService;
+    private final UserService userService;
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
@@ -31,21 +36,56 @@ public class AuthController {
         return authMapper.toDto(savedUser);
     }
 
-    @PostMapping("/login")
-    public Tokens login(@RequestBody @Validated(OnLogin.class) AuthDto authDto) {
-        User user = authMapper.toEntity(authDto);
-        return authService.login(user);
-    }
-
+    //todo
     @GetMapping("/me")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("isAuthenticated()")
     public UserDto me(@AuthenticationPrincipal AuthenficatedUser authenficatedUser) {
-        return authMapper.toDto(authenficatedUser.getUser());
+        return authMapper.toDto(userService.findOne(authenficatedUser.getUserId()));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Void> login(@RequestBody @Validated(OnLogin.class) AuthDto authDto, HttpServletResponse response) {
+        User user = authMapper.toEntity(authDto);
+        Tokens tokens = authService.login(user);
+
+        addJwtCookies(response, tokens);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        addJwtLogoutCookies(response);
+        return ResponseEntity.ok().build();
+    }
+
+    private void addJwtLogoutCookies(HttpServletResponse response) {
+        String accessCookie = buildSetCookieHeader("access_token", "", 0);
+        String refreshCookie = buildSetCookieHeader("refresh_token", "", 0);
+
+        response.addHeader("Set-Cookie", accessCookie);
+        response.addHeader("Set-Cookie", refreshCookie);
     }
 
     @PostMapping("/refresh")
-    @ResponseStatus(HttpStatus.OK)
-    public Tokens refresh(@AuthenticationPrincipal AuthenficatedUser authenficatedUser) {
-        return authService.refresh(authenficatedUser);
+    public ResponseEntity<Void> refresh(@AuthenticationPrincipal AuthenficatedUser user, HttpServletResponse response) {
+        Tokens tokens = authService.refresh(user);
+        addJwtCookies(response, tokens);
+        return ResponseEntity.ok().build();
+    }
+
+    private void addJwtCookies(HttpServletResponse response, Tokens tokens) {
+        String accessCookie = buildSetCookieHeader("access_token", tokens.getAccessToken(), 3600);
+        String refreshCookie = buildSetCookieHeader("refresh_token", tokens.getRefreshToken(), 604800);
+
+        response.addHeader("Set-Cookie", accessCookie);
+        response.addHeader("Set-Cookie", refreshCookie);
+    }
+
+    private String buildSetCookieHeader(String name, String value, int maxAge) {
+        return String.format(
+                "%s=%s; Max-Age=%d; Path=/; HttpOnly; Secure; SameSite=None",
+                name, value, maxAge
+        );
     }
 }
