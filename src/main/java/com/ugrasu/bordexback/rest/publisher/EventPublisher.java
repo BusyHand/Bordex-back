@@ -5,9 +5,9 @@ import com.ugrasu.bordexback.rest.dto.event.TaskEventDto;
 import com.ugrasu.bordexback.rest.dto.event.UserEventDto;
 import com.ugrasu.bordexback.rest.dto.web.slim.UserSlimDto;
 import com.ugrasu.bordexback.rest.entity.Board;
+import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
-import com.ugrasu.bordexback.rest.entity.UserBoardRole;
 import com.ugrasu.bordexback.rest.event.*;
 import com.ugrasu.bordexback.rest.mapper.EventMapper;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +30,7 @@ public class EventPublisher {
         TaskEventDto taskEventDto = eventMapper.toEventDto(task, eventType);
         if (unassignUser != null && unassignUser.length > 0) {
             UserSlimDto userSlimDto = new UserSlimDto();
+            userSlimDto.setId(unassignUser[0].getId());
             userSlimDto.setUsername(unassignUser[0].getUsername());
             userSlimDto.setEmail(unassignUser[0].getEmail());
             userSlimDto.setFirstName(unassignUser[0].getFirstName());
@@ -40,9 +41,10 @@ public class EventPublisher {
         return task;
     }
 
+    //todo
     public Board publish(EventType eventType, Board board) {
         BoardEventDto boardEventDto = eventMapper.toEventDto(board, eventType);
-        publish(new BoardEvent(this, boardEventDto));
+        //publish(new BoardEvent(this, boardEventDto));
         return board;
     }
 
@@ -52,9 +54,9 @@ public class EventPublisher {
         return user;
     }
 
-    public UserBoardRole publish(EventType eventType, UserBoardRole userBoardRole) {
-        var userBoardRoleEventDto = eventMapper.toEventDto(userBoardRole, eventType);
+    public BoardRoles publish(EventType eventType, BoardRoles boardRoles) {
+        var userBoardRoleEventDto = eventMapper.toEventDto(boardRoles, eventType);
         publish(new UserBoardRoleEvent(this, userBoardRoleEventDto));
-        return userBoardRole;
+        return boardRoles;
     }
 }

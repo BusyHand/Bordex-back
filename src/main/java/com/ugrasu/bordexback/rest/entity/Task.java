@@ -1,7 +1,6 @@
 package com.ugrasu.bordexback.rest.entity;
 
 
-import com.ugrasu.bordexback.notification.entity.Notification;
 import com.ugrasu.bordexback.rest.entity.enums.Priority;
 import com.ugrasu.bordexback.rest.entity.enums.Status;
 import com.ugrasu.bordexback.rest.entity.enums.Tag;
@@ -55,6 +54,15 @@ public class Task extends BaseEntity {
     @Column(name = "deadline")
     LocalDateTime deadline;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tag")
+    Tag tag;
+
+    @Max(100)
+    @Min(0)
+    @Column(name = "progress")
+    Integer progress = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "owner_id",
@@ -69,22 +77,24 @@ public class Task extends BaseEntity {
     )
     Board board;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "tag")
-    Tag tag;
-
-    @Max(100)
-    @Min(0)
-    @Column(name = "progress")
-    Integer progress = 0;
-
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(
             name = "tasks_users",
             joinColumns = @JoinColumn(name = "task_id"),
-            inverseJoinColumns = @JoinColumn(name = "users_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     Set<User> assignees = new LinkedHashSet<>();
+
+
+    public void addAssignee(User assignee) {
+        this.assignees.add(assignee);
+        assignee.getAssigneesTask().add(this);
+    }
+
+    public void removeAssignee(User assignee) {
+        this.assignees.remove(assignee);
+        assignee.getAssigneesTask().remove(this);
+    }
 
     @Override
     public final boolean equals(Object o) {

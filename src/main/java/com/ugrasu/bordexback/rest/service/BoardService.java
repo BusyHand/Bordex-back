@@ -2,8 +2,7 @@ package com.ugrasu.bordexback.rest.service;
 
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.User;
-import com.ugrasu.bordexback.rest.entity.UserBoardRole;
-import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
+import com.ugrasu.bordexback.rest.exception.UserNotBoardMemberException;
 import com.ugrasu.bordexback.rest.mapper.impl.BoardMapper;
 import com.ugrasu.bordexback.rest.publisher.EventPublisher;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
@@ -15,9 +14,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import static com.ugrasu.bordexback.rest.event.EventType.*;
 
 @Service
@@ -27,7 +23,6 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final BoardMapper boardMapper;
     private final EventPublisher eventPublisher;
-    private final UserService userService;
 
     public Page<Board> findAll(Specification<Board> specification, Pageable pageable) {
         return boardRepository.findAll(specification, pageable);
@@ -38,40 +33,50 @@ public class BoardService {
                 .orElseThrow(() -> new EntityNotFoundException("Board with id %s not found".formatted(id)));
     }
 
-    //todo manager on save
-    public Board save(Board board, Long userId) {
-        User owner = userService.findOne(userId);
-        board.setId(null);
+    @Transactional
+    public Board save(Board board, User owner) {
+        if (board.getId() != null) {
+            board.setId(null);
+        }
         board.setOwner(owner);
-        board.setBoardUsers(Set.of(owner));
-        return eventPublisher.publish(BOARD_CREATED,
-                boardRepository.save(board));
+        board.addMember(owner);
+        Board saved = boardRepository.save(board);
+        return eventPublisher.publish(BOARD_CREATED, saved);
     }
 
     @Transactional
     public Board patch(Long oldBoardId, Board newBoard) {
         Board oldBoard = findOne(oldBoardId);
         Board updatedBoard = boardMapper.partialUpdate(newBoard, oldBoard);
-        return eventPublisher.publish(BOARD_UPDATED,
-                boardRepository.save(updatedBoard));
+        return eventPublisher.publish(BOARD_UPDATED, updatedBoard);
     }
 
     @Transactional
     public void delete(Long id) {
         Board board = findOne(id);
-        eventPublisher.publish(BOARD_DELETED, board);
-        Set<User> boardUsers = new HashSet<>(board.getBoardUsers());
-        for (User user : boardUsers) {
-            user.getUserBoards().remove(board);
-        }
-        board.getBoardUsers().clear();
-
-        User owner = board.getOwner();
-        if (owner != null) {
-            owner.getBoards().remove(board);
-            board.setOwner(null);
-        }
-
-        boardRepository.delete(board);
+        board.getTasks().clear();
+        boardRepository.deleteBoardById(id);
     }
+
+    public Board addUser(Long boardId, User user) {
+        Board board = findOne(boardId);
+        board.addMember(user);
+        return eventPublisher.publish(BOARD_ASSIGNED, board);
+    }
+
+    public Board removeUser(Long boardId, User user) {
+        Board board = findOne(boardId);
+        board.removeMember(user);
+        return eventPublisher.publish(BOARD_UNASSIGNED, board);
+    }
+
+    public Board ownerTransfer(Long boardId, User newOwner) {
+        Board board = findOne(boardId);
+        if (!board.isMember(newOwner)) {
+            throw new UserNotBoardMemberException("User with %s username is not board member of board with %s id".formatted(newOwner.getUsername(), boardId));
+        }
+        board.setOwner(newOwner);
+        return eventPublisher.publish(BOARD_OWNER_CHANGED, board);
+    }
+
 }

@@ -37,4 +37,9 @@ public class Notification extends BaseEntity {
     )
     Set<Consumer> consumers = new LinkedHashSet<>();
 
+    public void delete(Consumer consumer) {
+        consumers.remove(consumer);
+        consumer.getNotifications().remove(this);
+    }
+
 }

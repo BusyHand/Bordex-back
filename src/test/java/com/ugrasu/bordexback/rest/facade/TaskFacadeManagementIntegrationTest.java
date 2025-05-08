@@ -1,11 +1,9 @@
-package com.ugrasu.bordexback.rest.service;
+package com.ugrasu.bordexback.rest.facade;
 
 import com.ugrasu.bordexback.config.PostgreTestcontainerConfig;
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
-import com.ugrasu.bordexback.rest.entity.enums.Priority;
-import com.ugrasu.bordexback.rest.entity.enums.Status;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
@@ -18,16 +16,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
-import java.time.LocalDateTime;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Import(PostgreTestcontainerConfig.class)
-public class TaskServiceIntegrationTest {
+public class TaskFacadeManagementIntegrationTest {
 
     @Autowired
-    TaskService taskService;
+    TaskFacadeManagement taskFacadeManagement;
 
     @Autowired
     BoardRepository boardRepository;
@@ -50,8 +46,8 @@ public class TaskServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("Сохранить task")
-    public void shouldSaveUser() {
+    @DisplayName("Должно создать задачу")
+    public void shouldCreateTask() {
         User owner = DataGenerator.getSimpleUser();
         owner = userRepository.save(owner);
         Board board = DataGenerator.getSimpleBoard();
@@ -59,59 +55,51 @@ public class TaskServiceIntegrationTest {
         board = boardRepository.save(board);
         Task task = DataGenerator.getSimpleTask();
 
-        Task saved = taskService.save(board, owner, task);
+        Task created = taskFacadeManagement.createTask(board.getId(), owner.getId(), task);
 
-        assertThat(saved.getName()).isEqualTo(task.getName());
-        assertThat(saved.getDescription()).isEqualTo(task.getDescription());
-        assertThat(saved.getBoard()).isEqualTo(board);
+        Task saved = taskRepository.findById(created.getId()).orElseThrow();
+        assertThat(saved.getName()).isEqualTo(created.getName());
+        assertThat(saved.getDescription()).isEqualTo(created.getDescription());
         assertThat(saved.getOwner()).isEqualTo(owner);
-
+        assertThat(saved.getBoard()).isEqualTo(board);
+        assertThat(saved.getStatus()).isEqualTo(created.getStatus());
+        assertThat(saved.getPriority()).isEqualTo(created.getPriority());
     }
 
     @Test
-    @DisplayName("Обновить task")
-    public void shouldUpdateTask() {
+    @DisplayName("Должно назначить пользователя на задачу")
+    public void shouldAssignUserToTask() {
         User owner = DataGenerator.getSimpleUser();
         owner = userRepository.save(owner);
         Board board = DataGenerator.getSimpleBoard();
         board.setOwner(owner);
         board = boardRepository.save(board);
         Task task = DataGenerator.getSimpleTask();
-        Task taskToUpdate = DataGenerator.getSimpleTask();
-        taskToUpdate.setName("new Name");
-        taskToUpdate.setDescription("new Description");
-        taskToUpdate.setPriority(Priority.LOW);
-        taskToUpdate.setStatus(Status.DONE);
-        taskToUpdate.setDeadline(LocalDateTime.now().plusDays(4));
+        task.setOwner(owner);
+        task.setBoard(board);
+        task = taskRepository.save(task);
 
+        Task saved = taskFacadeManagement.assignUserToTask(task.getId(), owner.getId());
 
-        Task saved = taskService.save(board, owner, task);
-        Task patched = taskService.patch(task.getId(), taskToUpdate);
-
-        assertThat(patched.getId()).isEqualTo(saved.getId());
-        assertThat(patched.getName()).isEqualTo(taskToUpdate.getName());
-        assertThat(patched.getDescription()).isEqualTo(taskToUpdate.getDescription());
-        assertThat(patched.getPriority()).isEqualTo(taskToUpdate.getPriority());
-        assertThat(patched.getStatus()).isEqualTo(taskToUpdate.getStatus());
-        assertThat(patched.getDeadline()).isEqualTo(taskToUpdate.getDeadline());
+        assertThat(saved.getAssignees().size()).isEqualTo(1);
     }
 
     @Test
-    @DisplayName("Удалить task")
-    public void shouldDeleteTask() {
+    @DisplayName("Должно снять пользователя с задачи")
+    public void shouldUnassignUserToTask() {
         User owner = DataGenerator.getSimpleUser();
         owner = userRepository.save(owner);
         Board board = DataGenerator.getSimpleBoard();
         board.setOwner(owner);
         board = boardRepository.save(board);
         Task task = DataGenerator.getSimpleTask();
-        Task saved = taskService.save(board, owner, task);
+        task.setOwner(owner);
+        task.setBoard(board);
+        task.addAssignee(owner);
+        task = taskRepository.save(task);
 
-        taskService.delete(saved.getId());
+        Task saved = taskFacadeManagement.unassignUserFromTask(task.getId(), owner.getId());
 
-        assertThat(taskRepository.findById(saved.getId()).isPresent()).isFalse();
-        assertThat(userRepository.findById(owner.getId()).isPresent()).isTrue();
-        assertThat(boardRepository.findById(board.getId()).isPresent()).isTrue();
+        assertThat(saved.getAssignees().size()).isEqualTo(0);
     }
-
 }

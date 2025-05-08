@@ -3,8 +3,11 @@ package com.ugrasu.bordexback.rest.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugrasu.bordexback.auth.dto.AuthDto;
 import com.ugrasu.bordexback.config.PostgreTestcontainerConfig;
-import com.ugrasu.bordexback.rest.dto.web.full.UserDto;
+import com.ugrasu.bordexback.rest.dto.web.full.UserBoardRoleDto;
+import com.ugrasu.bordexback.rest.entity.Board;
+import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.User;
+import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
@@ -22,7 +25,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Set;
+
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -31,22 +36,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(PostgreTestcontainerConfig.class)
-public class UserControllerIntegrationTest {
+public class BoardRolesControllerIntegrationTest {
 
     @Autowired
     MockMvc mockMvc;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
-
-    @Autowired
     ObjectMapper objectMapper;
 
     @Autowired
-    UserRepository userRepository;
+    PasswordEncoder passwordEncoder;
 
     @Autowired
     UserBoardRoleRepository userBoardRoleRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
     @Autowired
     BoardRepository boardRepository;
@@ -87,64 +92,82 @@ public class UserControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /api/users возвращает список пользователей")
-    void shouldReturnAllUsers() throws Exception {
+    @DisplayName("GET /api/boards возвращает список досок")
+    void shouldReturnAllBoards() throws Exception {
         User user = DataGenerator.getSimpleUser();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-
+        User savedUser = userRepository.save(user);
+        boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
         String accessToken = getAccessToken();
-        mockMvc.perform(get("/api/users")
+
+        mockMvc.perform(get("/api/boards")
                         .cookie(new Cookie("access_token", accessToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)));
     }
 
     @Test
-    @DisplayName("GET /api/users/{id} возвращает пользователя по id")
-    void shouldReturnUserById() throws Exception {
+    @DisplayName("GET /api/users/boards/roles возвращает список ролей")
+    void shouldReturnAllUserBoardRoles() throws Exception {
         User user = DataGenerator.getSimpleUser();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+        Board simpleBoard = DataGenerator.getSimpleBoard(user);
+        boardRepository.save(simpleBoard);
+        BoardRoles toSave = DataGenerator.getSimpleUserBoardRole(user, simpleBoard, BoardRole.VIEWER);
+        userBoardRoleRepository.save(toSave);
 
         String accessToken = getAccessToken();
-        mockMvc.perform(get("/api/users/" + user.getId())
+
+        mockMvc.perform(get("/api/users/boards/roles")
                         .cookie(new Cookie("access_token", accessToken)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(user.getId()));
+                .andExpect(jsonPath("$.content", hasSize(1)));
     }
 
     @Test
-    @DisplayName("PATCH /api/users/{id} обновляет пользователя")
-    void shouldPatchUser() throws Exception {
+    @DisplayName("PATCH /api/users/boards/roles/{user-id}/{board-id} обновляет роль")
+    void shouldPatchUserBoardRole() throws Exception {
         User user = DataGenerator.getSimpleUser();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
-
-        UserDto updateDto = DataGenerator.getSimpleUserDto();
+        Board simpleBoard = DataGenerator.getSimpleBoard(user);
+        boardRepository.save(simpleBoard);
+        userBoardRoleRepository.save(DataGenerator.getSimpleUserBoardRole(user, simpleBoard, BoardRole.VIEWER));
+        UserBoardRoleDto updatedDto = new UserBoardRoleDto(
+                null,
+                null,
+                null,
+                Set.of(BoardRole.MANAGER)
+        );
 
         String accessToken = getAccessToken();
-        mockMvc.perform(patch("/api/users/" + user.getId())
+
+        mockMvc.perform(patch("/api/users/boards/roles/" + user.getId() + "/" + simpleBoard.getId())
                         .cookie(new Cookie("access_token", accessToken))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDto)))
+                        .content(objectMapper.writeValueAsString(updatedDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("testuser"));
+                .andExpect(jsonPath("$.boardRoles[0]").value("MANAGER"));
     }
 
     @Test
-    @DisplayName("DELETE /api/users удаляет пользователя")
-    void shouldDeleteUser() throws Exception {
+    @DisplayName("DELETE /api/users/boards/roles/{user-id}/{board-id}/{role} удаляет роль")
+    void shouldDeleteRole() throws Exception {
         User user = DataGenerator.getSimpleUser();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+        Board simpleBoard = DataGenerator.getSimpleBoard(user);
+        boardRepository.save(simpleBoard);
+        userBoardRoleRepository.save(DataGenerator.getSimpleUserBoardRole(user, simpleBoard, BoardRole.VIEWER));
 
         String accessToken = getAccessToken();
-        mockMvc.perform(delete("/api/users/" + user.getId())
-                        .cookie(new Cookie("access_token", accessToken))
-                        .contentType(MediaType.APPLICATION_JSON))
+
+        mockMvc.perform(delete("/api/users/boards/roles/" + user.getId() + "/" + simpleBoard.getId() + "/VIEWER")
+                        .cookie(new Cookie("access_token", accessToken)))
                 .andExpect(status().isNoContent());
 
-        assertThat(userRepository.findById(user.getId())).isEmpty();
+        assertThat(userBoardRoleRepository.findAll()).isEmpty();
     }
+
 }

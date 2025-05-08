@@ -40,6 +40,7 @@ public class Board extends BaseEntity {
 
     @OneToMany(
             mappedBy = "board",
+            cascade = CascadeType.ALL,
             orphanRemoval = true
     )
     Set<Task> tasks = new LinkedHashSet<>();
@@ -48,7 +49,7 @@ public class Board extends BaseEntity {
             mappedBy = "board",
             orphanRemoval = true
     )
-    Set<UserBoardRole> userBoardRoles = new LinkedHashSet<>();
+    Set<BoardRoles> boardRoles = new LinkedHashSet<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -56,8 +57,47 @@ public class Board extends BaseEntity {
             joinColumns = @JoinColumn(name = "board_id"),
             inverseJoinColumns = @JoinColumn(name = "users_id")
     )
-    Set<User> boardUsers = new LinkedHashSet<>();
+    Set<User> boardMembers = new LinkedHashSet<>();
 
+    public void addBoardRoles(BoardRoles boardRoles) {
+        if (this.boardRoles == null) {
+            this.boardRoles = new LinkedHashSet<>();
+        }
+        this.boardRoles.add(boardRoles);
+        boardRoles.setBoard(this);
+    }
+
+    public void removeBoardRoles(BoardRoles boardRoles) {
+        this.boardRoles.remove(boardRoles);
+        boardRoles.setBoard(null);
+    }
+
+    public void addMember(User user) {
+        if (this.boardMembers == null) {
+            this.boardMembers = new LinkedHashSet<>();
+        }
+        this.boardMembers.add(user);
+        user.getMemberBoards().add(this);
+    }
+
+    public void removeMember(User user) {
+        this.boardMembers.remove(user);
+        user.getMemberBoards().remove(this);
+    }
+
+    public boolean isMember(User newOwner) {
+        return this.boardMembers.contains(newOwner);
+    }
+
+    public void deleteAll() {
+        this.boardRoles.forEach(boardRoles -> boardRoles.setBoard(null));
+        this.boardRoles.clear();
+
+        this.boardMembers.forEach(boardMember -> boardMember.getMemberBoards().remove(this));
+        this.boardMembers.clear();
+
+        this.owner.deleteOwnBoard(this);
+    }
 
     @Override
     public final boolean equals(Object o) {

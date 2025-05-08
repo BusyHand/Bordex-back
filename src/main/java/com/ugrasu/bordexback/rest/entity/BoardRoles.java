@@ -1,6 +1,5 @@
 package com.ugrasu.bordexback.rest.entity;
 
-import com.ugrasu.bordexback.notification.entity.Notification;
 import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,9 +18,12 @@ import java.util.Set;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_board_roles")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserBoardRole extends BaseEntity {
+@Table(
+        name = "user_board_roles",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "board_id"})}
+)
+public class BoardRoles extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -35,7 +37,8 @@ public class UserBoardRole extends BaseEntity {
     @Column(name = "board_role")
     @CollectionTable(
             name = "board_role",
-            joinColumns = @JoinColumn(name = "user_id")
+            joinColumns = @JoinColumn(name = "user_board_role_id"),
+            uniqueConstraints = {@UniqueConstraint(columnNames = {"user_board_role_id", "board_role"})}
     )
     @Enumerated(value = EnumType.STRING)
     Set<BoardRole> boardRoles = new LinkedHashSet<>(List.of(BoardRole.VIEWER));
@@ -47,7 +50,7 @@ public class UserBoardRole extends BaseEntity {
         Class<?> oEffectiveClass = o instanceof HibernateProxy proxy ? proxy.getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy proxy ? proxy.getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        UserBoardRole that = (UserBoardRole) o;
+        BoardRoles that = (BoardRoles) o;
         return getId() != null && Objects.equals(getId(), that.getId());
     }
 

@@ -1,13 +1,12 @@
 package com.ugrasu.bordexback.rest.controller;
 
 import com.ugrasu.bordexback.rest.controller.filter.UserBoardRoleFilter;
-import com.ugrasu.bordexback.rest.controller.validation.OnCreate;
 import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
 import com.ugrasu.bordexback.rest.dto.web.full.UserBoardRoleDto;
-import com.ugrasu.bordexback.rest.entity.UserBoardRole;
+import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
 import com.ugrasu.bordexback.rest.mapper.impl.UserBoardRoleMapper;
-import com.ugrasu.bordexback.rest.service.UserBoardRoleService;
+import com.ugrasu.bordexback.rest.service.BoardRolesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,9 +27,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users/boards/roles")
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 public class UserBoardRoleController {
 
-    private final UserBoardRoleService userBoardRoleService;
+    private final BoardRolesService boardRolesService;
     private final UserBoardRoleMapper userBoardRoleMapper;
 
     @Operation(
@@ -39,26 +40,13 @@ public class UserBoardRoleController {
     @GetMapping
     public PagedModel<UserBoardRoleDto> findAll(@ParameterObject @ModelAttribute UserBoardRoleFilter filter,
                                                 @ParameterObject Pageable pageable) {
-        Specification<UserBoardRole> specification = filter.toSpecification();
-        Page<UserBoardRole> userBoardRoles = userBoardRoleService.findAll(specification, pageable);
+        Specification<BoardRoles> specification = filter.toSpecification();
+        Page<BoardRoles> userBoardRoles = boardRolesService.findAll(specification, pageable);
         Page<UserBoardRoleDto> userBoardRoleDtos = userBoardRoles.map(userBoardRoleMapper::toDto);
         return new PagedModel<>(userBoardRoleDtos);
     }
 
-    @Operation(
-            summary = "Создать роль пользователя на доске",
-            description = "Добавляет роль для пользователя на указанной доске"
-    )
-    @PostMapping("/{user-id}/{board-id}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserBoardRoleDto create(@PathVariable("user-id") Long userId,
-                                   @PathVariable("board-id") Long boardId,
-                                   @Validated(OnCreate.class) @RequestBody UserBoardRoleDto userBoardRoleDto) {
-        var userBoardRole = userBoardRoleMapper.toEntity(userBoardRoleDto);
-        var saved = userBoardRoleService.save(boardId, userId, userBoardRole);
-        return userBoardRoleMapper.toDto(saved);
-    }
-
+    //todo
     @Operation(
             summary = "Обновить роль пользователя на доске",
             description = "Изменяет существующую роль пользователя на доске"
@@ -69,7 +57,7 @@ public class UserBoardRoleController {
                                    @PathVariable("board-id") Long boardId,
                                    @Validated(OnUpdate.class) @RequestBody UserBoardRoleDto userBoardRoleDto) {
         var userBoardRole = userBoardRoleMapper.toEntity(userBoardRoleDto);
-        var patched = userBoardRoleService.patch(userId, boardId, userBoardRole);
+        var patched = boardRolesService.patch(userId, boardId, userBoardRole.getBoardRoles());
         return userBoardRoleMapper.toDto(patched);
     }
 
@@ -82,17 +70,6 @@ public class UserBoardRoleController {
     public void deleteRole(@PathVariable("user-id") Long userId,
                            @PathVariable("board-id") Long boardId,
                            @PathVariable("board-role") BoardRole boardRole) {
-        userBoardRoleService.deleteBoardRole(userId, boardId, boardRole);
-    }
-
-    @Operation(
-            summary = "Удалить все роли пользователя на доске",
-            description = "Удаляет все роли пользователя на указанной доске"
-    )
-    @DeleteMapping("/{user-id}/{board-id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("user-id") Long userId,
-                       @PathVariable("board-id") Long boardId) {
-        userBoardRoleService.deleteAll(userId, boardId);
+        boardRolesService.deleteBoardRole(userId, boardId, boardRole);
     }
 }

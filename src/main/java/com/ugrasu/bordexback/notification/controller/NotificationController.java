@@ -12,17 +12,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/notifications")
+@PreAuthorize("isAuthenticated()")
 public class NotificationController {
 
     private final NotificationService notificationService;
     private final NotificationMapper notificationMapper;
 
-    @GetMapping()
+    @GetMapping
     public PagedModel<NotificationDto> findAll(@ParameterObject @ModelAttribute NotificationFilter filter,
                                                @ParameterObject Pageable pageable) {
         Specification<Notification> specification = filter.toSpecification();
@@ -31,9 +33,10 @@ public class NotificationController {
         return new PagedModel<>(notificationDtos);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{notification-id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("id") Long id) {
-        notificationService.delete(id);
+    public void delete(@PathVariable("notification-id") Long notificationId,
+                       @RequestParam("userId") Long userId) {
+        notificationService.delete(notificationId, userId);
     }
 }

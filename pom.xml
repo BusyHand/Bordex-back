@@ -21,6 +21,17 @@
         <spring-boot.run.jvmArguments>-Duser.timezone=GMT+5</spring-boot.run.jvmArguments>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>9.47</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+
 
     <dependencies>
 

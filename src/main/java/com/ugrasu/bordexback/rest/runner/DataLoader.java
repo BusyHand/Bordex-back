@@ -1,9 +1,9 @@
 package com.ugrasu.bordexback.rest.runner;
 
 import com.ugrasu.bordexback.rest.entity.Board;
+import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
-import com.ugrasu.bordexback.rest.entity.UserBoardRole;
 import com.ugrasu.bordexback.rest.entity.enums.*;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
@@ -54,11 +54,11 @@ public class DataLoader implements CommandLineRunner {
                 .limit(10)
                 .toList());
 
-        savedBoard1.setBoardUsers(new HashSet<>(firstUsers));
-        savedBoard2.setBoardUsers(new HashSet<>(secondUsers));
+        savedBoard1.setBoardMembers(new HashSet<>(firstUsers));
+        savedBoard2.setBoardMembers(new HashSet<>(secondUsers));
 
-        firstUsers.forEach(user -> user.getUserBoards().add(savedBoard1));
-        secondUsers.forEach(user -> user.getUserBoards().add(savedBoard2));
+        firstUsers.forEach(user -> user.getMemberBoards().add(savedBoard1));
+        secondUsers.forEach(user -> user.getMemberBoards().add(savedBoard2));
 
         secondUsers.remove(users.get(0));
         userRepository.saveAll(firstUsers);
@@ -79,49 +79,50 @@ public class DataLoader implements CommandLineRunner {
         me.setEmail("cool908yan@yandex.ru");
         userRepository.save(me);
         Board board = boardRepository.findById(2L).get();
-        UserBoardRole userBoardRole = UserBoardRole.builder()
+        BoardRoles boardRoles = BoardRoles.builder()
                 .user(me)
                 .board(board)
                 .boardRoles(Set.of(BoardRole.VIEWER, BoardRole.DEVELOPER, BoardRole.MANAGER))
                 .build();
-        board.getBoardUsers().add(me);
-        userBoardRoleRepository.save(userBoardRole);
+        board.getBoardMembers().add(me);
+        userBoardRoleRepository.save(boardRoles);
         boardRepository.save(board);
     }
 
     private void createUserBoardRoles(List<User> users, Board board) {
-        List<UserBoardRole> userBoardRoles = new ArrayList<>();
+        List<BoardRoles> boardRolesList = new ArrayList<>();
         for (User user : users) {
             if (user.getId() == 1L) {
-                UserBoardRole userBoardRole = UserBoardRole.builder()
+                BoardRoles boardRoles = BoardRoles.builder()
                         .user(user)
                         .board(board)
                         .boardRoles(Set.of(BoardRole.VIEWER, BoardRole.MANAGER))
                         .build();
-                userBoardRoles.add(userBoardRole);
+                boardRolesList.add(boardRoles);
                 continue;
             }
-            UserBoardRole userBoardRole = UserBoardRole.builder()
+            BoardRoles boardRoles = BoardRoles.builder()
                     .user(user)
                     .board(board)
                     .boardRoles(getSetOfRoles())
                     .build();
-            userBoardRoles.add(userBoardRole);
+            boardRolesList.add(boardRoles);
         }
-        userBoardRoleRepository.saveAll(userBoardRoles);
+        userBoardRoleRepository.saveAll(boardRolesList);
     }
 
     private List<Task> getTasks(List<User> users, Board board) {
         List<Task> tasks = new ArrayList<>();
+        List<Status> statuses = List.of(Status.NEW, Status.IN_PROGRESS, Status.DONE);
         for (int i = 0; i < 10; i++) {
             Task task = new Task();
             task.setBoard(board);
             task.setOwner(users.get(getRandom(0, users.size() - 1)));
             task.setAssignees(getAssignes(users));
             task.setPriority(getRandomEnum(Priority.class));
-            task.setStatus(getRandomEnum(Status.class));
+            task.setStatus(statuses.get(getRandom(0, statuses.size() - 1)));
             task.setName("Task " + (i + 1));
-            task.setDeadline(LocalDateTime.now().plusDays(getRandom(0, 3)));
+            task.setDeadline(LocalDateTime.now().plusDays(getRandom(0, 2)));
             task.setDescription("admin task");
             task.setTag(getRandomEnum(Tag.class));
             task.setProgress(getRandom(0, 100));

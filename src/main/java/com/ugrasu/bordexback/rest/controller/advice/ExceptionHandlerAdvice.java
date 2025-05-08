@@ -1,5 +1,6 @@
 package com.ugrasu.bordexback.rest.controller.advice;
 
+import com.ugrasu.bordexback.rest.exception.UserNotBoardMemberException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,11 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class ExceptionHandlerAdvice {
+
+    @ExceptionHandler(UserNotBoardMemberException.class)
+    public ResponseEntity<Object> handleUserNotBoardMemberException(UserNotBoardMemberException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {

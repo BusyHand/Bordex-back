@@ -36,7 +36,7 @@ public class AuthController {
         return authMapper.toDto(savedUser);
     }
 
-    //todo
+    //todo refactor
     @GetMapping("/me")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("isAuthenticated()")
@@ -44,6 +44,7 @@ public class AuthController {
         return authMapper.toDto(userService.findOne(authenficatedUser.getUserId()));
     }
 
+    //todo refactor
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody @Validated(OnLogin.class) AuthDto authDto, HttpServletResponse response) {
         User user = authMapper.toEntity(authDto);
@@ -53,12 +54,14 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    //todo refactor
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
         addJwtLogoutCookies(response);
         return ResponseEntity.ok().build();
     }
 
+    //todo refactor
     private void addJwtLogoutCookies(HttpServletResponse response) {
         String accessCookie = buildSetCookieHeader("access_token", "", 0);
         String refreshCookie = buildSetCookieHeader("refresh_token", "", 0);
@@ -67,6 +70,7 @@ public class AuthController {
         response.addHeader("Set-Cookie", refreshCookie);
     }
 
+    //todo refactor
     @PostMapping("/refresh")
     public ResponseEntity<Void> refresh(@AuthenticationPrincipal AuthenficatedUser user, HttpServletResponse response) {
         Tokens tokens = authService.refresh(user);
@@ -74,6 +78,7 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    //todo refactor
     private void addJwtCookies(HttpServletResponse response, Tokens tokens) {
         String accessCookie = buildSetCookieHeader("access_token", tokens.getAccessToken(), 3600);
         String refreshCookie = buildSetCookieHeader("refresh_token", tokens.getRefreshToken(), 604800);
@@ -82,6 +87,7 @@ public class AuthController {
         response.addHeader("Set-Cookie", refreshCookie);
     }
 
+    //todo refactor
     private String buildSetCookieHeader(String name, String value, int maxAge) {
         return String.format(
                 "%s=%s; Max-Age=%d; Path=/; HttpOnly; Secure; SameSite=None",

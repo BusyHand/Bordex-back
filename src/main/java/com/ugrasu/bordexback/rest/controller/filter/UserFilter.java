@@ -18,13 +18,13 @@ public record UserFilter(String username, String email, Role role, Boolean block
 
     private Specification<User> usernameSpec() {
         return (root, query, cb) -> username != null
-                ? cb.like(cb.lower(root.get("username")), "%" + username.toLowerCase() + "%")
+                ? cb.like(cb.lower(root.get("username")), username.toLowerCase() + "%")
                 : null;
     }
 
     private Specification<User> emailSpec() {
         return (root, query, cb) -> email != null
-                ? cb.like(cb.lower(root.get("email")), "%" + email.toLowerCase() + "%")
+                ? cb.like(cb.lower(root.get("email")), email.toLowerCase() + "%")
                 : null;
     }
 
@@ -42,7 +42,7 @@ public record UserFilter(String username, String email, Role role, Boolean block
 
     private Specification<User> userBoardsIdInSpec() {
         return ((root, query, cb) -> boardIds != null
-                ? root.get("userBoards").get("id").in(boardIds)
+                ? root.get("memberBoards").get("id").in(boardIds)
                 : null);
     }
 }

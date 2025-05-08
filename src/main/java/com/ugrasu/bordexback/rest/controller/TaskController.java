@@ -6,6 +6,7 @@ import com.ugrasu.bordexback.rest.controller.validation.OnCreate;
 import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
 import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
 import com.ugrasu.bordexback.rest.entity.Task;
+import com.ugrasu.bordexback.rest.facade.TaskFacadeManagement;
 import com.ugrasu.bordexback.rest.mapper.impl.TaskMapper;
 import com.ugrasu.bordexback.rest.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,8 +29,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/tasks")
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 public class TaskController {
 
+    private final TaskFacadeManagement taskFacadeManagement;
     private final TaskService taskService;
     private final TaskMapper taskMapper;
 
@@ -62,12 +65,11 @@ public class TaskController {
     )
     @PostMapping("/{board-id}")
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("isAuthenticated()")
     public TaskDto create(@AuthenticationPrincipal AuthenficatedUser authenficatedUser,
                           @PathVariable("board-id") Long boardId,
                           @Validated(OnCreate.class) @RequestBody TaskDto taskDto) {
         Task task = taskMapper.toEntity(taskDto);
-        Task saved = taskService.save(boardId, task, authenficatedUser.getUserId());
+        Task saved = taskFacadeManagement.createTask(boardId, authenficatedUser.getUserId(), task);
         return taskMapper.toDto(saved);
     }
 
@@ -102,7 +104,7 @@ public class TaskController {
     @ResponseStatus(HttpStatus.OK)
     public TaskDto assignUser(@PathVariable("task-id") Long taskId,
                               @PathVariable("user-id") Long userId) {
-        Task task = taskService.assignUser(taskId, userId);
+        Task task = taskFacadeManagement.assignUserToTask(taskId, userId);
         return taskMapper.toDto(task);
     }
 
@@ -114,7 +116,7 @@ public class TaskController {
     @ResponseStatus(HttpStatus.OK)
     public TaskDto unassignUser(@PathVariable("task-id") Long taskId,
                                 @PathVariable("user-id") Long userId) {
-        Task task = taskService.unassignUser(taskId, userId);
+        Task task = taskFacadeManagement.unassignUserFromTask(taskId, userId);
         return taskMapper.toDto(task);
     }
 }

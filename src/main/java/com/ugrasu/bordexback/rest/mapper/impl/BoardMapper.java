@@ -30,6 +30,6 @@ public interface BoardMapper extends WebMappable<Board, BoardDto, BoardSlimDto> 
     }
 
     default Long countMembers(Board board) {
-        return board.getBoardUsers() != null ? (long) board.getBoardUsers().size() : 0L;
+        return board.getBoardMembers() != null ? (long) board.getBoardMembers().size() : 0L;
     }
 }

@@ -1,6 +1,7 @@
 package com.ugrasu.bordexback.rest.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ugrasu.bordexback.auth.dto.AuthDto;
 import com.ugrasu.bordexback.config.PostgreTestcontainerConfig;
 import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
 import com.ugrasu.bordexback.rest.entity.Board;
@@ -11,6 +12,7 @@ import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import com.ugrasu.bordexback.util.DataGenerator;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,16 +39,23 @@ public class TaskControllerIntegrationTest {
     MockMvc mockMvc;
 
     @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
     ObjectMapper objectMapper;
 
     @Autowired
     TaskRepository taskRepository;
     @Autowired
-    private UserRepository userRepository;
+    UserRepository userRepository;
+
     @Autowired
-    private UserBoardRoleRepository userBoardRoleRepository;
+    UserBoardRoleRepository userBoardRoleRepository;
+
     @Autowired
-    private BoardRepository boardRepository;
+    BoardRepository boardRepository;
+
+    User authUser;
 
     @BeforeEach
     void setUp() {
@@ -53,19 +63,43 @@ public class TaskControllerIntegrationTest {
         userBoardRoleRepository.deleteAll();
         boardRepository.deleteAll();
         taskRepository.deleteAll();
+        authUser = DataGenerator.getSimpleUser();
+    }
+
+    private String getAccessToken() throws Exception {
+        AuthDto authDto = new AuthDto();
+        authDto.setUsername(authUser.getEmail());
+        authDto.setPassword(authUser.getPassword());
+
+        var result = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authDto)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String[] cookies = result.getResponse().getHeaders("Set-Cookie").toArray(new String[0]);
+
+        for (String cookie : cookies) {
+            if (cookie.startsWith("access_token=")) {
+                return cookie.split(";", 2)[0].substring("access_token=".length());
+            }
+        }
+        throw new RuntimeException("access_token cookie not found");
     }
 
     @Test
     @DisplayName("GET /api/tasks возвращает список задач")
     void shouldReturnAllTasks() throws Exception {
-        User simpleUser = DataGenerator.getSimpleUser();
-        simpleUser = userRepository.save(simpleUser);
-        Board simpleBoard = DataGenerator.getSimpleBoard(simpleUser);
-        simpleBoard = boardRepository.save(simpleBoard);
+        User user = DataGenerator.getSimpleUser();
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User savedUser = userRepository.save(user);
+        Board board = boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
 
-        taskRepository.save(DataGenerator.getSimpleTask(simpleUser, simpleBoard));
+        taskRepository.save(DataGenerator.getSimpleTask(savedUser, board));
 
-        mockMvc.perform(get("/api/tasks"))
+        String accessToken = getAccessToken();
+        mockMvc.perform(get("/api/tasks")
+                        .cookie(new Cookie("access_token", accessToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)));
     }
@@ -73,47 +107,52 @@ public class TaskControllerIntegrationTest {
     @Test
     @DisplayName("GET /api/tasks/{id} возвращает задачу по id")
     void shouldReturnTaskById() throws Exception {
-        User simpleUser = DataGenerator.getSimpleUser();
-        simpleUser = userRepository.save(simpleUser);
-        Board simpleBoard = DataGenerator.getSimpleBoard(simpleUser);
-        simpleBoard = boardRepository.save(simpleBoard);
-        Task task = taskRepository.save(DataGenerator.getSimpleTask(simpleUser, simpleBoard));
+        User user = DataGenerator.getSimpleUser();
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User savedUser = userRepository.save(user);
+        Board board = boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
+        Task task = taskRepository.save(DataGenerator.getSimpleTask(user, board));
 
-        mockMvc.perform(get("/api/tasks/" + task.getId()))
+        String accessToken = getAccessToken();
+        mockMvc.perform(get("/api/tasks/" + task.getId())
+                        .cookie(new Cookie("access_token", accessToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(task.getId()));
     }
 
-    //TODO with logged user
-    /*@Test
+    @Test
     @DisplayName("POST /api/tasks/{board-id} сохраняет новую задачу")
     void shouldSaveTask() throws Exception {
-        User simpleUser = DataGenerator.getSimpleUser();
-        simpleUser = userRepository.save(simpleUser);
-        Board simpleBoard = DataGenerator.getSimpleBoard(simpleUser);
-        simpleBoard = boardRepository.save(simpleBoard);
+        User user = DataGenerator.getSimpleUser();
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User savedUser = userRepository.save(user);
+        Board board = boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
 
         TaskDto taskDto = DataGenerator.getSimpleTaskDto();
 
-        mockMvc.perform(post("/api/tasks/" + simpleBoard.getId())
+        String accessToken = getAccessToken();
+        mockMvc.perform(post("/api/tasks/" + board.getId())
+                        .cookie(new Cookie("access_token", accessToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(taskDto)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value(taskDto.getName()));
-    }*/
+    }
 
 
     @Test
     @DisplayName("PATCH /api/tasks/{id} обновляет задачу")
     void shouldPatchTask() throws Exception {
-        User simpleUser = DataGenerator.getSimpleUser();
-        simpleUser = userRepository.save(simpleUser);
-        Board simpleBoard = DataGenerator.getSimpleBoard(simpleUser);
-        simpleBoard = boardRepository.save(simpleBoard);
-        Task task = taskRepository.save(DataGenerator.getSimpleTask(simpleUser, simpleBoard));
+        User user = DataGenerator.getSimpleUser();
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User savedUser = userRepository.save(user);
+        Board board = boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
+        Task task = taskRepository.save(DataGenerator.getSimpleTask(user, board));
         TaskDto updateDto = DataGenerator.getSimpleTaskDto();
 
+        String accessToken = getAccessToken();
         mockMvc.perform(patch("/api/tasks/" + task.getId())
+                        .cookie(new Cookie("access_token", accessToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
@@ -123,13 +162,15 @@ public class TaskControllerIntegrationTest {
     @Test
     @DisplayName("DELETE /api/tasks удаляет задачу")
     void shouldDeleteTask() throws Exception {
-        User simpleUser = DataGenerator.getSimpleUser();
-        simpleUser = userRepository.save(simpleUser);
-        Board simpleBoard = DataGenerator.getSimpleBoard(simpleUser);
-        simpleBoard = boardRepository.save(simpleBoard);
-        Task task = taskRepository.save(DataGenerator.getSimpleTask(simpleUser, simpleBoard));
+        User user = DataGenerator.getSimpleUser();
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User savedUser = userRepository.save(user);
+        Board board = boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
+        Task task = taskRepository.save(DataGenerator.getSimpleTask(user, board));
 
+        String accessToken = getAccessToken();
         mockMvc.perform(delete("/api/tasks/" + task.getId())
+                        .cookie(new Cookie("access_token", accessToken))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 

@@ -6,14 +6,15 @@ import com.ugrasu.bordexback.rest.dto.web.full.UserDto;
 import com.ugrasu.bordexback.rest.dto.web.slim.BoardSlimDto;
 import com.ugrasu.bordexback.rest.dto.web.slim.UserSlimDto;
 import com.ugrasu.bordexback.rest.entity.Board;
+import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
-import com.ugrasu.bordexback.rest.entity.UserBoardRole;
 import com.ugrasu.bordexback.rest.entity.enums.*;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @UtilityClass
@@ -24,6 +25,8 @@ public class DataGenerator {
                 .name("Test board")
                 .description("Test description board")
                 .scope(Scope.PUBLIC)
+                .boardRoles(new LinkedHashSet<>())
+                .boardMembers(new LinkedHashSet<>())
                 .build();
     }
 
@@ -32,6 +35,8 @@ public class DataGenerator {
                 .owner(user)
                 .name("Test board")
                 .description("Test description board")
+                .boardRoles(new LinkedHashSet<>())
+                .boardMembers(new LinkedHashSet<>())
                 .scope(Scope.PUBLIC)
                 .build();
     }
@@ -43,6 +48,7 @@ public class DataGenerator {
                 .deadline(LocalDateTime.now().plusDays(1))
                 .status(Status.NEW)
                 .priority(Priority.MEDIUM)
+                .assignees(new LinkedHashSet<>())
                 .build();
 
     }
@@ -60,8 +66,8 @@ public class DataGenerator {
 
     }
 
-    public UserBoardRole getSimpleUserBoardRole(User user, Board board, BoardRole... roles) {
-        return UserBoardRole.builder()
+    public BoardRoles getSimpleUserBoardRole(User user, Board board, BoardRole... roles) {
+        return BoardRoles.builder()
                 .user(user)
                 .board(board)
                 .boardRoles(new HashSet<>(Set.of(roles)))
@@ -74,8 +80,27 @@ public class DataGenerator {
                 .password("Password")
                 .firstName("FirstName")
                 .lastName("LastName")
-                .email("Email")
+                .email("email@gmail.com")
                 .roles(Set.of(Role.USER))
+                .assigneesTask(new LinkedHashSet<>())
+                .boardsRoles(new LinkedHashSet<>())
+                .ownBoards(new LinkedHashSet<>())
+                .memberBoards(new LinkedHashSet<>())
+                .build();
+    }
+
+    public User getSimpleUser(String username, String Email) {
+        return User.builder()
+                .username(username)
+                .password("Password")
+                .firstName("FirstName")
+                .lastName("LastName")
+                .email(Email)
+                .roles(Set.of(Role.USER))
+                .assigneesTask(new LinkedHashSet<>())
+                .boardsRoles(new LinkedHashSet<>())
+                .ownBoards(new LinkedHashSet<>())
+                .memberBoards(new LinkedHashSet<>())
                 .build();
     }
 
@@ -104,6 +129,7 @@ public class DataGenerator {
         taskDto.setStatus(Status.NEW);
         taskDto.setPriority(Priority.MEDIUM);
         taskDto.setDeadline(LocalDateTime.now().plusDays(1));
+        taskDto.setProgress(2);
         return taskDto;
     }
 

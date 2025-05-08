@@ -2,8 +2,8 @@ package com.ugrasu.bordexback.rest.service;
 
 import com.ugrasu.bordexback.config.PostgreTestcontainerConfig;
 import com.ugrasu.bordexback.rest.entity.Board;
+import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.User;
-import com.ugrasu.bordexback.rest.entity.UserBoardRole;
 import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
@@ -25,10 +25,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
 @Import(PostgreTestcontainerConfig.class)
-public class UserBoardRoleIntegrationTest {
+public class BoardRolesServiceIntegrationTest {
 
     @Autowired
-    UserBoardRoleService userBoardRoleService;
+    BoardRolesService boardRolesService;
 
     @Autowired
     BoardRepository boardRepository;
@@ -57,11 +57,11 @@ public class UserBoardRoleIntegrationTest {
         user = userRepository.save(user);
         Board board = DataGenerator.getSimpleBoard(user);
         board = boardRepository.save(board);
-        UserBoardRole toSave = DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.VIEWER);
+        DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.VIEWER);
 
 
-        UserBoardRole save = userBoardRoleService.save(board.getId(), user.getId(), toSave);
-        UserBoardRole found = userBoardRoleService.findOne(user.getId(), board.getId());
+        BoardRoles save = boardRolesService.save(user, board, Set.of(BoardRole.VIEWER));
+        BoardRoles found = boardRolesService.findOne(user.getId(), board.getId());
 
 
         assertThat(found.getBoard()).isEqualTo(board);
@@ -78,12 +78,11 @@ public class UserBoardRoleIntegrationTest {
         user = userRepository.save(user);
         Board board = DataGenerator.getSimpleBoard(user);
         board = boardRepository.save(board);
-        UserBoardRole toSave = DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.VIEWER);
-        UserBoardRole toUpdate = DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.VIEWER, BoardRole.DEVELOPER);
+        BoardRoles toUpdate = DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.VIEWER, BoardRole.DEVELOPER);
 
-        UserBoardRole save = userBoardRoleService.save(board.getId(), user.getId(), toSave);
-        userBoardRoleService.patch(user.getId(), board.getId(), toUpdate);
-        UserBoardRole found = userBoardRoleService.findOne(user.getId(), board.getId());
+        BoardRoles save = boardRolesService.save(user, board, Set.of(BoardRole.VIEWER));
+        boardRolesService.patch(user.getId(), board.getId(), toUpdate.getBoardRoles());
+        BoardRoles found = boardRolesService.findOne(user.getId(), board.getId());
 
         assertThat(found.getBoard()).isEqualTo(board);
         assertThat(found.getId()).isEqualTo(save.getId());
@@ -101,14 +100,11 @@ public class UserBoardRoleIntegrationTest {
         Board board = DataGenerator.getSimpleBoard();
         board.setOwner(user);
         board = boardRepository.save(board);
-        UserBoardRole toSave = DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.VIEWER, BoardRole.DEVELOPER, BoardRole.MANAGER);
         Set<BoardRole> outputRoles = Set.of(BoardRole.VIEWER, BoardRole.DEVELOPER);
 
-
-        UserBoardRole save = userBoardRoleService.save(board.getId(), user.getId(), toSave);
-        userBoardRoleService.deleteBoardRole(user.getId(), board.getId(), BoardRole.MANAGER);
-        UserBoardRole found = userBoardRoleService.findOne(user.getId(), board.getId());
-
+        BoardRoles save = boardRolesService.save(user, board, Set.of(BoardRole.VIEWER, BoardRole.DEVELOPER, BoardRole.MANAGER));
+        boardRolesService.deleteBoardRole(user.getId(), board.getId(), BoardRole.MANAGER);
+        BoardRoles found = boardRolesService.findOne(user.getId(), board.getId());
 
         assertThat(found.getBoard()).isEqualTo(board);
         assertThat(found.getId()).isEqualTo(save.getId());
@@ -124,13 +120,11 @@ public class UserBoardRoleIntegrationTest {
         Board board = DataGenerator.getSimpleBoard();
         board.setOwner(user);
         Board savedBoard = boardRepository.save(board);
-        UserBoardRole toSave = DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.VIEWER, BoardRole.DEVELOPER, BoardRole.MANAGER);
 
+        boardRolesService.save(user, board, Set.of(BoardRole.VIEWER, BoardRole.DEVELOPER, BoardRole.MANAGER));
+        boardRolesService.deleteUserRoles(user, board);
 
-        UserBoardRole save = userBoardRoleService.save(board.getId(), user.getId(), toSave);
-        userBoardRoleService.deleteAll(user.getId(), board.getId());
-
-        assertThatThrownBy(() -> userBoardRoleService.findOne(savedUser.getId(), savedBoard.getId()))
+        assertThatThrownBy(() -> boardRolesService.findOne(savedUser.getId(), savedBoard.getId()))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 

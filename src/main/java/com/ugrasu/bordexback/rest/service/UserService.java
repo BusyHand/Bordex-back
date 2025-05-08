@@ -32,9 +32,9 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("User with this %s id not found".formatted(id)));
     }
 
-    public User findOne(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("User with this %s username not found".formatted(username)));
+    public User findOne(String usernameOrEmail) {
+        return userRepository.findUserByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
+                .orElseThrow(() -> new EntityNotFoundException("User with this %s username or email not found".formatted(usernameOrEmail)));
     }
 
     @Transactional

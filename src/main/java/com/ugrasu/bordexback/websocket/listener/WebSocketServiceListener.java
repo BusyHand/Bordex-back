@@ -10,6 +10,7 @@ import com.ugrasu.bordexback.rest.dto.event.UserEventDto;
 import com.ugrasu.bordexback.rest.dto.web.full.BoardDto;
 import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
 import com.ugrasu.bordexback.rest.dto.web.full.UserDto;
+import com.ugrasu.bordexback.rest.dto.web.slim.UserSlimDto;
 import com.ugrasu.bordexback.rest.event.*;
 import com.ugrasu.bordexback.websocket.mapper.WebSocketEventMapper;
 import com.ugrasu.bordexback.websocket.sender.WebSocketSender;
@@ -42,7 +43,9 @@ public class WebSocketServiceListener {
             return;
         }
         if (TASK_UNASSIGNED.equals(eventType)) {
-            sender.sendTaskUnassignUser(dto, taskEventDto.getUnassignUser().getId());
+            UserSlimDto unassignUser = taskEventDto.getUnassignUser();
+            dto.getAssignees().remove(unassignUser);
+            sender.sendTaskUnassignUser(dto, unassignUser.getId());
             return;
         }
         sender.sendUpdateTask(dto);
@@ -72,10 +75,6 @@ public class WebSocketServiceListener {
             return;
         }
         if (BOARD_UNASSIGNED.equals(eventType)) {
-            //TODO
-            return;
-        }
-        if (BOARD_SCOPE_CHANGED.equals(eventType)) {
             //TODO
             return;
         }

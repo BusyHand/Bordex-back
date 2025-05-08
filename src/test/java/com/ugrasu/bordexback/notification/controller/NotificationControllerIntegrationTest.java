@@ -1,10 +1,13 @@
-package com.ugrasu.bordexback.rest.controller;
+package com.ugrasu.bordexback.notification.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import com.ugrasu.bordexback.auth.dto.AuthDto;
 import com.ugrasu.bordexback.config.PostgreTestcontainerConfig;
-import com.ugrasu.bordexback.rest.dto.web.full.UserDto;
+import com.ugrasu.bordexback.rest.entity.Board;
+import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
+import com.ugrasu.bordexback.rest.facade.TaskFacadeManagement;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
@@ -21,8 +24,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -31,16 +34,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(PostgreTestcontainerConfig.class)
-public class UserControllerIntegrationTest {
+public class NotificationControllerIntegrationTest {
+
 
     @Autowired
     MockMvc mockMvc;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    TaskFacadeManagement taskFacadeManagement;
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    BoardRepository boardRepository;
 
     @Autowired
     UserRepository userRepository;
@@ -49,7 +56,7 @@ public class UserControllerIntegrationTest {
     UserBoardRoleRepository userBoardRoleRepository;
 
     @Autowired
-    BoardRepository boardRepository;
+    PasswordEncoder passwordEncoder;
 
     @Autowired
     TaskRepository taskRepository;
@@ -87,64 +94,68 @@ public class UserControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /api/users возвращает список пользователей")
-    void shouldReturnAllUsers() throws Exception {
+    @DisplayName("GET /api/notifications?userId= возвращает список нотификаций пользователей")
+    void shouldGetNewNotification() throws Exception {
         User user = DataGenerator.getSimpleUser();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-
+        User savedUser = userRepository.save(user);
+        Board board = boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
+        Task task = DataGenerator.getSimpleTask();
+        Task created = taskFacadeManagement.createTask(board.getId(), user.getId(), task);
+        taskFacadeManagement.assignUserToTask(created.getId(), savedUser.getId());
         String accessToken = getAccessToken();
-        mockMvc.perform(get("/api/users")
+
+        mockMvc.perform(get("/api/notifications?userId={userId}", savedUser.getId())
                         .cookie(new Cookie("access_token", accessToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)));
     }
 
     @Test
-    @DisplayName("GET /api/users/{id} возвращает пользователя по id")
-    void shouldReturnUserById() throws Exception {
+    @DisplayName("DELETE /api/notifications/{notification-id}?userId={userId} удаляет только для одного пользователя")
+    void shouldDeleteOnlyForOneUser() throws Exception {
         User user = DataGenerator.getSimpleUser();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        Board board = boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
+        Task task = DataGenerator.getSimpleTask();
+        Task created = taskFacadeManagement.createTask(board.getId(), savedUser.getId(), task);
+        taskFacadeManagement.assignUserToTask(created.getId(), savedUser.getId());
+
+        User newUser = DataGenerator.getSimpleUser("newUser", "email");
+        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+        User savedNewUser = userRepository.save(newUser);
+        taskFacadeManagement.assignUserToTask(created.getId(), savedNewUser.getId());
 
         String accessToken = getAccessToken();
-        mockMvc.perform(get("/api/users/" + user.getId())
+
+        MvcResult result = mockMvc.perform(get("/api/notifications?userId=" + savedUser.getId())
                         .cookie(new Cookie("access_token", accessToken)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(user.getId()));
-    }
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andReturn();
 
-    @Test
-    @DisplayName("PATCH /api/users/{id} обновляет пользователя")
-    void shouldPatchUser() throws Exception {
-        User user = DataGenerator.getSimpleUser();
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+        String response = result.getResponse().getContentAsString();
+        Long notificationId = ((Number) JsonPath.read(response, "$.content[0].id")).longValue();
 
-        UserDto updateDto = DataGenerator.getSimpleUserDto();
-
-        String accessToken = getAccessToken();
-        mockMvc.perform(patch("/api/users/" + user.getId())
-                        .cookie(new Cookie("access_token", accessToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDto)))
+        mockMvc.perform(get("/api/notifications?userId=" + savedUser.getId())
+                        .cookie(new Cookie("access_token", accessToken)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("testuser"));
-    }
+                .andExpect(jsonPath("$.content", hasSize(2)));
 
-    @Test
-    @DisplayName("DELETE /api/users удаляет пользователя")
-    void shouldDeleteUser() throws Exception {
-        User user = DataGenerator.getSimpleUser();
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-
-        String accessToken = getAccessToken();
-        mockMvc.perform(delete("/api/users/" + user.getId())
-                        .cookie(new Cookie("access_token", accessToken))
-                        .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(delete("/api/notifications/{id}?userId={userId}", notificationId, savedUser.getId())
+                        .cookie(new Cookie("access_token", accessToken)))
                 .andExpect(status().isNoContent());
 
-        assertThat(userRepository.findById(user.getId())).isEmpty();
+        mockMvc.perform(get("/api/notifications?userId=" + savedUser.getId())
+                        .cookie(new Cookie("access_token", accessToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)));
+
+        mockMvc.perform(get("/api/notifications?userId=" + savedNewUser.getId())
+                        .cookie(new Cookie("access_token", accessToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)));
     }
+
 }

@@ -5,9 +5,9 @@ import com.ugrasu.bordexback.rest.dto.event.TaskEventDto;
 import com.ugrasu.bordexback.rest.dto.event.UserBoardRoleEventDto;
 import com.ugrasu.bordexback.rest.dto.event.UserEventDto;
 import com.ugrasu.bordexback.rest.entity.Board;
+import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
-import com.ugrasu.bordexback.rest.entity.UserBoardRole;
 import com.ugrasu.bordexback.rest.event.EventType;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -30,7 +30,7 @@ public interface EventMapper {
 
     UserEventDto toEventDto(User user, EventType eventType);
 
-    UserBoardRoleEventDto toEventDto(UserBoardRole userBoardRole, EventType eventType);
+    UserBoardRoleEventDto toEventDto(BoardRoles boardRoles, EventType eventType);
 
 
 }

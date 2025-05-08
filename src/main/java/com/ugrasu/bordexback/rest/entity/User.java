@@ -1,6 +1,5 @@
 package com.ugrasu.bordexback.rest.entity;
 
-import com.ugrasu.bordexback.notification.entity.Notification;
 import com.ugrasu.bordexback.rest.entity.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -58,34 +57,44 @@ public class User extends BaseEntity {
     Set<Role> roles = new LinkedHashSet<>(List.of(Role.USER));
 
     @OneToMany(
+            mappedBy = "owner",
+            orphanRemoval = true
+    )
+    Set<Task> ownTasks = new LinkedHashSet<>();
+
+    @OneToMany(
+            mappedBy = "owner",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    Set<Board> ownBoards = new LinkedHashSet<>();
+
+    @ManyToMany(mappedBy = "assignees")
+    Set<Task> assigneesTask = new LinkedHashSet<>();
+
+    @ManyToMany(mappedBy = "boardMembers")
+    Set<Board> memberBoards = new LinkedHashSet<>();
+
+    @OneToMany(
             mappedBy = "user",
             orphanRemoval = true
     )
-    Set<UserBoardRole> userBoardRoles = new LinkedHashSet<>();
+    Set<BoardRoles> boardsRoles = new LinkedHashSet<>();
 
-    @OneToMany(
-            mappedBy = "owner",
-            orphanRemoval = true
-    )
-    Set<Task> owner_tasks = new LinkedHashSet<>();
+    public void addBoardRoles(BoardRoles boardRoles) {
+        this.boardsRoles.add(boardRoles);
+        boardRoles.setUser(this);
+    }
 
-    @OneToMany(
-            mappedBy = "owner",
-            orphanRemoval = true
-    )
-    Set<Board> boards = new LinkedHashSet<>();
+    public void removeBoardRoles(BoardRoles boardRoles) {
+        this.boardsRoles.remove(boardRoles);
+        boardRoles.setUser(null);
+    }
 
-    @ManyToMany(
-            mappedBy = "assignees",
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE}
-    )
-    Set<Task> assigneesTask = new LinkedHashSet<>();
-
-    @ManyToMany(
-            mappedBy = "boardUsers",
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE}
-    )
-    Set<Board> userBoards = new LinkedHashSet<>();
+    public void deleteOwnBoard(Board board) {
+        this.ownBoards.remove(board);
+        board.setOwner(null);
+    }
 
     @Override
     public final boolean equals(Object o) {
