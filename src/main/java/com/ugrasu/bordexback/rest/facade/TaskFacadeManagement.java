@@ -18,6 +18,7 @@ public class TaskFacadeManagement {
     private final UserService userService;
     private final BoardService boardService;
 
+    @Transactional
     public Task createTask(Long boardId, Long userId, Task task) {
         User owner = userService.findOne(userId);
         Board board = boardService.findOne(boardId);

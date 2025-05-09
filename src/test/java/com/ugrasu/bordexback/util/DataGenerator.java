@@ -80,7 +80,7 @@ public class DataGenerator {
                 .password("Password")
                 .firstName("FirstName")
                 .lastName("LastName")
-                .email("email@gmail.com")
+                .email("cool908yan@yandex.ru")
                 .roles(Set.of(Role.USER))
                 .assigneesTask(new LinkedHashSet<>())
                 .boardsRoles(new LinkedHashSet<>())
@@ -117,7 +117,7 @@ public class DataGenerator {
         user.setUsername("testuser");
         user.setFirstName("FirstName");
         user.setLastName("LastName");
-        user.setEmail("test@example.com");
+        user.setEmail("cool908yan@yandex.ru");
         user.setRoles(Set.of(Role.USER));
         return user;
     }

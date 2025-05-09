@@ -8,7 +8,7 @@ import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
 import com.ugrasu.bordexback.rest.exception.UserNotBoardMemberException;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
-import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
+import com.ugrasu.bordexback.rest.repository.BoardRolesRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import com.ugrasu.bordexback.util.DataGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,14 +41,14 @@ public class BoardFacadeManagementIntegrationTest {
     TaskRepository taskRepository;
 
     @Autowired
-    UserBoardRoleRepository userBoardRoleRepository;
+    BoardRolesRepository boardRolesRepository;
 
     @BeforeEach
     public void setUp() {
         userRepository.deleteAll();
         boardRepository.deleteAll();
         taskRepository.deleteAll();
-        userBoardRoleRepository.deleteAll();
+        boardRolesRepository.deleteAll();
     }
 
     @Test

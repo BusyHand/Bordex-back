@@ -1,16 +1,16 @@
 package com.ugrasu.bordexback.rest.event;
 
-import com.ugrasu.bordexback.rest.dto.event.UserEventDto;
+import com.ugrasu.bordexback.rest.dto.payload.UserPayload;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class UserEvent extends ApplicationEvent {
 
-    private final UserEventDto userEventDto;
+    private final UserPayload userPayload;
 
-    public UserEvent(Object source, UserEventDto userEventDto) {
+    public UserEvent(Object source, UserPayload userPayload) {
         super(source);
-        this.userEventDto = userEventDto;
+        this.userPayload = userPayload;
     }
 }

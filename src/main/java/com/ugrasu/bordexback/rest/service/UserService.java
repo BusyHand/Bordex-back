@@ -41,14 +41,13 @@ public class UserService {
     public User patch(Long id, User newUser) {
         User oldUser = findOne(id);
         User updatedUser = userMapper.partialUpdate(newUser, oldUser);
-        return eventPublisher.publish(USER_UPDATE,
-                userRepository.save(updatedUser));
+        return eventPublisher.publish(USER_UPDATE, updatedUser);
     }
 
     @Transactional
     public void delete(Long id) {
         User userToDelete = findOne(id);
-        userRepository.deleteUserById(id);
         eventPublisher.publish(USER_DELETED, userToDelete);
+        userRepository.deleteUserById(id);
     }
 }

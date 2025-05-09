@@ -5,7 +5,6 @@ import com.ugrasu.bordexback.rest.controller.validation.OnCreate;
 import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
 import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
@@ -19,15 +18,21 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserBoardRoleSlimDto {
+public class BoardRolesSlimDto {
 
-    @Valid
     @Null(
             message = "Пользователь не имеет права задавать это поле",
             groups = {OnCreate.class, OnUpdate.class}
     )
-    @Schema(description = "Доска")
-    BoardSlimDto board;
+    @Schema(description = "ID пользователя")
+    Long userId;
+
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = {OnCreate.class, OnUpdate.class}
+    )
+    @Schema(description = "ID доски")
+    Long boardId;
 
     @NotNull(
             message = "Роли обязательны",
@@ -40,7 +45,7 @@ public class UserBoardRoleSlimDto {
     )
     @Schema(
             description = "Список ролей",
-            example = "[\"READER\", \"WRITER\"]"
+            example = "[\"VIEWER\", \"DEVELOPER\", \"MANAGER\"]"
     )
     Set<BoardRole> boardRoles;
 }

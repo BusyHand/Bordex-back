@@ -15,7 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class NotificationEventDto {
+public class NotificationPayload {
 
     Long id;
 
@@ -27,7 +27,7 @@ public class NotificationEventDto {
 
     EventType eventType;
 
-    Set<ConsumerEventDto> consumers = new LinkedHashSet<>();
+    Set<ConsumerPayload> consumers = new LinkedHashSet<>();
 
     LocalDateTime createdAt;
 

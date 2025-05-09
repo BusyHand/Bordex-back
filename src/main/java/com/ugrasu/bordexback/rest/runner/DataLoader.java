@@ -7,7 +7,7 @@ import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.entity.enums.*;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
-import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
+import com.ugrasu.bordexback.rest.repository.BoardRolesRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -30,7 +30,7 @@ public class DataLoader implements CommandLineRunner {
     private final UserRepository userRepository;
     private final BoardRepository boardRepository;
     private final TaskRepository taskRepository;
-    private final UserBoardRoleRepository userBoardRoleRepository;
+    private final BoardRolesRepository boardRolesRepository;
     private final PasswordEncoder encoder;
 
     @Override
@@ -85,7 +85,7 @@ public class DataLoader implements CommandLineRunner {
                 .boardRoles(Set.of(BoardRole.VIEWER, BoardRole.DEVELOPER, BoardRole.MANAGER))
                 .build();
         board.getBoardMembers().add(me);
-        userBoardRoleRepository.save(boardRoles);
+        boardRolesRepository.save(boardRoles);
         boardRepository.save(board);
     }
 
@@ -108,7 +108,7 @@ public class DataLoader implements CommandLineRunner {
                     .build();
             boardRolesList.add(boardRoles);
         }
-        userBoardRoleRepository.saveAll(boardRolesList);
+        boardRolesRepository.saveAll(boardRolesList);
     }
 
     private List<Task> getTasks(List<User> users, Board board) {

@@ -1,10 +1,10 @@
 package com.ugrasu.bordexback.websocket.sender;
 
 import com.ugrasu.bordexback.notification.dto.web.NotificationDto;
-import com.ugrasu.bordexback.rest.dto.event.UserEventDto;
+import com.ugrasu.bordexback.rest.dto.payload.UserPayload;
 import com.ugrasu.bordexback.rest.dto.web.full.BoardDto;
+import com.ugrasu.bordexback.rest.dto.web.full.BoardRolesDto;
 import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
-import com.ugrasu.bordexback.rest.dto.web.full.UserBoardRoleDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -22,12 +22,18 @@ public class WebSocketSender {
                 messagingTemplate.convertAndSend("/topic/notification/user/" + userId, notificationDto));
     }
 
-    public void sendUpdateBoard(BoardDto boardDto, Set<UserEventDto> boardUsers) {
-        boardUsers.forEach(boardUser -> messagingTemplate.convertAndSend("/topic/user/" + boardUser.getId() + "/board", boardDto));
+    public void sendUpdateBoard(BoardDto boardDto, Set<Long> boardMembersIds) {
+        boardMembersIds.forEach(memberId -> messagingTemplate.convertAndSend("/topic/user/" + memberId + "/board", boardDto));
     }
 
-    public void sendDeleteBoard(BoardDto boardDto, Set<UserEventDto> boardUsers) {
-        boardUsers.forEach(boardUser -> messagingTemplate.convertAndSend("/topic/user/" + boardUser.getId() + "/board/delete", boardDto));
+    public void sendDeleteBoard(BoardDto boardDto, Set<Long> boardMembersIds) {
+        boardMembersIds.forEach(memberId -> messagingTemplate.convertAndSend("/topic/user/" + memberId + "/board/delete", boardDto));
+    }
+
+    public void sendUnassignedUser(BoardDto boardDto, Set<Long> boardMembersIds, Long unassignUserId) {
+        boardMembersIds.forEach(memberId -> messagingTemplate.convertAndSend("/topic/user/" + memberId + "/board", boardDto));
+        messagingTemplate.convertAndSend("/topic/user/" + unassignUserId + "/board", boardDto);
+
     }
 
     public void sendUpdateTask(TaskDto task) {
@@ -52,7 +58,7 @@ public class WebSocketSender {
                 .forEach(assignee -> messagingTemplate.convertAndSend("/topic/users/" + assignee.getId() + "/tasks/delete", task));
     }
 
-    public void sendUpdateBoardRole(UserBoardRoleDto userBoardRole) {
+    public void sendUpdateBoardRole(BoardRolesDto userBoardRole) {
         Long boardId = userBoardRole.getBoard().getId();
         messagingTemplate.convertAndSend("/topic/board/" + boardId + "/roles", userBoardRole);
     }

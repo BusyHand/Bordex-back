@@ -1,11 +1,11 @@
 package com.ugrasu.bordexback.rest.controller;
 
-import com.ugrasu.bordexback.rest.controller.filter.UserBoardRoleFilter;
+import com.ugrasu.bordexback.rest.controller.filter.BoardRolesFilter;
 import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
-import com.ugrasu.bordexback.rest.dto.web.full.UserBoardRoleDto;
+import com.ugrasu.bordexback.rest.dto.web.full.BoardRolesDto;
 import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
-import com.ugrasu.bordexback.rest.mapper.impl.UserBoardRoleMapper;
+import com.ugrasu.bordexback.rest.mapper.impl.BoardRolesMapper;
 import com.ugrasu.bordexback.rest.service.BoardRolesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,21 +28,21 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/users/boards/roles")
 @RequiredArgsConstructor
 @PreAuthorize("isAuthenticated()")
-public class UserBoardRoleController {
+public class BoardRolesController {
 
     private final BoardRolesService boardRolesService;
-    private final UserBoardRoleMapper userBoardRoleMapper;
+    private final BoardRolesMapper boardRolesMapper;
 
     @Operation(
             summary = "Получить список ролей пользователей на досках",
             description = "Возвращает постраничный список ролей с фильтрацией по userId, boardId и boardRole"
     )
     @GetMapping
-    public PagedModel<UserBoardRoleDto> findAll(@ParameterObject @ModelAttribute UserBoardRoleFilter filter,
-                                                @ParameterObject Pageable pageable) {
+    public PagedModel<BoardRolesDto> findAll(@ParameterObject @ModelAttribute BoardRolesFilter filter,
+                                             @ParameterObject Pageable pageable) {
         Specification<BoardRoles> specification = filter.toSpecification();
         Page<BoardRoles> userBoardRoles = boardRolesService.findAll(specification, pageable);
-        Page<UserBoardRoleDto> userBoardRoleDtos = userBoardRoles.map(userBoardRoleMapper::toDto);
+        Page<BoardRolesDto> userBoardRoleDtos = userBoardRoles.map(boardRolesMapper::toDto);
         return new PagedModel<>(userBoardRoleDtos);
     }
 
@@ -53,12 +53,12 @@ public class UserBoardRoleController {
     )
     @PatchMapping("/{user-id}/{board-id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserBoardRoleDto update(@PathVariable("user-id") Long userId,
-                                   @PathVariable("board-id") Long boardId,
-                                   @Validated(OnUpdate.class) @RequestBody UserBoardRoleDto userBoardRoleDto) {
-        var userBoardRole = userBoardRoleMapper.toEntity(userBoardRoleDto);
+    public BoardRolesDto update(@PathVariable("user-id") Long userId,
+                                @PathVariable("board-id") Long boardId,
+                                @Validated(OnUpdate.class) @RequestBody BoardRolesDto boardRolesDto) {
+        var userBoardRole = boardRolesMapper.toEntity(boardRolesDto);
         var patched = boardRolesService.patch(userId, boardId, userBoardRole.getBoardRoles());
-        return userBoardRoleMapper.toDto(patched);
+        return boardRolesMapper.toDto(patched);
     }
 
     @Operation(

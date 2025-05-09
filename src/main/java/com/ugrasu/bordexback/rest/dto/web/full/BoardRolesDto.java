@@ -24,7 +24,7 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Роль пользователя на доске")
-public class UserBoardRoleDto extends BaseDto {
+public class BoardRolesDto extends BaseDto {
 
     @Null(
             message = "ID нельзя задавать вручную",

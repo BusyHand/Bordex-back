@@ -1,6 +1,6 @@
 package com.ugrasu.bordexback.notification.publisher;
 
-import com.ugrasu.bordexback.notification.dto.event.NotificationEventDto;
+import com.ugrasu.bordexback.notification.dto.event.NotificationPayload;
 import com.ugrasu.bordexback.notification.entity.Notification;
 import com.ugrasu.bordexback.notification.event.NotificationEvent;
 import com.ugrasu.bordexback.notification.mapper.NotificationMapper;
@@ -16,7 +16,7 @@ public class NotificationPublisher {
     private final ApplicationEventPublisher eventPublisher;
 
     public Notification publish(Notification notification) {
-        NotificationEventDto eventDto = notificationMapper.toEventDto(notification);
+        NotificationPayload eventDto = notificationMapper.toEventDto(notification);
         eventPublisher.publishEvent(new NotificationEvent(this, eventDto));
         return notification;
     }

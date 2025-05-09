@@ -33,14 +33,15 @@ public class TaskService {
                 .orElseThrow(() -> new EntityNotFoundException("Task with id %s not found".formatted(id)));
     }
 
+    @Transactional
     public Task save(Board board, User owner, Task task) {
         if (task.getId() != null) {
             task.setId(null);
         }
         task.setBoard(board);
         task.setOwner(owner);
-        return eventPublisher.publish(TASK_CREATED,
-                taskRepository.save(task));
+        taskRepository.save(task);
+        return eventPublisher.publish(TASK_CREATED, task);
     }
 
     public Task assignUser(Long taskId, User assignedUser) {
@@ -49,25 +50,23 @@ public class TaskService {
         return eventPublisher.publish(TASK_ASSIGNED, task);
     }
 
-    //todo
     public Task unassignUser(Long taskId, User unassignedUser) {
         Task task = findOne(taskId);
         task.removeAssignee(unassignedUser);
-        return eventPublisher.publish(TASK_UNASSIGNED, task, null);
+        return eventPublisher.publish(TASK_UNASSIGNED, task, unassignedUser);
     }
 
     @Transactional
     public Task patch(Long taskId, Task newTask) {
         Task oldTask = findOne(taskId);
         Task updatedTask = taskMapper.partialUpdate(newTask, oldTask);
-        return eventPublisher.publish(TASK_UPDATED,
-                taskRepository.save(updatedTask));
+        return eventPublisher.publish(TASK_UPDATED, updatedTask);
     }
 
     @Transactional
     public void delete(Long id) {
         Task taskToDelete = findOne(id);
-        taskRepository.deleteTaskById(id);
         eventPublisher.publish(TASK_DELETED, taskToDelete);
+        taskRepository.deleteTaskById(id);
     }
 }

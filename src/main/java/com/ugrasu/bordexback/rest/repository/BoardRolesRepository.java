@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-public interface UserBoardRoleRepository extends JpaRepository<BoardRoles, Long>, JpaSpecificationExecutor<BoardRoles> {
+public interface BoardRolesRepository extends JpaRepository<BoardRoles, Long>, JpaSpecificationExecutor<BoardRoles> {
 
 
     Optional<BoardRoles> findByUser_IdAndBoard_Id(Long userId, Long boardId);

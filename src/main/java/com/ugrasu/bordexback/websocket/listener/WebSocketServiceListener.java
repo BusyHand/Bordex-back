@@ -1,16 +1,14 @@
 package com.ugrasu.bordexback.websocket.listener;
 
-import com.ugrasu.bordexback.notification.dto.event.ConsumerEventDto;
-import com.ugrasu.bordexback.notification.dto.event.NotificationEventDto;
+import com.ugrasu.bordexback.notification.dto.event.ConsumerPayload;
+import com.ugrasu.bordexback.notification.dto.event.NotificationPayload;
 import com.ugrasu.bordexback.notification.dto.web.NotificationDto;
 import com.ugrasu.bordexback.notification.event.NotificationEvent;
-import com.ugrasu.bordexback.rest.dto.event.BoardEventDto;
-import com.ugrasu.bordexback.rest.dto.event.TaskEventDto;
-import com.ugrasu.bordexback.rest.dto.event.UserEventDto;
+import com.ugrasu.bordexback.rest.dto.payload.BoardPayload;
+import com.ugrasu.bordexback.rest.dto.payload.TaskPayload;
+import com.ugrasu.bordexback.rest.dto.payload.UserPayload;
 import com.ugrasu.bordexback.rest.dto.web.full.BoardDto;
 import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
-import com.ugrasu.bordexback.rest.dto.web.full.UserDto;
-import com.ugrasu.bordexback.rest.dto.web.slim.UserSlimDto;
 import com.ugrasu.bordexback.rest.event.*;
 import com.ugrasu.bordexback.websocket.mapper.WebSocketEventMapper;
 import com.ugrasu.bordexback.websocket.sender.WebSocketSender;
@@ -34,67 +32,57 @@ public class WebSocketServiceListener {
 
     @EventListener
     public void handleTaskEvent(TaskEvent taskEvent) {
-        TaskEventDto taskEventDto = taskEvent.getTaskEventDto();
-        TaskDto dto = eventMapper.toDto(taskEventDto);
-        EventType eventType = taskEventDto.getEventType();
+        TaskPayload taskPayload = taskEvent.getTaskPayload();
+        TaskDto payload = eventMapper.toDto(taskPayload);
+        EventType eventType = taskPayload.getEventType();
 
         if (TASK_DELETED.equals(eventType)) {
-            sender.sendDeleteTask(dto);
+            sender.sendDeleteTask(payload);
             return;
         }
         if (TASK_UNASSIGNED.equals(eventType)) {
-            UserSlimDto unassignUser = taskEventDto.getUnassignUser();
-            dto.getAssignees().remove(unassignUser);
-            sender.sendTaskUnassignUser(dto, unassignUser.getId());
+            UserPayload unassignUser = taskPayload.getUnassignUser();
+            sender.sendTaskUnassignUser(payload, unassignUser.getId());
             return;
         }
-        sender.sendUpdateTask(dto);
-    }
-
-    @EventListener
-    public void handleUserEvent(UserEvent userEvent) {
-        UserEventDto userEventDto = userEvent.getUserEventDto();
-        EventType eventType = userEventDto.getEventType();
-        UserDto dto = eventMapper.toDto(userEventDto);
-
-        if (USER_DELETED.equals(eventType)) {
-            //todo send user delete
-            return;
-        }
-        //todo send user update
+        sender.sendUpdateTask(payload);
     }
 
     @EventListener
     public void handleBoardEvent(BoardEvent boardEvent) {
-        BoardEventDto boardEventDto = boardEvent.getBoardEventDto();
-        BoardDto dto = eventMapper.toDto(boardEventDto);
-        EventType eventType = boardEventDto.getEventType();
+        BoardPayload boardPayload = boardEvent.getBoardPayload();
+        BoardDto dto = eventMapper.toDto(boardPayload);
+        EventType eventType = boardPayload.getEventType();
+        Set<Long> boardMembersIds = boardPayload.getBoardMembers()
+                .stream()
+                .map(UserPayload::getId)
+                .collect(Collectors.toSet());
 
         if (BOARD_DELETED.equals(eventType)) {
-            sender.sendDeleteBoard(dto, boardEventDto.getBoardUsers());
+            sender.sendDeleteBoard(dto, boardMembersIds);
             return;
         }
         if (BOARD_UNASSIGNED.equals(eventType)) {
-            //TODO
+            sender.sendUnassignedUser(dto, boardMembersIds, boardPayload.getUnassignUser().getId());
             return;
         }
-        sender.sendUpdateBoard(dto, boardEventDto.getBoardUsers());
+        sender.sendUpdateBoard(dto, boardMembersIds);
     }
 
     @EventListener
-    public void handleUserBoardRoleEvent(UserBoardRoleEvent userBoardRoleEvent) {
-        var userBoardRoleEventDto = userBoardRoleEvent.getUserBoardRoleEventDto();
+    public void handleUserBoardRoleEvent(BoardRolesEvent boardRolesEvent) {
+        var userBoardRoleEventDto = boardRolesEvent.getBoardRolePayload();
         var dto = eventMapper.toDto(userBoardRoleEventDto);
         sender.sendUpdateBoardRole(dto);
     }
 
     @EventListener
     public void handleTaskEvent(NotificationEvent notificationEvent) {
-        NotificationEventDto notificationEventDto = notificationEvent.getNotificationEventDto();
-        NotificationDto dto = eventMapper.toDto(notificationEventDto);
-        Set<Long> consumersUsersId = notificationEventDto.getConsumers()
+        NotificationPayload notificationPayload = notificationEvent.getNotificationPayload();
+        NotificationDto dto = eventMapper.toDto(notificationPayload);
+        Set<Long> consumersUsersId = notificationPayload.getConsumers()
                 .stream()
-                .map(ConsumerEventDto::getUserId)
+                .map(ConsumerPayload::getUserId)
                 .collect(Collectors.toSet());
         sender.sendNotification(dto, consumersUsersId);
     }

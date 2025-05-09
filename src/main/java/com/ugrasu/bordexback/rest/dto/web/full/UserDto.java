@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ugrasu.bordexback.rest.controller.validation.OnCreate;
 import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
 import com.ugrasu.bordexback.rest.dto.BaseDto;
-import com.ugrasu.bordexback.rest.dto.web.slim.UserBoardRoleSlimDto;
+import com.ugrasu.bordexback.rest.dto.web.slim.BoardRolesSlimDto;
 import com.ugrasu.bordexback.rest.entity.enums.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
@@ -112,6 +112,6 @@ public class UserDto extends BaseDto {
             description = "Все роли пользователя на досках в которых он состоит",
             example = "[\"ADMIN\"]"
     )
-    Set<UserBoardRoleSlimDto> userBoardRoles;
+    Set<BoardRolesSlimDto> boardsRoles;
 
 }

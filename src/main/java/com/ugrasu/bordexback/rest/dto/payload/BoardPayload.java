@@ -1,11 +1,8 @@
-package com.ugrasu.bordexback.rest.dto.event;
+package com.ugrasu.bordexback.rest.dto.payload;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ugrasu.bordexback.rest.dto.BaseDto;
-import com.ugrasu.bordexback.rest.dto.web.full.UserDto;
-import com.ugrasu.bordexback.rest.dto.web.slim.UserSlimDto;
-import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.entity.enums.Scope;
 import com.ugrasu.bordexback.rest.event.EventType;
 import lombok.*;
@@ -19,7 +16,7 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BoardEventDto extends BaseDto {
+public class BoardPayload extends BaseDto {
 
     Long id;
 
@@ -29,14 +26,16 @@ public class BoardEventDto extends BaseDto {
 
     Scope scope;
 
-    UserSlimDto owner;
+    UserPayload owner;
 
     Long tasksCount;
 
     Long membersCount;
 
-    Set<UserEventDto> boardUsers;
+    Set<UserPayload> boardMembers;
 
     EventType eventType;
+
+    UserPayload unassignUser;
 
 }

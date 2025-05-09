@@ -1,9 +1,10 @@
 package com.ugrasu.bordexback.rest.mapper;
 
-import com.ugrasu.bordexback.rest.dto.event.BoardEventDto;
-import com.ugrasu.bordexback.rest.dto.event.TaskEventDto;
-import com.ugrasu.bordexback.rest.dto.event.UserBoardRoleEventDto;
-import com.ugrasu.bordexback.rest.dto.event.UserEventDto;
+import com.ugrasu.bordexback.rest.dto.payload.BoardPayload;
+import com.ugrasu.bordexback.rest.dto.payload.BoardRolesPayload;
+import com.ugrasu.bordexback.rest.dto.payload.TaskPayload;
+import com.ugrasu.bordexback.rest.dto.payload.UserPayload;
+import com.ugrasu.bordexback.rest.dto.web.full.BoardDto;
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.Task;
@@ -24,13 +25,30 @@ public interface EventMapper {
             target = "tagColor",
             expression = "java(task.getTag() != null ? task.getTag().getColor() : null)"
     )
-    TaskEventDto toEventDto(Task task, EventType eventType);
+    TaskPayload toPayload(Task task, EventType eventType);
 
-    BoardEventDto toEventDto(Board board, EventType eventType);
+    @Mapping(
+            target = "tasksCount",
+            expression = "java(countTasks(board))"
+    )
+    @Mapping(
+            target = "membersCount",
+            expression = "java(countMembers(board))"
+    )
+    BoardPayload toPayload(Board board, EventType eventType);
 
-    UserEventDto toEventDto(User user, EventType eventType);
+    UserPayload toPayload(User user, EventType eventType);
 
-    UserBoardRoleEventDto toEventDto(BoardRoles boardRoles, EventType eventType);
+    BoardRolesPayload toPayload(BoardRoles boardRoles, EventType eventType);
 
+    BoardDto toDto(Board board);
+
+    default Long countTasks(Board board) {
+        return board.getTasks() != null ? (long) board.getTasks().size() : 0L;
+    }
+
+    default Long countMembers(Board board) {
+        return board.getBoardMembers() != null ? (long) board.getBoardMembers().size() : 0L;
+    }
 
 }

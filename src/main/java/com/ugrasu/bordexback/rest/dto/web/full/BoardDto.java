@@ -89,6 +89,13 @@ public class BoardDto extends BaseDto {
             message = "Пользователь не имеет права задавать это поле",
             groups = {OnCreate.class, OnUpdate.class}
     )
+    Integer progress;
+
+
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = {OnCreate.class, OnUpdate.class}
+    )
     @Schema(description = "Владелец доски")
     UserSlimDto owner;
 

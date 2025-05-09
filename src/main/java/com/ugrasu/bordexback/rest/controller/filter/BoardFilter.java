@@ -38,19 +38,19 @@ public class BoardFilter {
 
     private Specification<Board> nameSpec() {
         return (root, query, cb) -> name != null && !name.isEmpty()
-                ? cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%")
+                ? cb.like(cb.lower(root.get("name")),  name.toLowerCase() + "%")
                 : null;
     }
 
     private Specification<Board> descriptionSpec() {
         return (root, query, cb) -> description != null && !description.isEmpty()
-                ? cb.like(cb.lower(root.get("description")), "%" + description.toLowerCase() + "%")
+                ? cb.like(cb.lower(root.get("description")), description.toLowerCase() + "%")
                 : null;
     }
 
     private Specification<Board> memberIdsSpec() {
         return (root, query, cb) -> !CollectionUtils.isEmpty(memberIds)
-                ? root.join("boardUsers").get("id").in(memberIds)
+                ? root.join("boardMembers").get("id").in(memberIds)
                 : null;
     }
 }

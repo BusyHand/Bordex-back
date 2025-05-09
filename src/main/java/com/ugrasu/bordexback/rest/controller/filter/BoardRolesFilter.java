@@ -4,7 +4,7 @@ import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
 import org.springframework.data.jpa.domain.Specification;
 
-public record UserBoardRoleFilter(Long userId, Long boardId, BoardRole boardRole) {
+public record BoardRolesFilter(Long userId, Long boardId, BoardRole boardRole) {
 
     public Specification<BoardRoles> toSpecification() {
         return Specification.where(userIdSpec())

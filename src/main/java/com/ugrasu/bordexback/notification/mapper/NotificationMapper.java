@@ -1,12 +1,14 @@
 package com.ugrasu.bordexback.notification.mapper;
 
-import com.ugrasu.bordexback.notification.dto.event.ConsumerEventDto;
-import com.ugrasu.bordexback.notification.dto.event.NotificationEventDto;
+import com.ugrasu.bordexback.notification.dto.event.ConsumerPayload;
+import com.ugrasu.bordexback.notification.dto.event.NotificationPayload;
 import com.ugrasu.bordexback.notification.dto.web.NotificationDto;
 import com.ugrasu.bordexback.notification.entity.Consumer;
 import com.ugrasu.bordexback.notification.entity.Notification;
-import com.ugrasu.bordexback.rest.dto.event.TaskEventDto;
-import com.ugrasu.bordexback.rest.dto.web.slim.UserSlimDto;
+import com.ugrasu.bordexback.rest.dto.payload.BoardPayload;
+import com.ugrasu.bordexback.rest.dto.payload.BoardRolesPayload;
+import com.ugrasu.bordexback.rest.dto.payload.TaskPayload;
+import com.ugrasu.bordexback.rest.dto.payload.UserPayload;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -22,13 +24,13 @@ import java.util.stream.Collectors;
 )
 public interface NotificationMapper {
 
-    NotificationDto toDto(TaskEventDto taskEvent);
+    NotificationDto toDto(TaskPayload taskEvent);
 
     NotificationDto toDto(Notification notification);
 
-    NotificationEventDto toEventDto(Notification notification);
+    NotificationPayload toEventDto(Notification notification);
 
-    ConsumerEventDto toEventDto(Consumer consumer);
+    ConsumerPayload toEventDto(Consumer consumer);
 
     @Mapping(
             target = "id",
@@ -36,13 +38,33 @@ public interface NotificationMapper {
     )
     @Mapping(
             target = "consumers",
-            expression = "java(mapConsumers(taskEventDto))"
+            expression = "java(mapConsumers(taskPayload))"
     )
-    Notification toEntity(TaskEventDto taskEventDto);
+    Notification toEntity(TaskPayload taskPayload);
 
-    default Set<Consumer> mapConsumers(TaskEventDto taskEventDto) {
-        Set<UserSlimDto> userSlimDtos = taskEventDto.getAssignees();
-        UserSlimDto unassignUser = taskEventDto.getUnassignUser();
+    @Mapping(
+            target = "id",
+            ignore = true
+    )
+    @Mapping(
+            target = "consumers",
+            expression = "java(mapConsumers(boardPayload))"
+    )
+    Notification toEntity(BoardPayload boardPayload);
+
+    @Mapping(
+            target = "id",
+            ignore = true
+    )
+    @Mapping(
+            target = "consumers",
+            expression = "java(mapConsumers(boardRolesPayload))"
+    )
+    Notification toEntity(BoardRolesPayload boardRolesPayload);
+
+    default Set<Consumer> mapConsumers(TaskPayload taskPayload) {
+        Set<UserPayload> userSlimDtos = taskPayload.getAssignees();
+        UserPayload unassignUser = taskPayload.getUnassignUser();
         if (unassignUser != null) {
             userSlimDtos.add(unassignUser);
         }
@@ -50,15 +72,47 @@ public interface NotificationMapper {
             return Collections.emptySet();
         }
         return userSlimDtos.stream()
-                .map(userSlimDto -> {
-                    Consumer userConsumerEventDto = new Consumer();
-                    userConsumerEventDto.setUsername(userSlimDto.getUsername());
-                    userConsumerEventDto.setUserId(userSlimDto.getId());
-                    userConsumerEventDto.setEmail(userSlimDto.getEmail());
-                    userConsumerEventDto.setFirstName(userSlimDto.getFirstName());
-                    userConsumerEventDto.setLastName(userSlimDto.getLastName());
-                    return userConsumerEventDto;
-                })
+                .map(this::mapUserToConsumer)
                 .collect(Collectors.toSet());
     }
+
+    default Set<Consumer> mapConsumers(BoardPayload boardPayload) {
+        Set<UserPayload> boardMembers = boardPayload.getBoardMembers();
+        UserPayload unassignUser = boardPayload.getUnassignUser();
+        if (unassignUser != null) {
+            boardMembers.add(unassignUser);
+        }
+        if (boardMembers == null) {
+            return Collections.emptySet();
+        }
+        return boardMembers.stream()
+                .map(this::mapUserToConsumer)
+                .collect(Collectors.toSet());
+    }
+
+    default Set<Consumer> mapConsumers(BoardRolesPayload boardRolesPayload) {
+        UserPayload user = boardRolesPayload.getUser();
+        if (user == null) {
+            return Collections.emptySet();
+        }
+        return Set.of(mapUserToConsumer(user));
+    }
+
+    default Set<Consumer> mapConsumers(UserPayload userPayload) {
+        if (userPayload == null) {
+            return Collections.emptySet();
+        }
+        return Set.of(mapUserToConsumer(userPayload));
+    }
+
+    default Consumer mapUserToConsumer(UserPayload user) {
+        Consumer consumer = new Consumer();
+        consumer.setUsername(user.getUsername());
+        consumer.setUserId(user.getId());
+        consumer.setEmail(user.getEmail());
+        consumer.setFirstName(user.getFirstName());
+        consumer.setLastName(user.getLastName());
+        return consumer;
+    }
+
 }

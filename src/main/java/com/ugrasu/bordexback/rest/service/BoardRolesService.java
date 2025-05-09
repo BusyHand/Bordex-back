@@ -5,7 +5,7 @@ import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
 import com.ugrasu.bordexback.rest.publisher.EventPublisher;
-import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
+import com.ugrasu.bordexback.rest.repository.BoardRolesRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,15 +22,15 @@ import static com.ugrasu.bordexback.rest.event.EventType.*;
 @RequiredArgsConstructor
 public class BoardRolesService {
 
-    private final UserBoardRoleRepository userBoardRoleRepository;
+    private final BoardRolesRepository boardRolesRepository;
     private final EventPublisher eventPublisher;
 
     public Page<BoardRoles> findAll(Specification<BoardRoles> specification, Pageable pageable) {
-        return userBoardRoleRepository.findAll(specification, pageable);
+        return boardRolesRepository.findAll(specification, pageable);
     }
 
     public BoardRoles findOne(Long userId, Long boardId) {
-        return userBoardRoleRepository.findByUser_IdAndBoard_Id(userId, boardId)
+        return boardRolesRepository.findByUser_IdAndBoard_Id(userId, boardId)
                 .orElseThrow(() -> new EntityNotFoundException("User board role with user id %s and board id %s not found".formatted(userId, boardId)));
     }
 
@@ -39,7 +39,7 @@ public class BoardRolesService {
         boardRoles.setBoardRoles(roles);
         owner.addBoardRoles(boardRoles);
         board.addBoardRoles(boardRoles);
-        BoardRoles saved = userBoardRoleRepository.save(boardRoles);
+        BoardRoles saved = boardRolesRepository.save(boardRoles);
         return eventPublisher.publish(BOARD_ROLE_CREATED, saved);
     }
 
@@ -54,15 +54,12 @@ public class BoardRolesService {
     public void deleteBoardRole(Long userId, Long boardId, BoardRole boardRole) {
         BoardRoles boardRoles = findOne(userId, boardId);
         boardRoles.getBoardRoles().remove(boardRole);
-        if (boardRoles.getBoardRoles().isEmpty()) {
-            userBoardRoleRepository.delete(boardRoles);
-        } else {
-            userBoardRoleRepository.save(boardRoles);
-        }
         eventPublisher.publish(BOARD_ROLE_DELETED, boardRoles);
+        if (boardRoles.getBoardRoles().isEmpty()) {
+            boardRolesRepository.delete(boardRoles);
+        }
     }
 
-    //todo publish alraydy deleted
     @Transactional
     public void deleteUserRoles(User user, Board board) {
         BoardRoles boardRole = findOne(user.getId(), board.getId());

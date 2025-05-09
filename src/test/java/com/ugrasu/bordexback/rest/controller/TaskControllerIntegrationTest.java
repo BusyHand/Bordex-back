@@ -9,7 +9,7 @@ import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
-import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
+import com.ugrasu.bordexback.rest.repository.BoardRolesRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import com.ugrasu.bordexback.util.DataGenerator;
 import jakarta.servlet.http.Cookie;
@@ -50,7 +50,7 @@ public class TaskControllerIntegrationTest {
     UserRepository userRepository;
 
     @Autowired
-    UserBoardRoleRepository userBoardRoleRepository;
+    BoardRolesRepository boardRolesRepository;
 
     @Autowired
     BoardRepository boardRepository;
@@ -60,7 +60,7 @@ public class TaskControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
-        userBoardRoleRepository.deleteAll();
+        boardRolesRepository.deleteAll();
         boardRepository.deleteAll();
         taskRepository.deleteAll();
         authUser = DataGenerator.getSimpleUser();

@@ -1,9 +1,8 @@
 package com.ugrasu.bordexback.rest.publisher;
 
-import com.ugrasu.bordexback.rest.dto.event.BoardEventDto;
-import com.ugrasu.bordexback.rest.dto.event.TaskEventDto;
-import com.ugrasu.bordexback.rest.dto.event.UserEventDto;
-import com.ugrasu.bordexback.rest.dto.web.slim.UserSlimDto;
+import com.ugrasu.bordexback.rest.dto.payload.BoardPayload;
+import com.ugrasu.bordexback.rest.dto.payload.TaskPayload;
+import com.ugrasu.bordexback.rest.dto.payload.UserPayload;
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.Task;
@@ -14,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+
 
 @Component
 @RequiredArgsConstructor
@@ -26,37 +26,43 @@ public class EventPublisher {
         eventPublisher.publishEvent(event);
     }
 
-    public Task publish(EventType eventType, Task task, User... unassignUser) {
-        TaskEventDto taskEventDto = eventMapper.toEventDto(task, eventType);
-        if (unassignUser != null && unassignUser.length > 0) {
-            UserSlimDto userSlimDto = new UserSlimDto();
-            userSlimDto.setId(unassignUser[0].getId());
-            userSlimDto.setUsername(unassignUser[0].getUsername());
-            userSlimDto.setEmail(unassignUser[0].getEmail());
-            userSlimDto.setFirstName(unassignUser[0].getFirstName());
-            userSlimDto.setLastName(unassignUser[0].getLastName());
-            taskEventDto.setUnassignUser(userSlimDto);
+    public Task publish(EventType eventType, Task task) {
+        return publish(eventType, task, null);
+    }
+
+    public Task publish(EventType eventType, Task task, User unassignUser) {
+        TaskPayload taskPayload = eventMapper.toPayload(task, eventType);
+        if (unassignUser != null) {
+            UserPayload userPayload = eventMapper.toPayload(unassignUser, eventType);
+            taskPayload.setUnassignUser(userPayload);
         }
-        publish(new TaskEvent(this, taskEventDto));
+        publish(new TaskEvent(this, taskPayload));
         return task;
     }
 
-    //todo
     public Board publish(EventType eventType, Board board) {
-        BoardEventDto boardEventDto = eventMapper.toEventDto(board, eventType);
-        //publish(new BoardEvent(this, boardEventDto));
+        return publish(eventType, board, null);
+    }
+
+    public Board publish(EventType eventType, Board board, User unassignUser) {
+        BoardPayload boardPayload = eventMapper.toPayload(board, eventType);
+        if(unassignUser != null) {
+            UserPayload userPayload = eventMapper.toPayload(unassignUser, eventType);
+            boardPayload.setUnassignUser(userPayload);
+        }
+        publish(new BoardEvent(this, boardPayload));
         return board;
     }
 
     public User publish(EventType eventType, User user) {
-        UserEventDto userEventDto = eventMapper.toEventDto(user, eventType);
-        publish(new UserEvent(this, userEventDto));
+        UserPayload userPayload = eventMapper.toPayload(user, eventType);
+        publish(new UserEvent(this, userPayload));
         return user;
     }
 
     public BoardRoles publish(EventType eventType, BoardRoles boardRoles) {
-        var userBoardRoleEventDto = eventMapper.toEventDto(boardRoles, eventType);
-        publish(new UserBoardRoleEvent(this, userBoardRoleEventDto));
+        var boardRolePayload = eventMapper.toPayload(boardRoles, eventType);
+        publish(new BoardRolesEvent(this, boardRolePayload));
         return boardRoles;
     }
 }

@@ -7,7 +7,7 @@ import com.ugrasu.bordexback.rest.entity.enums.Role;
 import com.ugrasu.bordexback.rest.entity.enums.Scope;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
-import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
+import com.ugrasu.bordexback.rest.repository.BoardRolesRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,14 +39,14 @@ public class BoardServiceIntegrationTest {
     TaskRepository taskRepository;
 
     @Autowired
-    UserBoardRoleRepository userBoardRoleRepository;
+    BoardRolesRepository boardRolesRepository;
     @Autowired
     EntityManager entityManager;
 
 
     @BeforeEach
     public void setUp() {
-        userBoardRoleRepository.deleteAll();
+        boardRolesRepository.deleteAll();
         taskRepository.deleteAll();
         userRepository.deleteAll();
         boardRepository.deleteAll();

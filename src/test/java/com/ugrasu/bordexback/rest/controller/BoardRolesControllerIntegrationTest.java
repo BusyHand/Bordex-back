@@ -3,14 +3,14 @@ package com.ugrasu.bordexback.rest.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ugrasu.bordexback.auth.dto.AuthDto;
 import com.ugrasu.bordexback.config.PostgreTestcontainerConfig;
-import com.ugrasu.bordexback.rest.dto.web.full.UserBoardRoleDto;
+import com.ugrasu.bordexback.rest.dto.web.full.BoardRolesDto;
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
-import com.ugrasu.bordexback.rest.repository.UserBoardRoleRepository;
+import com.ugrasu.bordexback.rest.repository.BoardRolesRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import com.ugrasu.bordexback.util.DataGenerator;
 import jakarta.servlet.http.Cookie;
@@ -48,7 +48,7 @@ public class BoardRolesControllerIntegrationTest {
     PasswordEncoder passwordEncoder;
 
     @Autowired
-    UserBoardRoleRepository userBoardRoleRepository;
+    BoardRolesRepository boardRolesRepository;
 
     @Autowired
     UserRepository userRepository;
@@ -64,7 +64,7 @@ public class BoardRolesControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
-        userBoardRoleRepository.deleteAll();
+        boardRolesRepository.deleteAll();
         boardRepository.deleteAll();
         taskRepository.deleteAll();
         authUser = DataGenerator.getSimpleUser();
@@ -115,7 +115,7 @@ public class BoardRolesControllerIntegrationTest {
         Board simpleBoard = DataGenerator.getSimpleBoard(user);
         boardRepository.save(simpleBoard);
         BoardRoles toSave = DataGenerator.getSimpleUserBoardRole(user, simpleBoard, BoardRole.VIEWER);
-        userBoardRoleRepository.save(toSave);
+        boardRolesRepository.save(toSave);
 
         String accessToken = getAccessToken();
 
@@ -133,8 +133,8 @@ public class BoardRolesControllerIntegrationTest {
         userRepository.save(user);
         Board simpleBoard = DataGenerator.getSimpleBoard(user);
         boardRepository.save(simpleBoard);
-        userBoardRoleRepository.save(DataGenerator.getSimpleUserBoardRole(user, simpleBoard, BoardRole.VIEWER));
-        UserBoardRoleDto updatedDto = new UserBoardRoleDto(
+        boardRolesRepository.save(DataGenerator.getSimpleUserBoardRole(user, simpleBoard, BoardRole.VIEWER));
+        BoardRolesDto updatedDto = new BoardRolesDto(
                 null,
                 null,
                 null,
@@ -159,7 +159,7 @@ public class BoardRolesControllerIntegrationTest {
         userRepository.save(user);
         Board simpleBoard = DataGenerator.getSimpleBoard(user);
         boardRepository.save(simpleBoard);
-        userBoardRoleRepository.save(DataGenerator.getSimpleUserBoardRole(user, simpleBoard, BoardRole.VIEWER));
+        boardRolesRepository.save(DataGenerator.getSimpleUserBoardRole(user, simpleBoard, BoardRole.VIEWER));
 
         String accessToken = getAccessToken();
 
@@ -167,7 +167,7 @@ public class BoardRolesControllerIntegrationTest {
                         .cookie(new Cookie("access_token", accessToken)))
                 .andExpect(status().isNoContent());
 
-        assertThat(userBoardRoleRepository.findAll()).isEmpty();
+        assertThat(boardRolesRepository.findAll()).isEmpty();
     }
 
 }

@@ -23,6 +23,7 @@ services:
 
 #  bordex-back:
 #    image: busylefthand2009/bordex-back:1.1
+#    build: .
 #    restart: "no"
 #    ports:
 #      - "8080:8080"

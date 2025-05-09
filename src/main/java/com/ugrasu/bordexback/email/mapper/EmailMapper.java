@@ -1,7 +1,7 @@
 package com.ugrasu.bordexback.email.mapper;
 
 import com.ugrasu.bordexback.email.domain.Email;
-import com.ugrasu.bordexback.notification.dto.event.NotificationEventDto;
+import com.ugrasu.bordexback.notification.dto.event.NotificationPayload;
 import com.ugrasu.bordexback.rest.event.EventType;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
@@ -16,11 +16,11 @@ import java.util.stream.Collectors;
 )
 public interface EmailMapper {
 
-    default Set<Email> toEntities(NotificationEventDto notificationEventDto) {
-        EventType eventType = notificationEventDto.getEventType();
-        String title = notificationEventDto.getTitle();
-        String subject = "Событие:" + eventType + "\n" + notificationEventDto.getContent();
-        return notificationEventDto.getConsumers()
+    default Set<Email> toEntities(NotificationPayload notificationPayload) {
+        EventType eventType = notificationPayload.getEventType();
+        String title = notificationPayload.getTitle();
+        String subject = "Событие:" + eventType.getTitle() + "\n" + notificationPayload.getContent();
+        return notificationPayload.getConsumers()
                 .stream()
                 .map(user -> {
                     Email email = new Email();

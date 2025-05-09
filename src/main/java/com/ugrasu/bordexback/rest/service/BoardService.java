@@ -55,6 +55,7 @@ public class BoardService {
     public void delete(Long id) {
         Board board = findOne(id);
         board.getTasks().clear();
+        eventPublisher.publish(BOARD_DELETED, board);
         boardRepository.deleteBoardById(id);
     }
 
@@ -64,10 +65,10 @@ public class BoardService {
         return eventPublisher.publish(BOARD_ASSIGNED, board);
     }
 
-    public Board removeUser(Long boardId, User user) {
+    public Board removeUser(Long boardId, User unassignUser) {
         Board board = findOne(boardId);
-        board.removeMember(user);
-        return eventPublisher.publish(BOARD_UNASSIGNED, board);
+        board.removeMember(unassignUser);
+        return eventPublisher.publish(BOARD_UNASSIGNED, board, unassignUser);
     }
 
     public Board ownerTransfer(Long boardId, User newOwner) {
@@ -78,5 +79,4 @@ public class BoardService {
         board.setOwner(newOwner);
         return eventPublisher.publish(BOARD_OWNER_CHANGED, board);
     }
-
 }

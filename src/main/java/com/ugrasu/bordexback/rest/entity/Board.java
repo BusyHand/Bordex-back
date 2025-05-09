@@ -31,6 +31,9 @@ public class Board extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     Scope scope = Scope.PUBLIC;
 
+    @Column(name = "progress")
+    Integer progress;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "owner_id",
