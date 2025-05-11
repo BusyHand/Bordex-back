@@ -23,6 +23,12 @@ public class UserSlimDto {
     )
     Long id;
 
+    @Null(
+            message = "Пользователь не имеет право задавать это поле",
+            groups = {OnCreate.class, OnUpdate.class}
+    )
+    String telegramUsername;
+
     @NotNull(
             message = "Имя пользователя обязательно",
             groups = OnCreate.class

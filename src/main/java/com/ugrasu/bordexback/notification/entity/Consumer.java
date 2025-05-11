@@ -30,6 +30,11 @@ public class Consumer extends BaseEntity {
     Long chatId;
 
     @Column(
+            name = "telegram_username"
+    )
+    String telegramUsername;
+
+    @Column(
             name = "user_id"
     )
     Long userId;

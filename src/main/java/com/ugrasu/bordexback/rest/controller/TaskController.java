@@ -1,6 +1,6 @@
 package com.ugrasu.bordexback.rest.controller;
 
-import com.ugrasu.bordexback.auth.security.AuthenficatedUser;
+import com.ugrasu.bordexback.auth.security.AuthenticatedUser;
 import com.ugrasu.bordexback.rest.controller.filter.TaskFilter;
 import com.ugrasu.bordexback.rest.controller.validation.OnCreate;
 import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
@@ -65,11 +65,11 @@ public class TaskController {
     )
     @PostMapping("/{board-id}")
     @ResponseStatus(HttpStatus.CREATED)
-    public TaskDto create(@AuthenticationPrincipal AuthenficatedUser authenficatedUser,
+    public TaskDto create(@AuthenticationPrincipal AuthenticatedUser authenticatedUser,
                           @PathVariable("board-id") Long boardId,
                           @Validated(OnCreate.class) @RequestBody TaskDto taskDto) {
         Task task = taskMapper.toEntity(taskDto);
-        Task saved = taskFacadeManagement.createTask(boardId, authenficatedUser.getUserId(), task);
+        Task saved = taskFacadeManagement.createTask(boardId, authenticatedUser.getUserId(), task);
         return taskMapper.toDto(saved);
     }
 

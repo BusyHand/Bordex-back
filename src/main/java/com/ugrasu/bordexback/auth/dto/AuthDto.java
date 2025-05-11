@@ -1,6 +1,7 @@
 package com.ugrasu.bordexback.auth.dto;
 
 import com.ugrasu.bordexback.auth.dto.validation.OnLogin;
+import com.ugrasu.bordexback.auth.dto.validation.OnLoginTelegram;
 import com.ugrasu.bordexback.auth.dto.validation.OnRegister;
 import com.ugrasu.bordexback.rest.entity.enums.Role;
 import jakarta.validation.constraints.Email;
@@ -17,6 +18,10 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AuthDto {
 
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = OnLoginTelegram.class
+    )
     @NotBlank(
             message = "Имя пользователя не может быть пустым",
             groups = {OnLogin.class, OnRegister.class}
@@ -29,6 +34,10 @@ public class AuthDto {
     )
     String username;
 
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = OnLoginTelegram.class
+    )
     @NotBlank(
             message = "Имя пользователя не может быть пустым",
             groups = {OnRegister.class}
@@ -41,6 +50,10 @@ public class AuthDto {
     )
     String firstName;
 
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = OnLoginTelegram.class
+    )
     @NotBlank(
             message = "Фамилия пользователя не может быть пустым",
             groups = {OnRegister.class}
@@ -53,6 +66,10 @@ public class AuthDto {
     )
     String lastName;
 
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = OnLoginTelegram.class
+    )
     @NotBlank(
             message = "Пароль не может быть пустым",
             groups = {OnLogin.class, OnRegister.class}
@@ -65,6 +82,10 @@ public class AuthDto {
     )
     String password;
 
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = OnLoginTelegram.class
+    )
     @NotBlank(
             message = "Email не может быть пустым",
             groups = OnRegister.class
@@ -78,7 +99,7 @@ public class AuthDto {
 
     @Null(
             message = "Пользователь не имеет права задавать это поле",
-            groups = {OnLogin.class}
+            groups = {OnLogin.class, OnLoginTelegram.class}
     )
     @NotBlank(
             message = "Подтверждение пароля не может быть пустым",
@@ -94,9 +115,24 @@ public class AuthDto {
 
     @Null(
             message = "Пользователь не имеет права задавать это поле",
-            groups = {OnLogin.class, OnRegister.class}
+            groups = {OnLogin.class, OnRegister.class, OnLoginTelegram.class}
     )
     Set<Role> roles;
+
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = {OnLogin.class, OnRegister.class}
+    )
+    @Size(
+            min = 5,
+            max = 5,
+            message = "Код должен быть 5 символов длиной",
+            groups = OnLoginTelegram.class
+    )
+    String telegramPasscode;
+
+
+
 
 }
 

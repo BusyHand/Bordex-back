@@ -21,6 +21,8 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface EventMapper {
 
+    User toEntity(UserPayload userPayload);
+
     @Mapping(
             target = "tagColor",
             expression = "java(task.getTag() != null ? task.getTag().getColor() : null)"

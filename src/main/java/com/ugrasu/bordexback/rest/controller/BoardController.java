@@ -1,7 +1,7 @@
 package com.ugrasu.bordexback.rest.controller;
 
 
-import com.ugrasu.bordexback.auth.security.AuthenficatedUser;
+import com.ugrasu.bordexback.auth.security.AuthenticatedUser;
 import com.ugrasu.bordexback.rest.controller.filter.BoardFilter;
 import com.ugrasu.bordexback.rest.controller.validation.OnCreate;
 import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
@@ -67,10 +67,10 @@ public class BoardController {
     )
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BoardDto create(@AuthenticationPrincipal AuthenficatedUser authenficatedUser,
+    public BoardDto create(@AuthenticationPrincipal AuthenticatedUser authenticatedUser,
                            @Validated(OnCreate.class) @RequestBody BoardDto boardDto) {
         Board board = boardMapper.toEntity(boardDto);
-        Board saved = boardFacadeManagement.createBoard(board, authenficatedUser.getUserId());
+        Board saved = boardFacadeManagement.createBoard(board, authenticatedUser.getUserId());
         return boardMapper.toDto(saved);
     }
 

@@ -17,6 +17,13 @@ public class CustomUserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userService.findOne(username);
-        return new AuthenficatedUser(user.getRoles(), user.getId(), user.getUsername(), user.getPassword());
+        return AuthenticatedUser.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .roles(user.getRoles())
+                .chatId(user.getChatId())
+                .telegramUsername(user.getTelegramUsername())
+                .build();
     }
 }

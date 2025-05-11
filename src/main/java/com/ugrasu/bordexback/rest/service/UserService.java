@@ -33,8 +33,13 @@ public class UserService {
     }
 
     public User findOne(String usernameOrEmail) {
-        return userRepository.findUserByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
+        return userRepository.findUserByUsernameOrEmailOrTelegramUsername(usernameOrEmail, usernameOrEmail, usernameOrEmail)
                 .orElseThrow(() -> new EntityNotFoundException("User with this %s username or email not found".formatted(usernameOrEmail)));
+    }
+
+    public User findOneByTelegramPasscode(String telegramPasscode) {
+        return userRepository.findByTelegramPasscode(telegramPasscode)
+                .orElseThrow(() -> new EntityNotFoundException("Passcode incorrect"));
     }
 
     @Transactional
@@ -48,6 +53,6 @@ public class UserService {
     public void delete(Long id) {
         User userToDelete = findOne(id);
         eventPublisher.publish(USER_DELETED, userToDelete);
-        userRepository.deleteUserById(id);
+        userRepository.deleteById(id);
     }
 }

@@ -7,11 +7,20 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
-    Optional<User> findByUsername(String username);
-
-    Optional<User> deleteUserById(Long id);
 
     boolean existsUserByUsernameOrEmail(String username, String email);
 
-    Optional<User> findUserByUsernameOrEmail(String username, String email);
+    boolean existsByTelegramUsername(String telegramUsername);
+
+    Optional<User> findByTelegramPasscode(String telegramPasscode);
+
+    Optional<User> findUserByUsernameOrEmailOrTelegramUsername(String username, String email, String telegramUsername);
+
+    boolean existsUserByUsername(String username);
+
+    boolean existsByChatId(Long chatId);
+
+    Optional<User> findByChatId(Long chatId);
+
+    boolean existsByTelegramPasscode(String telegramPasscode);
 }

@@ -23,10 +23,34 @@ import java.util.Set;
 public class User extends BaseEntity {
 
     @Column(
+            name = "chat_id",
+            unique = true
+    )
+    Long chatId;
+
+    @Column(
+            name = "telegram_username",
+            unique = true
+    )
+    String telegramUsername;
+
+    @Column(
+            name = "telegram_passcode",
+            unique = true
+    )
+    String telegramPasscode;
+
+    @Column(
             name = "username",
-            nullable = false
+            unique = true
     )
     String username;
+
+    @Column(
+            name = "email",
+            unique = true
+    )
+    String email;
 
     @Column(name = "password")
     String password;
@@ -37,23 +61,16 @@ public class User extends BaseEntity {
     @Column(name = "last_name")
     String lastName;
 
-    @Column(
-            name = "email",
-            unique = true,
-            nullable = false
-    )
-    String email;
-
     @Column(name = "block")
     boolean block = false;
 
-    @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "role")
+    @Enumerated(value = EnumType.STRING)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
             name = "user_role",
             joinColumns = @JoinColumn(name = "owner_id")
     )
-    @Enumerated(value = EnumType.STRING)
     Set<Role> roles = new LinkedHashSet<>(List.of(Role.USER));
 
     @OneToMany(

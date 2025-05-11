@@ -11,10 +11,11 @@ public class ConsumerPayload {
 
     Long id;
 
-
     Long chatId;
 
     Long userId;
+
+    String telegramUsername;
 
     String username;
 

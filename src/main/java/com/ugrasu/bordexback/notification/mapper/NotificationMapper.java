@@ -112,6 +112,7 @@ public interface NotificationMapper {
         consumer.setEmail(user.getEmail());
         consumer.setFirstName(user.getFirstName());
         consumer.setLastName(user.getLastName());
+        consumer.setChatId(user.getChatId());
         return consumer;
     }
 

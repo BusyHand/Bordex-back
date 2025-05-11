@@ -33,6 +33,17 @@ public class UserDto extends BaseDto {
     )
     Long id;
 
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = {OnCreate.class, OnUpdate.class}
+    )
+    @Schema(
+            description = "Имя пользователя в телеграме",
+            example = "bordex_bot",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
+    String telegramUsername;
+
     @NotNull(
             message = "Имя пользователя обязательно",
             groups = OnCreate.class

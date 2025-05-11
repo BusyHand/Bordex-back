@@ -20,6 +20,12 @@ public class UserPayload extends BaseDto {
 
     Long id;
 
+    Long chatId;
+
+    String telegramUsername;
+
+    String telegramPasscode;
+
     String username;
 
     String firstName;

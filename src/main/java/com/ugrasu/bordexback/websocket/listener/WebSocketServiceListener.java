@@ -9,7 +9,11 @@ import com.ugrasu.bordexback.rest.dto.payload.TaskPayload;
 import com.ugrasu.bordexback.rest.dto.payload.UserPayload;
 import com.ugrasu.bordexback.rest.dto.web.full.BoardDto;
 import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
-import com.ugrasu.bordexback.rest.event.*;
+import com.ugrasu.bordexback.rest.dto.web.slim.UserSlimDto;
+import com.ugrasu.bordexback.rest.event.BoardEvent;
+import com.ugrasu.bordexback.rest.event.BoardRolesEvent;
+import com.ugrasu.bordexback.rest.event.EventType;
+import com.ugrasu.bordexback.rest.event.TaskEvent;
 import com.ugrasu.bordexback.websocket.mapper.WebSocketEventMapper;
 import com.ugrasu.bordexback.websocket.sender.WebSocketSender;
 import lombok.RequiredArgsConstructor;
@@ -33,19 +37,25 @@ public class WebSocketServiceListener {
     @EventListener
     public void handleTaskEvent(TaskEvent taskEvent) {
         TaskPayload taskPayload = taskEvent.getTaskPayload();
-        TaskDto payload = eventMapper.toDto(taskPayload);
+        TaskDto dto = eventMapper.toDto(taskPayload);
         EventType eventType = taskPayload.getEventType();
 
         if (TASK_DELETED.equals(eventType)) {
-            sender.sendDeleteTask(payload);
+            sender.sendDeleteTask(dto);
             return;
         }
         if (TASK_UNASSIGNED.equals(eventType)) {
+            //todo bug
             UserPayload unassignUser = taskPayload.getUnassignUser();
-            sender.sendTaskUnassignUser(payload, unassignUser.getId());
+            Set<UserSlimDto> userSlimDtoStream = dto.getAssignees()
+                    .stream()
+                    .filter(assing -> !assing.getId().equals(unassignUser.getId()))
+                    .collect(Collectors.toSet());
+            dto.setAssignees(userSlimDtoStream);
+            sender.sendTaskUnassignUser(dto, unassignUser.getId());
             return;
         }
-        sender.sendUpdateTask(payload);
+        sender.sendUpdateTask(dto);
     }
 
     @EventListener

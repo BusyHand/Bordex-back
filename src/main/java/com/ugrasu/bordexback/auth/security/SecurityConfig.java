@@ -5,6 +5,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.ugrasu.bordexback.rest.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -61,11 +62,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    AuthenticationManager authenticationManager(CustomUserDetailService userDetailsService) {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+    AuthenticationManager authenticationManager(CustomUserDetailService userDetailsService, UserService userService) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(passwordEncoder());
         authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return new ProviderManager(authProvider);
+
+        TelegramAuthenticationProvider telegramAuthenticationProvider = new TelegramAuthenticationProvider(userService, userDetailsService);
+        return new ProviderManager(authProvider, telegramAuthenticationProvider);
     }
 
     @Bean

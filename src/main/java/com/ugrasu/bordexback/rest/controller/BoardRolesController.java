@@ -46,7 +46,6 @@ public class BoardRolesController {
         return new PagedModel<>(userBoardRoleDtos);
     }
 
-    //todo
     @Operation(
             summary = "Обновить роль пользователя на доске",
             description = "Изменяет существующую роль пользователя на доске"

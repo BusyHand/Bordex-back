@@ -1,7 +1,6 @@
 package com.ugrasu.bordexback.websocket.sender;
 
 import com.ugrasu.bordexback.notification.dto.web.NotificationDto;
-import com.ugrasu.bordexback.rest.dto.payload.UserPayload;
 import com.ugrasu.bordexback.rest.dto.web.full.BoardDto;
 import com.ugrasu.bordexback.rest.dto.web.full.BoardRolesDto;
 import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
