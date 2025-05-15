@@ -4,6 +4,7 @@ import com.ugrasu.bordexback.auth.security.authenfication.AuthenticatedUser;
 import com.ugrasu.bordexback.rest.entity.BaseEntity;
 import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.Task;
+import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.repository.BoardRolesRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,16 @@ public class TaskSecurityExpression extends SecurityExpressionPrincipal {
         return boardRoles.getBoardRoles()
                 .stream()
                 .anyMatch(boardRole -> boardRole.name().equals(role));
+    }
+
+    public boolean isBoardOwnerByTaskId(Long taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new AccessDeniedException("Доступ запрещен"));
+
+        User owner = task.getBoard().getOwner();
+
+        return owner.getId().equals(getPrincipal().getUserId());
+
     }
 
     public boolean canAccessTasks(Long boardId, String role) {

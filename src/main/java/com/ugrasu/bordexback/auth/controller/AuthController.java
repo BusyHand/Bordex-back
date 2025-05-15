@@ -6,6 +6,7 @@ import com.ugrasu.bordexback.auth.dto.validation.OnLogin;
 import com.ugrasu.bordexback.auth.dto.validation.OnLoginTelegram;
 import com.ugrasu.bordexback.auth.dto.validation.OnRegister;
 import com.ugrasu.bordexback.auth.mapper.AuthMapper;
+import com.ugrasu.bordexback.auth.security.JwtCookieComponent;
 import com.ugrasu.bordexback.auth.security.authenfication.AuthenticatedUser;
 import com.ugrasu.bordexback.auth.service.AuthService;
 import com.ugrasu.bordexback.rest.dto.web.full.UserDto;
@@ -22,8 +23,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-//todo add refresh support
-// refactor cookie
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -32,6 +31,7 @@ public class AuthController {
     private final AuthMapper authMapper;
     private final AuthService authService;
     private final UserService userService;
+    private final JwtCookieComponent jwtCookieComponent;
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
@@ -52,18 +52,14 @@ public class AuthController {
     public ResponseEntity<Void> login(@RequestBody @Validated(OnLogin.class) AuthDto authDto, HttpServletResponse response) {
         User user = authMapper.toEntity(authDto);
         Tokens tokens = authService.login(user);
-
-        addJwtCookies(response, tokens);
-        return ResponseEntity.ok().build();
+        return jwtCookieComponent.addJwtSetCookies(response, tokens);
     }
 
     @PostMapping("/login/telegram")
     public ResponseEntity<Void> loginTelegram(@RequestBody @Validated(OnLoginTelegram.class) AuthDto authDto, HttpServletResponse response) {
         User user = authMapper.toEntity(authDto);
         Tokens tokens = authService.loginTelegram(user);
-
-        addJwtCookies(response, tokens);
-        return ResponseEntity.ok().build();
+        return jwtCookieComponent.addJwtSetCookies(response, tokens);
     }
 
     @PostMapping("/telegram-assign")
@@ -73,46 +69,27 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("telegramPasscode", telegramPasscode));
     }
 
+    @PostMapping("/telegram-post-register")
+    @PreAuthorize("isAuthenticated()")
+    public UserDto telegramPostRegister(@AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+                                        @RequestBody @Validated(OnRegister.class) AuthDto authDto) {
+        User user = authMapper.toEntity(authDto);
+        User postRegisterUser = authService.telegramPostRegister(authenticatedUser.getUserId(), user);
+        return authMapper.toDto(postRegisterUser);
+    }
+
     @PostMapping("/telegram-unassign")
     @PreAuthorize("isAuthenticated()")
-    public UserDto unassignTelegram(@AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
+    public UserDto unassignTelegram(HttpServletResponse response,
+                                    @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
         User user = authService.unassignTelegram(authenticatedUser.getUserId());
+        Tokens tokens = authService.login(authenticatedUser);
+        jwtCookieComponent.addJwtSetCookies(response, tokens);
         return authMapper.toDto(user);
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
-        addJwtLogoutCookies(response);
-        return ResponseEntity.ok().build();
-    }
-
-    private void addJwtLogoutCookies(HttpServletResponse response) {
-        String accessCookie = buildSetCookieHeader("access_token", "", 0);
-        String refreshCookie = buildSetCookieHeader("refresh_token", "", 0);
-
-        response.addHeader("Set-Cookie", accessCookie);
-        response.addHeader("Set-Cookie", refreshCookie);
-    }
-
-    @PostMapping("/refresh")
-    public ResponseEntity<Void> refresh(@AuthenticationPrincipal AuthenticatedUser user, HttpServletResponse response) {
-        Tokens tokens = authService.refresh(user);
-        addJwtCookies(response, tokens);
-        return ResponseEntity.ok().build();
-    }
-
-    private void addJwtCookies(HttpServletResponse response, Tokens tokens) {
-        String accessCookie = buildSetCookieHeader("access_token", tokens.getAccessToken(), 3600);
-        String refreshCookie = buildSetCookieHeader("refresh_token", tokens.getRefreshToken(), 604800);
-
-        response.addHeader("Set-Cookie", accessCookie);
-        response.addHeader("Set-Cookie", refreshCookie);
-    }
-
-    private String buildSetCookieHeader(String name, String value, int maxAge) {
-        return String.format(
-                "%s=%s; Max-Age=%d; Path=/; HttpOnly; Secure; SameSite=None",
-                name, value, maxAge
-        );
+        return jwtCookieComponent.addJwtLogoutCookies(response);
     }
 }

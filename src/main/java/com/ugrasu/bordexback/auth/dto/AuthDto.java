@@ -3,6 +3,8 @@ package com.ugrasu.bordexback.auth.dto;
 import com.ugrasu.bordexback.auth.dto.validation.OnLogin;
 import com.ugrasu.bordexback.auth.dto.validation.OnLoginTelegram;
 import com.ugrasu.bordexback.auth.dto.validation.OnRegister;
+import com.ugrasu.bordexback.auth.dto.validation.OnTelegramPostRegister;
+import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
 import com.ugrasu.bordexback.rest.entity.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -24,13 +26,13 @@ public class AuthDto {
     )
     @NotBlank(
             message = "Имя пользователя не может быть пустым",
-            groups = {OnLogin.class, OnRegister.class}
+            groups = {OnLogin.class, OnRegister.class, OnTelegramPostRegister.class}
     )
     @Size(
             min = 3,
             max = 50,
             message = "Имя пользователя должно быть от 3 до 50 символов",
-            groups = {OnLogin.class, OnRegister.class}
+            groups = {OnLogin.class, OnRegister.class, OnTelegramPostRegister.class}
     )
     String username;
 
@@ -72,13 +74,13 @@ public class AuthDto {
     )
     @NotBlank(
             message = "Пароль не может быть пустым",
-            groups = {OnLogin.class, OnRegister.class}
+            groups = {OnLogin.class, OnRegister.class, OnTelegramPostRegister.class}
     )
     @Size(
             min = 6,
             max = 100,
             message = "Пароль должен быть от 6 до 100 символов",
-            groups = {OnLogin.class, OnRegister.class}
+            groups = {OnLogin.class, OnRegister.class, OnTelegramPostRegister.class}
     )
     String password;
 
@@ -92,7 +94,7 @@ public class AuthDto {
     )
     @Email(
             message = "Некорректный формат email",
-            groups = OnRegister.class
+            groups = {OnRegister.class, OnTelegramPostRegister.class, OnUpdate.class, OnLogin.class}
     )
     String email;
 
@@ -109,7 +111,7 @@ public class AuthDto {
             min = 6,
             max = 100,
             message = "Подтверждение пароля должно быть от 6 до 100 символов",
-            groups = OnRegister.class
+            groups = {OnRegister.class, OnTelegramPostRegister.class, OnUpdate.class, OnLogin.class}
     )
     String passwordConfirm;
 
@@ -130,8 +132,6 @@ public class AuthDto {
             groups = OnLoginTelegram.class
     )
     String telegramPasscode;
-
-
 
 
 }

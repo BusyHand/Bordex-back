@@ -5,9 +5,12 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.ugrasu.bordexback.auth.security.JwtCookieComponent;
 import com.ugrasu.bordexback.auth.security.converter.CustomJwtAuthenticationConverter;
 import com.ugrasu.bordexback.auth.security.filter.CookieJwtAuthenticationFilter;
+import com.ugrasu.bordexback.auth.security.filter.RefreshCookieFilter;
 import com.ugrasu.bordexback.auth.security.provider.TelegramAuthenticationProvider;
+import com.ugrasu.bordexback.auth.security.provider.TokenProvider;
 import com.ugrasu.bordexback.auth.service.CustomUserDetailService;
 import com.ugrasu.bordexback.rest.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,9 +78,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomJwtAuthenticationConverter customJwtAuthenticationConverter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtCookieComponent jwtCookieComponent, TokenProvider tokenProvider, CustomJwtAuthenticationConverter customJwtAuthenticationConverter) throws Exception {
         return http
                 .addFilterBefore(new CookieJwtAuthenticationFilter(), BearerTokenAuthenticationFilter.class)
+                .addFilterAfter(new RefreshCookieFilter(jwtCookieComponent, tokenProvider), BearerTokenAuthenticationFilter.class)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

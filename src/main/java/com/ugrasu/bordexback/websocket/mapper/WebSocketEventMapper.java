@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 )
 public interface WebSocketEventMapper {
 
-
     BoardDto toDto(BoardPayload board);
 
     UserDto toDto(UserPayload user);

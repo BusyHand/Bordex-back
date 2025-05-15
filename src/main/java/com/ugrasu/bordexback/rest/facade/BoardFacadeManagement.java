@@ -57,7 +57,8 @@ public class BoardFacadeManagement {
             """
                     !@use.isTheSameUser(#userId) and !@bse.isOwner(#userId, #boardId)
                         and ((@bse.isOwner(#boardId)
-                                or (!@bse.isPrivate(#boardId) and @brse.hasBoardRole(#boardId, 'MANAGER'))))"""
+                                or (!@bse.isPrivate(#boardId) and @brse.hasBoardRole(#boardId, 'MANAGER')
+                                    and !@brse.hasBoardRole(#userId, #boardId, 'MANAGER'))))"""
     )
     public Board removeUserFromBoard(@P("boardId") Long boardId, @P("userId") Long userId) {
         User user = userService.findOne(userId);

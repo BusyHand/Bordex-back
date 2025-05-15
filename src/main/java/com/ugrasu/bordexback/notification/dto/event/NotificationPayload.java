@@ -23,7 +23,7 @@ public class NotificationPayload {
 
     String content;
 
-    String link;
+    Long boardId;
 
     EventType eventType;
 

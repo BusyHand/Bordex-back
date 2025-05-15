@@ -21,7 +21,7 @@ public class TaskFacadeManagement {
     private final BoardService boardService;
 
     @Transactional
-    @PreAuthorize("@brse.hasBoardRole(#boardId, 'MANAGER')")
+    @PreAuthorize("@bse.isOwner(#boardId) or @brse.hasBoardRole(#boardId, 'MANAGER')")
     public Task createTask(@P("boardId") Long boardId, @P("userId") Long userId, Task task) {
         User owner = userService.findOne(userId);
         Board board = boardService.findOne(boardId);
@@ -30,7 +30,8 @@ public class TaskFacadeManagement {
 
     @Transactional
     @PreAuthorize(
-            """
+            """      
+                    @tse.isBoardOwnerByTaskId(#taskId) or
                     (@tse.hasBoardRoleByTaskId(#taskId, 'MANAGER')
                     and @tse.hasBoardRoleByTaskId(#userId, #taskId, 'DEVELOPER'))"""
     )
@@ -42,8 +43,8 @@ public class TaskFacadeManagement {
     @Transactional
     @PreAuthorize(
             """
-                    (@tse.hasBoardRoleByTaskId(#taskId, 'MANAGER')
-                     and @tse.hasBoardRoleByTaskId(#unassignUserId, #taskId, 'DEVELOPER'))"""
+                    @tse.isBoardOwnerByTaskId(#taskId) or
+                    @tse.hasBoardRoleByTaskId(#taskId, 'MANAGER')"""
     )
     public Task unassignUserFromTask(@P("taskId") Long taskId, @P("unassignUserId") Long unassignUserId) {
         User unassignUser = userService.findOne(unassignUserId);

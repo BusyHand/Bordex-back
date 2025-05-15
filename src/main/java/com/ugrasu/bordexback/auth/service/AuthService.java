@@ -1,6 +1,7 @@
 package com.ugrasu.bordexback.auth.service;
 
 import com.ugrasu.bordexback.auth.dto.Tokens;
+import com.ugrasu.bordexback.auth.security.authenfication.AuthenticatedUser;
 import com.ugrasu.bordexback.auth.security.authenfication.TelegramUserAuthentication;
 import com.ugrasu.bordexback.auth.security.provider.TokenProvider;
 import com.ugrasu.bordexback.rest.entity.User;
@@ -8,6 +9,7 @@ import com.ugrasu.bordexback.rest.entity.enums.Role;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -34,16 +36,16 @@ public class AuthService {
         return tokenProvider.generateTokens(loginUser);
     }
 
+    public Tokens login(AuthenticatedUser authenticatedUser) {
+        return tokenProvider.generateTokens(authenticatedUser);
+    }
+
     public Tokens login(User user) {
         return login(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
     }
 
     public Tokens loginTelegram(User user) {
         return login(new TelegramUserAuthentication(user.getTelegramPasscode()));
-    }
-
-    public Tokens refresh(UserDetails user) {
-        return tokenProvider.generateTokens(user);
     }
 
     public User register(User user) {
@@ -103,9 +105,23 @@ public class AuthService {
 
     public User unassignTelegram(Long userId) {
         User user = userRepository.findById(userId).get();
+        if (user.getUsername() == null || user.getEmail() == null || user.getPassword() == null) {
+            throw new AccessDeniedException("Полностью зарегистрируйтесь чтобы отвязать телеграмм");
+        }
         user.setTelegramPasscode(null);
         user.setChatId(null);
         user.setTelegramUsername(null);
         return userRepository.save(user);
+    }
+
+    public User telegramPostRegister(Long userId, User user) {
+        if (userRepository.existsUserByUsernameOrEmail(user.getUsername(), user.getEmail())) {
+            throw new EntityExistsException("User with username or email already exists");
+        }
+        User loggedUser = userRepository.findById(userId).get();
+        loggedUser.setUsername(user.getUsername());
+        loggedUser.setEmail(user.getEmail());
+        loggedUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(loggedUser);
     }
 }

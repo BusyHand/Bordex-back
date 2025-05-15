@@ -23,7 +23,7 @@ public class NotificationDto extends BaseDto {
 
     String content;
 
-    String link;
+    Long boardId;
 
     EventType eventType;
 
