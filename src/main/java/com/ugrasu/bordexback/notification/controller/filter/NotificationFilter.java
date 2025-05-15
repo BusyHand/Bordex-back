@@ -1,21 +1,16 @@
 package com.ugrasu.bordexback.notification.controller.filter;
 
 import com.ugrasu.bordexback.notification.entity.Notification;
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.experimental.UtilityClass;
 import org.springframework.data.jpa.domain.Specification;
 
-@Data
-public class NotificationFilter {
+public record NotificationFilter(Long userId) {
 
-    @Schema(description = "ID потребителя userId")
-    private Long userId;
-
-    public Specification<Notification> toSpecification() {
-        return Specification.where(consumerIdSpec());
+    public Specification<Notification> filter() {
+        return Specification.where(consumerIdSpec(userId));
     }
 
-    private Specification<Notification> consumerIdSpec() {
+    private Specification<Notification> consumerIdSpec(Long userId) {
         return (root, query, cb) -> userId != null
                 ? cb.equal(root.join("consumers").get("userId"), userId)
                 : null;

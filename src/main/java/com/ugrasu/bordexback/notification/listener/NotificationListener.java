@@ -2,7 +2,7 @@ package com.ugrasu.bordexback.notification.listener;
 
 import com.ugrasu.bordexback.notification.entity.Notification;
 import com.ugrasu.bordexback.notification.mapper.NotificationMapper;
-import com.ugrasu.bordexback.notification.service.NotificationService;
+import com.ugrasu.bordexback.notification.publisher.NotificationPublisher;
 import com.ugrasu.bordexback.rest.dto.payload.BoardRolesPayload;
 import com.ugrasu.bordexback.rest.dto.payload.UserPayload;
 import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
@@ -24,7 +24,7 @@ import static com.ugrasu.bordexback.rest.event.EventType.BOARD_UPDATED;
 public class NotificationListener {
 
     private final NotificationMapper notificationMapper;
-    private final NotificationService notificationService;
+    private final NotificationPublisher notificationPublisher;
 
     @EventListener
     public void handleTaskEvent(TaskEvent taskEvent) {
@@ -37,8 +37,8 @@ public class NotificationListener {
         ));
 
         notification.setTitle(type.getTitle());
-        notification.setLink("/board/" + taskEvent.getTaskPayload().getBoard().getId());
-        notificationService.save(notification);
+        notification.setBoardId(taskEvent.getTaskPayload().getBoard().getId());
+        notificationPublisher.publish(notification);
     }
 
 
@@ -55,8 +55,8 @@ public class NotificationListener {
                 boardEvent.getBoardPayload().getName()
         ));
 
-        notification.setLink("/boards/" + boardEvent.getBoardPayload().getId());
-        notificationService.save(notification);
+        notification.setBoardId(boardEvent.getBoardPayload().getId());
+        notificationPublisher.publish(notification);
     }
 
     @EventListener
@@ -76,7 +76,7 @@ public class NotificationListener {
                 boardRolePayload.getBoard().getName()
         ));
 
-        notification.setLink("/boards/" + boardRolesEvent.getBoardRolePayload().getBoard().getId());
-        notificationService.save(notification);
+        notification.setBoardId(boardRolesEvent.getBoardRolePayload().getBoard().getId());
+        notificationPublisher.publish(notification);
     }
 }

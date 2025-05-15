@@ -44,6 +44,22 @@ public class UserDto extends BaseDto {
     )
     String telegramUsername;
 
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = {OnCreate.class, OnUpdate.class}
+    )
+    @Schema(
+            description = "ID пользователя в телеграме",
+            example = "12345123",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
+    Long chatId;
+
+
+    @Null(
+            message = "Пользователь не имеет права задавать это поле",
+            groups = OnUpdate.class
+    )
     @NotNull(
             message = "Имя пользователя обязательно",
             groups = OnCreate.class
@@ -58,20 +74,31 @@ public class UserDto extends BaseDto {
             message = "Имя пользователя не может быть пустым",
             groups = OnCreate.class
     )
+    @Pattern(
+            regexp = "^[a-zA-Z0-9_]+$",
+            message = "Имя пользователя может содержать только латинские буквы, цифры и подчёркивания",
+            groups = OnCreate.class
+    )
     @Schema(
             description = "Логин пользователя",
             example = "ivan123"
     )
     String username;
 
+
+    @Pattern(
+            regexp = "^[a-zA-Zа-яА-Я0-9_]+$",
+            message = "Имя пользователя может содержать только латинские буквы, цифры и подчёркивания",
+            groups = {OnCreate.class, OnUpdate.class}
+    )
     @NotNull(
             message = "Имя обязательно",
             groups = OnCreate.class
     )
     @Size(
             min = 1,
-            max = 100,
-            message = "Имя должно быть от 1 до 100 символов",
+            max = 25,
+            message = "Имя должно быть от 1 до 25 символов",
             groups = OnCreate.class
     )
     @NotBlank(
@@ -84,9 +111,15 @@ public class UserDto extends BaseDto {
     )
     String firstName;
 
+    @Pattern(
+            regexp = "^[a-zA-Zа-яА-Я0-9_]+$",
+            message = "Имя пользователя может содержать только латинские буквы, цифры и подчёркивания",
+            groups = {OnCreate.class, OnUpdate.class}
+    )
     @Size(
-            max = 100,
-            message = "Фамилия не может быть длиннее 100 символов",
+            min = 1,
+            max = 25,
+            message = "Фамилия должна быть от 1 до 25 символов",
             groups = OnCreate.class
     )
     @Schema(
@@ -101,7 +134,7 @@ public class UserDto extends BaseDto {
     )
     @Email(
             message = "Некорректный формат email",
-            groups = OnCreate.class
+            groups = {OnCreate.class, OnUpdate.class}
     )
     @Schema(
             description = "Email пользователя",
@@ -109,6 +142,28 @@ public class UserDto extends BaseDto {
     )
     String email;
 
+    @Schema(
+            description = "Разрешены ли уведомления в Telegram",
+            example = "true"
+    )
+    Boolean allowTelegramNotifications;
+
+    @Schema(
+            description = "Разрешены ли уведомления по email",
+            example = "false"
+    )
+    Boolean allowEmailNotifications;
+
+    @Schema(
+            description = "Разрешены ли уведомления на сайте",
+            example = "true"
+    )
+    Boolean allowOnSiteNotifications;
+
+    @Null(
+            message = "ID задается автоматически",
+            groups = {OnCreate.class, OnUpdate.class}
+    )
     @Schema(
             description = "Системные роли пользователя",
             example = "[\"ADMIN\"]"
@@ -121,7 +176,7 @@ public class UserDto extends BaseDto {
     )
     @Schema(
             description = "Все роли пользователя на досках в которых он состоит",
-            example = "[\"ADMIN\"]"
+            example = "[\"VIEWER\"]"
     )
     Set<BoardRolesSlimDto> boardsRoles;
 

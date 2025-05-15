@@ -1,6 +1,6 @@
 package com.ugrasu.bordexback.rest.controller;
 
-import com.ugrasu.bordexback.auth.security.AuthenticatedUser;
+import com.ugrasu.bordexback.auth.security.authenfication.AuthenticatedUser;
 import com.ugrasu.bordexback.rest.controller.filter.TaskFilter;
 import com.ugrasu.bordexback.rest.controller.validation.OnCreate;
 import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
@@ -41,10 +41,10 @@ public class TaskController {
             description = "Возвращает постраничный список задач с возможностью фильтрации по параметрам"
     )
     @GetMapping
-    public PagedModel<TaskDto> findAll(@ParameterObject @ModelAttribute TaskFilter filter,
-                                       @ParameterObject Pageable pageable) {
-        var spec = filter.toSpecification();
-        Page<Task> tasks = taskService.findAll(spec, pageable);
+    public PagedModel<TaskDto> findAll(@ParameterObject @ModelAttribute TaskFilter taskFilter,
+                                       @ParameterObject Pageable pageable
+    ) {
+        Page<Task> tasks = taskService.findAll(taskFilter, pageable);
         Page<TaskDto> taskDtos = tasks.map(taskMapper::toDto);
         return new PagedModel<>(taskDtos);
     }

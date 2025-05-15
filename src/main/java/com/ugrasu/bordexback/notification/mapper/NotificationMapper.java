@@ -30,6 +30,8 @@ public interface NotificationMapper {
 
     NotificationPayload toEventDto(Notification notification);
 
+    Notification toEntity(NotificationPayload notificationPayload);
+
     ConsumerPayload toEventDto(Consumer consumer);
 
     @Mapping(
@@ -113,7 +115,9 @@ public interface NotificationMapper {
         consumer.setFirstName(user.getFirstName());
         consumer.setLastName(user.getLastName());
         consumer.setChatId(user.getChatId());
+        consumer.setAllowTelegramNotifications(user.getAllowTelegramNotifications());
+        consumer.setAllowEmailNotifications(user.getAllowEmailNotifications());
+        consumer.setAllowOnSiteNotifications(user.getAllowOnSiteNotifications());
         return consumer;
     }
-
 }

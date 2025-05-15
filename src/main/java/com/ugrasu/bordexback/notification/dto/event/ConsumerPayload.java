@@ -1,6 +1,7 @@
 package com.ugrasu.bordexback.notification.dto.event;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -24,4 +25,10 @@ public class ConsumerPayload {
     String lastName;
 
     String email;
+
+    Boolean allowTelegramNotifications;
+
+    Boolean allowEmailNotifications;
+
+    Boolean allowOnSiteNotifications;
 }

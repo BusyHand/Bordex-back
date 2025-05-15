@@ -1,5 +1,6 @@
 package com.ugrasu.bordexback.rest.service;
 
+import com.ugrasu.bordexback.rest.controller.filter.TaskFilter;
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
@@ -10,7 +11,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,11 +26,19 @@ public class TaskService {
     private final TaskMapper taskMapper;
     private final EventPublisher eventPublisher;
 
-    public Page<Task> findAll(Specification<Task> specification, Pageable pageable) {
-        return taskRepository.findAll(specification, pageable);
+
+    @PreAuthorize(
+            """
+                    (@use.isTheSameUser(#taskFilter.assigneeIds())
+                    or @bse.isOwner(#taskFilter.boardId())
+                    or @tse.canAccessTasks(#taskFilter.boardId(), 'VIEWER'))"""
+    )
+    public Page<Task> findAll(@P("taskFilter") TaskFilter taskFilter, Pageable pageable) {
+        return taskRepository.findAll(taskFilter.filter(), pageable);
     }
 
-    public Task findOne(Long id) {
+    @PreAuthorize("@tse.hasBoardRoleByTaskId(#id, 'VIEWER')")
+    public Task findOne(@P("id") Long id) {
         return taskRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Task with id %s not found".formatted(id)));
     }
@@ -57,14 +67,19 @@ public class TaskService {
     }
 
     @Transactional
-    public Task patch(Long taskId, Task newTask) {
+    @PreAuthorize(
+            "@tse.hasBoardRoleByTaskId(#taskId, 'MANAGER')" +
+            "or (@tse.hasBoardRoleByTaskId(#taskId, 'DEVELOPER') and @tse.developerPatch(#taskId, #newTask))"
+    )
+    public Task patch(@P("taskId") Long taskId, @P("newTask") Task newTask) {
         Task oldTask = findOne(taskId);
         Task updatedTask = taskMapper.partialUpdate(newTask, oldTask);
         return eventPublisher.publish(TASK_UPDATED, updatedTask);
     }
 
     @Transactional
-    public void delete(Long id) {
+    @PreAuthorize("@tse.hasBoardRoleByTaskId(#id, 'MANAGER')")
+    public void delete(@P("id") Long id) {
         Task taskToDelete = findOne(id);
         eventPublisher.publish(TASK_DELETED, taskToDelete);
         taskRepository.deleteTaskById(id);

@@ -27,8 +27,7 @@ public class NotificationController {
     @GetMapping
     public PagedModel<NotificationDto> findAll(@ParameterObject @ModelAttribute NotificationFilter filter,
                                                @ParameterObject Pageable pageable) {
-        Specification<Notification> specification = filter.toSpecification();
-        Page<Notification> notifications = notificationService.findAll(specification, pageable);
+        Page<Notification> notifications = notificationService.findAll(filter, pageable);
         Page<NotificationDto> notificationDtos = notifications.map(notificationMapper::toDto);
         return new PagedModel<>(notificationDtos);
     }

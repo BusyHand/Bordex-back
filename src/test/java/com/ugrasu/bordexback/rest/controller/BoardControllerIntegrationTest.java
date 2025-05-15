@@ -5,11 +5,14 @@ import com.ugrasu.bordexback.auth.dto.AuthDto;
 import com.ugrasu.bordexback.config.PostgreTestcontainerConfig;
 import com.ugrasu.bordexback.rest.dto.web.full.BoardDto;
 import com.ugrasu.bordexback.rest.entity.Board;
+import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
+import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
+import com.ugrasu.bordexback.rest.entity.enums.Role;
 import com.ugrasu.bordexback.rest.facade.BoardFacadeManagement;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
-import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.BoardRolesRepository;
+import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import com.ugrasu.bordexback.util.DataGenerator;
 import jakarta.servlet.http.Cookie;
@@ -23,6 +26,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -96,6 +101,7 @@ public class BoardControllerIntegrationTest {
     void shouldReturnAllBoards() throws Exception {
         User user = DataGenerator.getSimpleUser();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(Set.of(Role.values()));
         User savedUser = userRepository.save(user);
         boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
         String accessToken = getAccessToken();
@@ -113,7 +119,10 @@ public class BoardControllerIntegrationTest {
         User user = DataGenerator.getSimpleUser();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
-        Board board = boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
+        Board board = DataGenerator.getSimpleBoard(savedUser);
+        boardRepository.save(board);
+        board.getBoardMembers().add(userRepository.getReferenceById(savedUser.getId()));
+        boardRepository.save(board);
         String accessToken = getAccessToken();
 
         mockMvc.perform(get("/api/boards/" + board.getId())
@@ -165,7 +174,13 @@ public class BoardControllerIntegrationTest {
         User user = DataGenerator.getSimpleUser();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
-        Board board = boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
+        Board board = DataGenerator.getSimpleBoard(savedUser);
+        boardRepository.save(board);
+        board.getBoardMembers().add(userRepository.getReferenceById(savedUser.getId()));
+        boardRepository.save(board);
+        Task task = taskRepository.save(DataGenerator.getSimpleTask(user, board));
+        boardRolesRepository.save(DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.values()));
+
         String accessToken = getAccessToken();
 
         mockMvc.perform(delete("/api/boards/" + board.getId())

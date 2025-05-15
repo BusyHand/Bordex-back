@@ -32,7 +32,6 @@ public class WebSocketSender {
     public void sendUnassignedUser(BoardDto boardDto, Set<Long> boardMembersIds, Long unassignUserId) {
         boardMembersIds.forEach(memberId -> messagingTemplate.convertAndSend("/topic/user/" + memberId + "/board", boardDto));
         messagingTemplate.convertAndSend("/topic/user/" + unassignUserId + "/board", boardDto);
-
     }
 
     public void sendUpdateTask(TaskDto task) {

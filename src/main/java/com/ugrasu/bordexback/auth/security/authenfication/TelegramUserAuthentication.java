@@ -1,4 +1,4 @@
-package com.ugrasu.bordexback.auth.security;
+package com.ugrasu.bordexback.auth.security.authenfication;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;

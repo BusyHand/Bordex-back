@@ -1,5 +1,6 @@
-package com.ugrasu.bordexback.auth.security;
+package com.ugrasu.bordexback.auth.service;
 
+import com.ugrasu.bordexback.auth.security.authenfication.AuthenticatedUser;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.service.UserService;
 import lombok.RequiredArgsConstructor;

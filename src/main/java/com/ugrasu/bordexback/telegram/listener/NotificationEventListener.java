@@ -26,6 +26,7 @@ public class NotificationEventListener {
         String content = notificationPayload.getContent();
         List<Long> chatIds = notificationPayload.getConsumers()
                 .stream()
+                .filter(ConsumerPayload::getAllowTelegramNotifications)
                 .map(ConsumerPayload::getChatId)
                 .filter(Objects::nonNull)
                 .toList();

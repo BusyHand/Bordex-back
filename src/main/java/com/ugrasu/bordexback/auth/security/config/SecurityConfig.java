@@ -1,10 +1,14 @@
-package com.ugrasu.bordexback.auth.security;
+package com.ugrasu.bordexback.auth.security.config;
 
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.ugrasu.bordexback.auth.security.converter.CustomJwtAuthenticationConverter;
+import com.ugrasu.bordexback.auth.security.filter.CookieJwtAuthenticationFilter;
+import com.ugrasu.bordexback.auth.security.provider.TelegramAuthenticationProvider;
+import com.ugrasu.bordexback.auth.service.CustomUserDetailService;
 import com.ugrasu.bordexback.rest.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -88,7 +92,16 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://127.0.0.1:5173", "https://127.0.0.1:5173"));
+        configuration.setAllowedOrigins(List.of(
+                "http://127.0.0.1:5173",
+                "https://127.0.0.1:5173",
+                "http://localhost",
+                "http://87.228.90.18",
+                "http://localhost:80",
+                "http://87.228.90.18:80",
+                "http://localhost:3000",
+                "http://87.228.90.18:3000",
+                "https://127.0.0.1:80"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

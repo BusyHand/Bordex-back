@@ -7,6 +7,8 @@ import com.ugrasu.bordexback.rest.service.BoardService;
 import com.ugrasu.bordexback.rest.service.TaskService;
 import com.ugrasu.bordexback.rest.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,20 +21,31 @@ public class TaskFacadeManagement {
     private final BoardService boardService;
 
     @Transactional
-    public Task createTask(Long boardId, Long userId, Task task) {
+    @PreAuthorize("@brse.hasBoardRole(#boardId, 'MANAGER')")
+    public Task createTask(@P("boardId") Long boardId, @P("userId") Long userId, Task task) {
         User owner = userService.findOne(userId);
         Board board = boardService.findOne(boardId);
         return taskService.save(board, owner, task);
     }
 
     @Transactional
-    public Task assignUserToTask(Long taskId, Long userId) {
+    @PreAuthorize(
+            """
+                    (@tse.hasBoardRoleByTaskId(#taskId, 'MANAGER')
+                    and @tse.hasBoardRoleByTaskId(#userId, #taskId, 'DEVELOPER'))"""
+    )
+    public Task assignUserToTask(@P("taskId") Long taskId, @P("userId") Long userId) {
         User assignUser = userService.findOne(userId);
         return taskService.assignUser(taskId, assignUser);
     }
 
     @Transactional
-    public Task unassignUserFromTask(Long taskId, Long unassignUserId) {
+    @PreAuthorize(
+            """
+                    (@tse.hasBoardRoleByTaskId(#taskId, 'MANAGER')
+                     and @tse.hasBoardRoleByTaskId(#unassignUserId, #taskId, 'DEVELOPER'))"""
+    )
+    public Task unassignUserFromTask(@P("taskId") Long taskId, @P("unassignUserId") Long unassignUserId) {
         User unassignUser = userService.findOne(unassignUserId);
         return taskService.unassignUser(taskId, unassignUser);
     }

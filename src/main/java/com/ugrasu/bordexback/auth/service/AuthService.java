@@ -1,8 +1,8 @@
 package com.ugrasu.bordexback.auth.service;
 
 import com.ugrasu.bordexback.auth.dto.Tokens;
-import com.ugrasu.bordexback.auth.security.TelegramUserAuthentication;
-import com.ugrasu.bordexback.auth.security.TokenProvider;
+import com.ugrasu.bordexback.auth.security.authenfication.TelegramUserAuthentication;
+import com.ugrasu.bordexback.auth.security.provider.TokenProvider;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.entity.enums.Role;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.security.SecureRandom;
 import java.util.Set;
 import java.util.UUID;
 
@@ -58,7 +59,7 @@ public class AuthService {
             User alreadyExistUser = userRepository.findByChatId(user.getChatId()).get();
             if (!alreadyExistUser.getTelegramUsername().equals(user.getTelegramUsername())
                 && (userRepository.existsUserByUsername(user.getTelegramUsername())
-                 || userRepository.existsByTelegramUsername(user.getTelegramUsername()))) {
+                    || userRepository.existsByTelegramUsername(user.getTelegramUsername()))) {
                 user.setTelegramUsername(user.getTelegramUsername() + UUID.randomUUID());
             }
             alreadyExistUser.setTelegramUsername(user.getTelegramUsername());
@@ -69,6 +70,42 @@ public class AuthService {
             user.setRoles(Set.of(Role.USER));
             user.setTelegramUsername(user.getTelegramUsername() + UUID.randomUUID());
         }
+        return userRepository.save(user);
+    }
+
+
+    public String generateTelegramPasscode(Long userId) {
+        String randomPasscode = getRandomPasscode();
+        User user = userRepository.findById(userId).get();
+        user.setTelegramPasscode(randomPasscode);
+        userRepository.save(user);
+        return randomPasscode;
+    }
+
+    private String getRandomPasscode() {
+        String passcode;
+        do {
+            passcode = generateRandomPasscode();
+        } while (userRepository.existsByTelegramPasscode(passcode));
+        return passcode;
+    }
+
+    private String generateRandomPasscode() {
+        String characters = "QWERTYUIOPASDFGHJKLZXCVBNM";
+        SecureRandom random = new SecureRandom();
+        StringBuilder passcode = new StringBuilder(5);
+        for (int i = 0; i < 5; i++) {
+            int index = random.nextInt(characters.length());
+            passcode.append(characters.charAt(index));
+        }
+        return passcode.toString();
+    }
+
+    public User unassignTelegram(Long userId) {
+        User user = userRepository.findById(userId).get();
+        user.setTelegramPasscode(null);
+        user.setChatId(null);
+        user.setTelegramUsername(null);
         return userRepository.save(user);
     }
 }

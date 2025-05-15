@@ -1,5 +1,6 @@
-package com.ugrasu.bordexback.auth.security;
+package com.ugrasu.bordexback.auth.security.converter;
 
+import com.ugrasu.bordexback.auth.service.CustomUserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;

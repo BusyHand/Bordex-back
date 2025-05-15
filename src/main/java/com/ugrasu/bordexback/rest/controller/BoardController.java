@@ -1,7 +1,7 @@
 package com.ugrasu.bordexback.rest.controller;
 
 
-import com.ugrasu.bordexback.auth.security.AuthenticatedUser;
+import com.ugrasu.bordexback.auth.security.authenfication.AuthenticatedUser;
 import com.ugrasu.bordexback.rest.controller.filter.BoardFilter;
 import com.ugrasu.bordexback.rest.controller.validation.OnCreate;
 import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,11 +44,11 @@ public class BoardController {
     @GetMapping
     public PagedModel<BoardDto> findAll(@ParameterObject @ModelAttribute BoardFilter filter,
                                         @ParameterObject Pageable pageable) {
-        Specification<Board> specification = filter.toSpecification();
-        Page<Board> boards = boardService.findAll(specification, pageable);
+        Page<Board> boards = boardService.findAll(filter, pageable);
         Page<BoardDto> boardDtos = boards.map(boardMapper::toDto);
         return new PagedModel<>(boardDtos);
     }
+
 
     @Operation(
             summary = "Получить доску по ID",
@@ -129,6 +128,18 @@ public class BoardController {
     public BoardDto ownerTransfer(@PathVariable("board-id") Long boardId,
                                   @PathVariable("new-owner-id") Long newOwnerId) {
         Board board = boardFacadeManagement.ownerTransfer(boardId, newOwnerId);
+        return boardMapper.toDto(board);
+    }
+
+    @Operation(
+            summary = "Выйти с доски",
+            description = "Выйти пользователю с доски"
+    )
+    @DeleteMapping("/{board-id}/leave")
+    @ResponseStatus(HttpStatus.OK)
+    public BoardDto exitFromBoard(@AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+                                  @PathVariable("board-id") Long boardId) {
+        Board board = boardFacadeManagement.exitFromBoard(boardId, authenticatedUser.getUserId());
         return boardMapper.toDto(board);
     }
 }

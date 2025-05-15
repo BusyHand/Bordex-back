@@ -1,6 +1,7 @@
 package com.ugrasu.bordexback.email.mapper;
 
 import com.ugrasu.bordexback.email.domain.Email;
+import com.ugrasu.bordexback.notification.dto.event.ConsumerPayload;
 import com.ugrasu.bordexback.notification.dto.event.NotificationPayload;
 import com.ugrasu.bordexback.rest.event.EventType;
 import org.mapstruct.Mapper;
@@ -22,6 +23,7 @@ public interface EmailMapper {
         String subject = "Событие:" + eventType.getTitle() + "\n" + notificationPayload.getContent();
         return notificationPayload.getConsumers()
                 .stream()
+                .filter(ConsumerPayload::getAllowEmailNotifications)
                 .map(user -> {
                     Email email = new Email();
                     email.setTo(user.getEmail());

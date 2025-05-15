@@ -3,6 +3,7 @@ package com.ugrasu.bordexback.rest.dto.web.slim;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ugrasu.bordexback.rest.controller.validation.OnCreate;
 import com.ugrasu.bordexback.rest.controller.validation.OnUpdate;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
@@ -59,6 +60,24 @@ public class UserSlimDto {
             groups = OnCreate.class
     )
     String lastName;
+
+    @Schema(
+            description = "Разрешены ли уведомления в Telegram",
+            example = "true"
+    )
+    Boolean allowTelegramNotifications;
+
+    @Schema(
+            description = "Разрешены ли уведомления по email",
+            example = "true"
+    )
+    Boolean allowEmailNotifications;
+
+    @Schema(
+            description = "Разрешены ли уведомления на сайте",
+            example = "true"
+    )
+    Boolean allowOnSiteNotifications;
 
     @NotNull(
             message = "Email обязателен",

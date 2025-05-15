@@ -1,6 +1,7 @@
 package com.ugrasu.bordexback.telegram.handler.impl;
 
 import com.ugrasu.bordexback.telegram.command.Command;
+import com.ugrasu.bordexback.telegram.command.ParsedCommand;
 import com.ugrasu.bordexback.telegram.handler.CommandHandler;
 import com.ugrasu.bordexback.telegram.sender.MessageSender;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.message.Message;
 
 @Component
 @RequiredArgsConstructor
-public class StartCommandHandler implements CommandHandler {
+public class StartCommandHandlerImpl implements CommandHandler {
 
     private final MessageSender messageSender;
 
@@ -22,7 +23,7 @@ public class StartCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handleCommand(Update update, Message message, CallbackQuery callbackQuery, User user) {
+    public void handleCommand(Message message) {
         Long chatId = message.getChatId();
         String text = "Для привязки телеграм аккаунта нужно на сайте Bordex нажать на кнопку \n \"Продолжить с телеграм\"";
         messageSender.sendMessage(chatId, text);

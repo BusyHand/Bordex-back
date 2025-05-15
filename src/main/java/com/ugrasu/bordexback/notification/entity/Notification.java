@@ -25,7 +25,7 @@ public class Notification extends BaseEntity {
 
     String content;
 
-    String link;
+    Long boardId;
 
     EventType eventType;
 

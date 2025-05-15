@@ -1,5 +1,7 @@
-package com.ugrasu.bordexback.auth.security;
+package com.ugrasu.bordexback.auth.security.provider;
 
+import com.ugrasu.bordexback.auth.service.CustomUserDetailService;
+import com.ugrasu.bordexback.auth.security.authenfication.TelegramUserAuthentication;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.service.UserService;
 import lombok.RequiredArgsConstructor;

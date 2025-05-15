@@ -1,4 +1,4 @@
-package com.ugrasu.bordexback.auth.security;
+package com.ugrasu.bordexback.auth.security.authenfication;
 
 import com.ugrasu.bordexback.rest.entity.enums.Role;
 import lombok.AllArgsConstructor;

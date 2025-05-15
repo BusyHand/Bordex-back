@@ -1,5 +1,6 @@
 package com.ugrasu.bordexback.rest.service;
 
+import com.ugrasu.bordexback.rest.controller.filter.BoardRolesFilter;
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.User;
@@ -10,7 +11,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +27,12 @@ public class BoardRolesService {
     private final BoardRolesRepository boardRolesRepository;
     private final EventPublisher eventPublisher;
 
-    public Page<BoardRoles> findAll(Specification<BoardRoles> specification, Pageable pageable) {
-        return boardRolesRepository.findAll(specification, pageable);
+    @PreAuthorize(
+            """
+                    @use.isTheSameUser(#filter.userId()) or @bse.isMember(#filter.boardId())"""
+    )
+    public Page<BoardRoles> findAll(@P("filter") BoardRolesFilter filter, Pageable pageable) {
+        return boardRolesRepository.findAll(filter.filter(), pageable);
     }
 
     public BoardRoles findOne(Long userId, Long boardId) {
@@ -44,14 +50,26 @@ public class BoardRolesService {
     }
 
     @Transactional
-    public BoardRoles patch(Long userId, Long boardId, Set<BoardRole> roles) {
+    @PreAuthorize(
+            """
+                    (@bse.isOwner(#boardId)
+                    or (@brse.hasBoardRole(#boardId, 'MANAGER') and !@bse.isOwner(#userId, #boardId)
+                        and (@brse.allowToUpdateBoardRole(#userId, #boardId, #roles))))"""
+    )
+    public BoardRoles patch(@P("userId") Long userId, @P("boardId") Long boardId, @P("roles") Set<BoardRole> roles) {
         BoardRoles boardRoles = findOne(userId, boardId);
         boardRoles.setBoardRoles(roles);
         return eventPublisher.publish(BOARD_ROLE_UPDATED, boardRoles);
     }
 
     @Transactional
-    public void deleteBoardRole(Long userId, Long boardId, BoardRole boardRole) {
+    @PreAuthorize(
+            """
+                    (@bse.isOwner(#boardId)
+                    or (@brse.hasBoardRole(#boardId, 'MANAGER')
+                        and @brse.allowToDeleteRole(#userId, #boardId, #boardRole)))"""
+    )
+    public void deleteBoardRole(@P("userId") Long userId, @P("boardId") Long boardId, @P("boardRole") BoardRole boardRole) {
         BoardRoles boardRoles = findOne(userId, boardId);
         boardRoles.getBoardRoles().remove(boardRole);
         eventPublisher.publish(BOARD_ROLE_DELETED, boardRoles);

@@ -1,11 +1,16 @@
-FROM eclipse-temurin:17.0.2_8-jre AS layers
+FROM amazoncorretto:23.0.2-alpine AS layers
 WORKDIR /application
 COPY target/*.jar app.jar
 RUN java -Djarmode=tools -jar app.jar extract --layers --destination extracted
 
-FROM eclipse-temurin:17.0.2_8-jre
+FROM amazoncorretto:23.0.2-alpine
 VOLUME /tmp
-RUN useradd -ms /bin/bash spring-user
+
+RUN addgroup -S spring && adduser -S -G spring spring-user
+
+# Добавляем права на запись в /tmp для spring-user
+RUN chmod 1777 /tmp
+
 USER spring-user
 
 WORKDIR /application

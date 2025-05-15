@@ -1,4 +1,4 @@
-package com.ugrasu.bordexback.auth.security;
+package com.ugrasu.bordexback.auth.security.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -3,6 +3,7 @@ package com.ugrasu.bordexback.telegram.handler.impl;
 import com.ugrasu.bordexback.rest.dto.payload.UserPayload;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import com.ugrasu.bordexback.telegram.command.Command;
+import com.ugrasu.bordexback.telegram.command.ParsedCommand;
 import com.ugrasu.bordexback.telegram.handler.CommandHandler;
 import com.ugrasu.bordexback.telegram.publisher.BotEventPublisher;
 import com.ugrasu.bordexback.telegram.sender.MessageSender;
@@ -20,7 +21,7 @@ import static com.ugrasu.bordexback.rest.event.EventType.TELEGRAM_REGISTER;
 
 @Component
 @RequiredArgsConstructor
-public class StartRegistrationCommandHandler implements CommandHandler {
+public class StartRegistrationCommandHandlerImpl implements CommandHandler {
 
     private final MessageSender messageSender;
     private final BotEventPublisher botEventPublisher;
@@ -34,7 +35,7 @@ public class StartRegistrationCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handleCommand(Update update, Message message, CallbackQuery callbackQuery, User user) {
+    public void handleCommand(Message message, User user) {
         String passcode = getRandomPasscode();
         UserPayload userPayload = new UserPayload();
         userPayload.setChatId(message.getChatId());
@@ -42,6 +43,9 @@ public class StartRegistrationCommandHandler implements CommandHandler {
         userPayload.setFirstName(user.getFirstName());
         userPayload.setLastName(user.getLastName());
         userPayload.setTelegramPasscode(passcode);
+        userPayload.setAllowEmailNotifications(true);
+        userPayload.setAllowTelegramNotifications(true);
+        userPayload.setAllowOnSiteNotifications(true);
         botEventPublisher.publish(TELEGRAM_REGISTER, userPayload);
         String messageText = """
                 *Введите код на сайте*

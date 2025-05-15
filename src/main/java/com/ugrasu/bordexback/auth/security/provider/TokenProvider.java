@@ -1,4 +1,4 @@
-package com.ugrasu.bordexback.auth.security;
+package com.ugrasu.bordexback.auth.security.provider;
 
 import com.ugrasu.bordexback.auth.dto.Tokens;
 import lombok.RequiredArgsConstructor;

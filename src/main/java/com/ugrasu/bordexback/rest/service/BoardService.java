@@ -1,5 +1,6 @@
 package com.ugrasu.bordexback.rest.service;
 
+import com.ugrasu.bordexback.rest.controller.filter.BoardFilter;
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.exception.UserNotBoardMemberException;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,11 +27,16 @@ public class BoardService {
     private final BoardMapper boardMapper;
     private final EventPublisher eventPublisher;
 
-    public Page<Board> findAll(Specification<Board> specification, Pageable pageable) {
-        return boardRepository.findAll(specification, pageable);
+    @PreAuthorize(
+            """
+                    (@use.isTheSameUser(#filter.memberIds()))"""
+    )
+    public Page<Board> findAll(@P("filter") BoardFilter filter, Pageable pageable) {
+        return boardRepository.findAll(filter.filter(), pageable);
     }
 
-    public Board findOne(Long id) {
+    @PreAuthorize("@bse.isMember(#id)")
+    public Board findOne(@P("id") Long id) {
         return boardRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Board with id %s not found".formatted(id)));
     }
@@ -45,18 +53,20 @@ public class BoardService {
     }
 
     @Transactional
-    public Board patch(Long oldBoardId, Board newBoard) {
+    @PreAuthorize("@bse.isOwner(#oldBoardId)")
+    public Board patch(@P("oldBoardId") Long oldBoardId, Board newBoard) {
         Board oldBoard = findOne(oldBoardId);
         Board updatedBoard = boardMapper.partialUpdate(newBoard, oldBoard);
         return eventPublisher.publish(BOARD_UPDATED, updatedBoard);
     }
 
     @Transactional
-    public void delete(Long id) {
+    @PreAuthorize("@bse.isOwner(#id)")
+    public void delete(@P("id") Long id) {
         Board board = findOne(id);
-        board.getTasks().clear();
         eventPublisher.publish(BOARD_DELETED, board);
-        boardRepository.deleteBoardById(id);
+        board.deleteAll();
+        boardRepository.deleteById(id);
     }
 
     public Board addUser(Long boardId, User user) {

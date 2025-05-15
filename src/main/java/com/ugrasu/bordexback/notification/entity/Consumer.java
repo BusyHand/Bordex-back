@@ -50,6 +50,15 @@ public class Consumer extends BaseEntity {
     @Column(name = "last_name")
     String lastName;
 
+    @Column(name = "allow_telegram_notifications")
+    Boolean allowTelegramNotifications;
+
+    @Column(name = "allow_email_notifications")
+    Boolean allowEmailNotifications;
+
+    @Column(name = "allow_on_site_notifications")
+    Boolean allowOnSiteNotifications;
+
     @Column(
             name = "email"
     )

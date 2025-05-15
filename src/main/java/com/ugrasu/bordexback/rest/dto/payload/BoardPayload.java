@@ -32,6 +32,8 @@ public class BoardPayload extends BaseDto {
 
     Long membersCount;
 
+    Long progress;
+
     Set<UserPayload> boardMembers;
 
     EventType eventType;

@@ -87,6 +87,17 @@ public class DataLoader implements CommandLineRunner {
         board.getBoardMembers().add(me);
         boardRolesRepository.save(boardRoles);
         boardRepository.save(board);
+
+        me = userRepository.findById(2L).get();
+        board = boardRepository.findById(2L).get();
+        boardRoles = BoardRoles.builder()
+                .user(me)
+                .board(board)
+                .boardRoles(Set.of(BoardRole.VIEWER, BoardRole.DEVELOPER, BoardRole.MANAGER))
+                .build();
+        board.getBoardMembers().add(me);
+        boardRolesRepository.save(boardRoles);
+        boardRepository.save(board);
     }
 
     private void createUserBoardRoles(List<User> users, Board board) {
@@ -113,7 +124,7 @@ public class DataLoader implements CommandLineRunner {
 
     private List<Task> getTasks(List<User> users, Board board) {
         List<Task> tasks = new ArrayList<>();
-        List<Status> statuses = List.of(Status.NEW, Status.IN_PROGRESS, Status.DONE);
+        List<Status> statuses = List.of(Status.NEW, Status.IN_PROGRESS, Status.DONE, Status.REVIEW);
         for (int i = 0; i < 10; i++) {
             Task task = new Task();
             task.setBoard(board);
@@ -171,7 +182,7 @@ public class DataLoader implements CommandLineRunner {
             user.setLastName("lastname" + (i + 1));
             user.setEmail("user" + (i + 1) + "@gmail.com");
             Set<Role> roles = new HashSet<>();
-            roles.add(getRandomEnum(Role.class));
+            roles.add(Role.USER);
             user.setRoles(roles);
             user.setPassword(encoder.encode("123456"));
             users.add(user);

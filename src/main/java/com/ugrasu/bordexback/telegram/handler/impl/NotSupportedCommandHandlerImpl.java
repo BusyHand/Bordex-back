@@ -1,6 +1,7 @@
 package com.ugrasu.bordexback.telegram.handler.impl;
 
 import com.ugrasu.bordexback.telegram.command.Command;
+import com.ugrasu.bordexback.telegram.command.ParsedCommand;
 import com.ugrasu.bordexback.telegram.handler.CommandHandler;
 import com.ugrasu.bordexback.telegram.sender.MessageSender;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ import static com.ugrasu.bordexback.telegram.command.Command.NOT_SUPPORTED;
 
 @Component
 @RequiredArgsConstructor
-public class NotSupportedCommandHandler implements CommandHandler {
+public class NotSupportedCommandHandlerImpl implements CommandHandler {
 
     private final MessageSender messageSender;
 
@@ -24,7 +25,7 @@ public class NotSupportedCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handleCommand(Update update, Message message, CallbackQuery callbackQuery, User user) {
+    public void handleCommand(Message message) {
         Long chatId = message.getChatId();
         String text = "Command not supported";
         messageSender.sendMessage(chatId, text);

@@ -6,7 +6,7 @@ import com.ugrasu.bordexback.auth.dto.validation.OnLogin;
 import com.ugrasu.bordexback.auth.dto.validation.OnLoginTelegram;
 import com.ugrasu.bordexback.auth.dto.validation.OnRegister;
 import com.ugrasu.bordexback.auth.mapper.AuthMapper;
-import com.ugrasu.bordexback.auth.security.AuthenticatedUser;
+import com.ugrasu.bordexback.auth.security.authenfication.AuthenticatedUser;
 import com.ugrasu.bordexback.auth.service.AuthService;
 import com.ugrasu.bordexback.rest.dto.web.full.UserDto;
 import com.ugrasu.bordexback.rest.entity.User;
@@ -19,6 +19,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 //todo add refresh support
 // refactor cookie
@@ -62,6 +64,20 @@ public class AuthController {
 
         addJwtCookies(response, tokens);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/telegram-assign")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, String>> assignTelegram(@AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
+        String telegramPasscode = authService.generateTelegramPasscode(authenticatedUser.getUserId());
+        return ResponseEntity.ok(Map.of("telegramPasscode", telegramPasscode));
+    }
+
+    @PostMapping("/telegram-unassign")
+    @PreAuthorize("isAuthenticated()")
+    public UserDto unassignTelegram(@AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
+        User user = authService.unassignTelegram(authenticatedUser.getUserId());
+        return authMapper.toDto(user);
     }
 
     @PostMapping("/logout")

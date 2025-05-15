@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,8 +39,7 @@ public class BoardRolesController {
     @GetMapping
     public PagedModel<BoardRolesDto> findAll(@ParameterObject @ModelAttribute BoardRolesFilter filter,
                                              @ParameterObject Pageable pageable) {
-        Specification<BoardRoles> specification = filter.toSpecification();
-        Page<BoardRoles> userBoardRoles = boardRolesService.findAll(specification, pageable);
+        Page<BoardRoles> userBoardRoles = boardRolesService.findAll(filter, pageable);
         Page<BoardRolesDto> userBoardRoleDtos = userBoardRoles.map(boardRolesMapper::toDto);
         return new PagedModel<>(userBoardRoleDtos);
     }
@@ -54,8 +52,8 @@ public class BoardRolesController {
     @ResponseStatus(HttpStatus.OK)
     public BoardRolesDto update(@PathVariable("user-id") Long userId,
                                 @PathVariable("board-id") Long boardId,
-                                @Validated(OnUpdate.class) @RequestBody BoardRolesDto boardRolesDto) {
-        var userBoardRole = boardRolesMapper.toEntity(boardRolesDto);
+                                @Validated(OnUpdate.class) @RequestBody BoardRolesDto dto) {
+        var userBoardRole = boardRolesMapper.toEntity(dto);
         var patched = boardRolesService.patch(userId, boardId, userBoardRole.getBoardRoles());
         return boardRolesMapper.toDto(patched);
     }

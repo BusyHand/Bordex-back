@@ -5,6 +5,7 @@ import com.ugrasu.bordexback.auth.dto.AuthDto;
 import com.ugrasu.bordexback.config.PostgreTestcontainerConfig;
 import com.ugrasu.bordexback.rest.dto.web.full.UserDto;
 import com.ugrasu.bordexback.rest.entity.User;
+import com.ugrasu.bordexback.rest.entity.enums.Role;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.BoardRolesRepository;
@@ -21,6 +22,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -122,6 +125,9 @@ public class UserControllerIntegrationTest {
         userRepository.save(user);
 
         UserDto updateDto = DataGenerator.getSimpleUserDto();
+        updateDto.setId(null);
+        updateDto.setUsername(null);
+        updateDto.setRoles(null);
 
         String accessToken = getAccessToken();
         mockMvc.perform(patch("/api/users/" + user.getId())
@@ -129,7 +135,7 @@ public class UserControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("testuser"));
+                .andExpect(jsonPath("$.email").value("newemail@gmail.com"));
     }
 
     @Test
@@ -137,6 +143,7 @@ public class UserControllerIntegrationTest {
     void shouldDeleteUser() throws Exception {
         User user = DataGenerator.getSimpleUser();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(Set.of(Role.values()));
         userRepository.save(user);
 
         String accessToken = getAccessToken();

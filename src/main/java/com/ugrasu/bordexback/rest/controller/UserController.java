@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,9 +38,9 @@ public class UserController {
     )
     @GetMapping
     public PagedModel<UserDto> findAll(@ParameterObject @ModelAttribute UserFilter filter,
-                                       @ParameterObject Pageable pageable) {
-        Specification<User> specification = filter.toSpecification();
-        Page<User> users = userService.findAll(specification, pageable);
+                                       @ParameterObject Pageable pageable
+    ) {
+        Page<User> users = userService.findAll(filter, pageable);
         Page<UserDto> userDtos = users.map(userMapper::toDto);
         return new PagedModel<>(userDtos);
     }

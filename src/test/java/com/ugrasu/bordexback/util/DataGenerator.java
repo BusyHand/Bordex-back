@@ -117,7 +117,7 @@ public class DataGenerator {
         user.setUsername("testuser");
         user.setFirstName("FirstName");
         user.setLastName("LastName");
-        user.setEmail("cool908yan@yandex.ru");
+        user.setEmail("newemail@gmail.com");
         user.setRoles(Set.of(Role.USER));
         return user;
     }

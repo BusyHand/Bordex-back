@@ -92,6 +92,7 @@ public class WebSocketServiceListener {
         NotificationDto dto = eventMapper.toDto(notificationPayload);
         Set<Long> consumersUsersId = notificationPayload.getConsumers()
                 .stream()
+                .filter(ConsumerPayload::getAllowOnSiteNotifications)
                 .map(ConsumerPayload::getUserId)
                 .collect(Collectors.toSet());
         sender.sendNotification(dto, consumersUsersId);

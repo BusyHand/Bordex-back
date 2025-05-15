@@ -9,8 +9,8 @@ import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.facade.TaskFacadeManagement;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
-import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.BoardRolesRepository;
+import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import com.ugrasu.bordexback.util.DataGenerator;
 import jakarta.servlet.http.Cookie;
@@ -72,9 +72,9 @@ public class NotificationControllerIntegrationTest {
         authUser = DataGenerator.getSimpleUser();
     }
 
-    private String getAccessToken() throws Exception {
+    private String getAccessToken(String usename) throws Exception {
         AuthDto authDto = new AuthDto();
-        authDto.setUsername(authUser.getEmail());
+        authDto.setUsername(usename);
         authDto.setPassword(authUser.getPassword());
 
         var result = mockMvc.perform(post("/api/auth/login")
@@ -103,7 +103,7 @@ public class NotificationControllerIntegrationTest {
         Task task = DataGenerator.getSimpleTask();
         Task created = taskFacadeManagement.createTask(board.getId(), user.getId(), task);
         taskFacadeManagement.assignUserToTask(created.getId(), savedUser.getId());
-        String accessToken = getAccessToken();
+        String accessToken = getAccessToken("UserName");
 
         mockMvc.perform(get("/api/notifications?userId={userId}", savedUser.getId())
                         .cookie(new Cookie("access_token", accessToken)))
@@ -122,12 +122,12 @@ public class NotificationControllerIntegrationTest {
         Task created = taskFacadeManagement.createTask(board.getId(), savedUser.getId(), task);
         taskFacadeManagement.assignUserToTask(created.getId(), savedUser.getId());
 
-        User newUser = DataGenerator.getSimpleUser("newUser", "email");
+        User newUser = DataGenerator.getSimpleUser("newUser", "email2");
         newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
         User savedNewUser = userRepository.save(newUser);
         taskFacadeManagement.assignUserToTask(created.getId(), savedNewUser.getId());
 
-        String accessToken = getAccessToken();
+        String accessToken = getAccessToken("UserName");
 
         MvcResult result = mockMvc.perform(get("/api/notifications?userId=" + savedUser.getId())
                         .cookie(new Cookie("access_token", accessToken)))
@@ -152,8 +152,10 @@ public class NotificationControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
+
+        String anotherToken = getAccessToken(savedNewUser.getEmail());
         mockMvc.perform(get("/api/notifications?userId=" + savedNewUser.getId())
-                        .cookie(new Cookie("access_token", accessToken)))
+                        .cookie(new Cookie("access_token", anotherToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)));
     }

@@ -8,6 +8,7 @@ import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.BoardRoles;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
+import com.ugrasu.bordexback.rest.entity.enums.Role;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.BoardRolesRepository;
@@ -92,25 +93,11 @@ public class BoardRolesControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /api/boards возвращает список досок")
-    void shouldReturnAllBoards() throws Exception {
-        User user = DataGenerator.getSimpleUser();
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        User savedUser = userRepository.save(user);
-        boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
-        String accessToken = getAccessToken();
-
-        mockMvc.perform(get("/api/boards")
-                        .cookie(new Cookie("access_token", accessToken)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)));
-    }
-
-    @Test
     @DisplayName("GET /api/users/boards/roles возвращает список ролей")
     void shouldReturnAllUserBoardRoles() throws Exception {
         User user = DataGenerator.getSimpleUser();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(Set.of(Role.values()));
         userRepository.save(user);
         Board simpleBoard = DataGenerator.getSimpleBoard(user);
         boardRepository.save(simpleBoard);

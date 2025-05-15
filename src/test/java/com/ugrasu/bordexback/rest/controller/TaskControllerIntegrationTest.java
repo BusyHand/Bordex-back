@@ -7,9 +7,11 @@ import com.ugrasu.bordexback.rest.dto.web.full.TaskDto;
 import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
+import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
+import com.ugrasu.bordexback.rest.entity.enums.Role;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
-import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.BoardRolesRepository;
+import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import com.ugrasu.bordexback.util.DataGenerator;
 import jakarta.servlet.http.Cookie;
@@ -23,6 +25,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -92,9 +96,10 @@ public class TaskControllerIntegrationTest {
     void shouldReturnAllTasks() throws Exception {
         User user = DataGenerator.getSimpleUser();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(Set.of(Role.values()));
         User savedUser = userRepository.save(user);
         Board board = boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
-
+        boardRolesRepository.save(DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.values()));
         taskRepository.save(DataGenerator.getSimpleTask(savedUser, board));
 
         String accessToken = getAccessToken();
@@ -112,6 +117,7 @@ public class TaskControllerIntegrationTest {
         User savedUser = userRepository.save(user);
         Board board = boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
         Task task = taskRepository.save(DataGenerator.getSimpleTask(user, board));
+        boardRolesRepository.save(DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.values()));
 
         String accessToken = getAccessToken();
         mockMvc.perform(get("/api/tasks/" + task.getId())
@@ -127,7 +133,7 @@ public class TaskControllerIntegrationTest {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
         Board board = boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
-
+        boardRolesRepository.save(DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.values()));
         TaskDto taskDto = DataGenerator.getSimpleTaskDto();
 
         String accessToken = getAccessToken();
@@ -148,6 +154,7 @@ public class TaskControllerIntegrationTest {
         User savedUser = userRepository.save(user);
         Board board = boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
         Task task = taskRepository.save(DataGenerator.getSimpleTask(user, board));
+        boardRolesRepository.save(DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.values()));
         TaskDto updateDto = DataGenerator.getSimpleTaskDto();
 
         String accessToken = getAccessToken();
@@ -167,6 +174,7 @@ public class TaskControllerIntegrationTest {
         User savedUser = userRepository.save(user);
         Board board = boardRepository.save(DataGenerator.getSimpleBoard(savedUser));
         Task task = taskRepository.save(DataGenerator.getSimpleTask(user, board));
+        boardRolesRepository.save(DataGenerator.getSimpleUserBoardRole(user, board, BoardRole.values()));
 
         String accessToken = getAccessToken();
         mockMvc.perform(delete("/api/tasks/" + task.getId())

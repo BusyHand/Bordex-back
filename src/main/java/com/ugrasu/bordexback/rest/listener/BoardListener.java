@@ -5,8 +5,8 @@ import com.ugrasu.bordexback.rest.entity.Board;
 import com.ugrasu.bordexback.rest.event.EventType;
 import com.ugrasu.bordexback.rest.event.TaskEvent;
 import com.ugrasu.bordexback.rest.publisher.EventPublisher;
+import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
-import com.ugrasu.bordexback.rest.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -20,7 +20,7 @@ import static com.ugrasu.bordexback.rest.event.EventType.*;
 @RequiredArgsConstructor
 public class BoardListener {
 
-    private final BoardService boardService;
+    private final BoardRepository boardRepository;
     private final EventPublisher eventPublisher;
     private final TaskRepository taskRepository;
 
@@ -29,36 +29,20 @@ public class BoardListener {
     public void listenTaskEvent(TaskEvent taskEvent) {
         EventType eventType = taskEvent.getTaskPayload().getEventType();
         BoardPayload board = taskEvent.getTaskPayload().getBoard();
-        if (TASK_CREATED.equals(eventType)) {
-            listenTaskCreated(board);
-        }
-        if (TASK_DELETED.equals(eventType)) {
-            listenTaskDelete(board);
-        }
-        if (TASK_UPDATED.equals(eventType)) {
+        if (TASK_CREATED.equals(eventType) || TASK_DELETED.equals(eventType) || TASK_UPDATED.equals(eventType)) {
             listenTaskUpdate(board);
         }
     }
 
     private void listenTaskUpdate(BoardPayload boardPayload) {
-        Board board = boardService.findOne(boardPayload.getId());
+        Board board = boardRepository.findById(boardPayload.getId()).get();
         calculateAverageProgressByBoard(board);
-        eventPublisher.publish(BOARD_UPDATED, board);
-    }
-
-    public void listenTaskCreated(BoardPayload boardPayload) {
-        Board board = boardService.findOne(boardPayload.getId());
-        calculateAverageProgressByBoard(board);
-        eventPublisher.publish(BOARD_UPDATED, board);
-    }
-
-    public void listenTaskDelete(BoardPayload boardPayload) {
-        Board board = boardService.findOne(boardPayload.getId());
         eventPublisher.publish(BOARD_UPDATED, board);
     }
 
     public void calculateAverageProgressByBoard(Board board) {
         int boardProgress = taskRepository.calculateAverageProgressByBoard(board);
         board.setProgress(boardProgress);
+        boardRepository.save(board);
     }
 }

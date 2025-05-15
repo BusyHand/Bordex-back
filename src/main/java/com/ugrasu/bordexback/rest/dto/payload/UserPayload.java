@@ -34,6 +34,12 @@ public class UserPayload extends BaseDto {
 
     String email;
 
+    Boolean allowTelegramNotifications;
+
+    Boolean allowEmailNotifications;
+
+    Boolean allowOnSiteNotifications;
+
     Set<Role> roles;
 
     EventType eventType;

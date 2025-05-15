@@ -62,7 +62,16 @@ public class User extends BaseEntity {
     String lastName;
 
     @Column(name = "block")
-    boolean block = false;
+    Boolean block = false;
+
+    @Column(name = "allow_telegram_notifications")
+    Boolean allowTelegramNotifications = true;
+
+    @Column(name = "allow_email_notifications")
+    Boolean allowEmailNotifications = true;
+
+    @Column(name = "allow_on_site_notifications")
+    Boolean allowOnSiteNotifications = true;
 
     @Column(name = "role")
     @Enumerated(value = EnumType.STRING)

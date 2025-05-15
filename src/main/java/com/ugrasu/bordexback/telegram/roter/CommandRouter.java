@@ -1,6 +1,7 @@
 package com.ugrasu.bordexback.telegram.roter;
 
 import com.ugrasu.bordexback.telegram.command.Command;
+import com.ugrasu.bordexback.telegram.command.ParsedCommand;
 import com.ugrasu.bordexback.telegram.handler.CommandHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,8 @@ public class CommandRouter {
 
     public void route(Update update, Message message, CallbackQuery callbackQuery, User user) {
         String commandText = message.getText();
-        CommandHandler commandHandler = getCommandHandler(of(commandText));
-        commandHandler.handleCommand(update, message, callbackQuery, user);
+        ParsedCommand parsedCommand = of(commandText);
+        CommandHandler commandHandler = getCommandHandler(parsedCommand.command());
+        commandHandler.handleCommand(update, message, callbackQuery, user, parsedCommand);
     }
 }
