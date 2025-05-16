@@ -12,14 +12,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-@Component
 @RequiredArgsConstructor
 public class RefreshCookieFilter extends OncePerRequestFilter {
 

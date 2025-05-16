@@ -1,6 +1,7 @@
 package com.ugrasu.bordexback.auth.controller;
 
 import com.ugrasu.bordexback.auth.dto.AuthDto;
+import com.ugrasu.bordexback.auth.dto.TelegramLoginInitDataRequest;
 import com.ugrasu.bordexback.auth.dto.Tokens;
 import com.ugrasu.bordexback.auth.dto.validation.OnLogin;
 import com.ugrasu.bordexback.auth.dto.validation.OnLoginTelegram;
@@ -52,6 +53,18 @@ public class AuthController {
     public ResponseEntity<Void> login(@RequestBody @Validated(OnLogin.class) AuthDto authDto, HttpServletResponse response) {
         User user = authMapper.toEntity(authDto);
         Tokens tokens = authService.login(user);
+        return jwtCookieComponent.addJwtSetCookies(response, tokens);
+    }
+
+    @PostMapping("/login/telegram-webapp")
+    public ResponseEntity<Void> loginTelegramWebApp(@RequestBody TelegramLoginInitDataRequest loginRequest, HttpServletResponse response) {
+        boolean isCorrect = authService.validateInitData(loginRequest.getInitData());
+        if (!isCorrect) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        User user = authMapper.toEntity(loginRequest);
+        User telegramUser = authService.autheficateTelegramUser(user);
+        Tokens tokens = authService.loginTelegram(telegramUser);
         return jwtCookieComponent.addJwtSetCookies(response, tokens);
     }
 

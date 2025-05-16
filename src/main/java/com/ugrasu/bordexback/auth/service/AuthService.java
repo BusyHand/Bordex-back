@@ -9,6 +9,8 @@ import com.ugrasu.bordexback.rest.entity.enums.Role;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,9 +19,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -29,6 +40,9 @@ public class AuthService {
     private final TokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+
+    @Value("${telegrambots.token}")
+    private String botToken;
 
     private Tokens login(Authentication toAuthenticate) {
         Authentication authentication = authenticationManager.authenticate(toAuthenticate);
@@ -72,7 +86,8 @@ public class AuthService {
             user.setRoles(Set.of(Role.USER));
             user.setTelegramUsername(user.getTelegramUsername() + UUID.randomUUID());
         }
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+        return userRepository.save(saved);
     }
 
 
@@ -123,5 +138,63 @@ public class AuthService {
         loggedUser.setEmail(user.getEmail());
         loggedUser.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(loggedUser);
+    }
+
+    public boolean validateInitData(String initData) {
+        Map<String, String> dataMap = parseInitData(initData);
+        String hash = dataMap.remove("hash");
+        try {
+            return validateTelegramAuth(dataMap, hash);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Map<String, String> parseInitData(String initData) {
+        return Arrays.stream(initData.split("&"))
+                .map(pair -> pair.split("=", 2))
+                .collect(Collectors.toMap(
+                        arr -> URLDecoder.decode(arr[0], StandardCharsets.UTF_8),
+                        arr -> arr.length > 1 ? URLDecoder.decode(arr[1], StandardCharsets.UTF_8) : ""
+                ));
+    }
+
+    private boolean validateTelegramAuth(Map<String, String> paramMap, String receivedHash) throws Exception {
+
+        // Пункт 1. Убираем hash и сортируем оставшиеся параметры
+        String dataString = paramMap.entrySet().stream()
+                .filter(e -> !"hash".equals(e.getKey()))
+                .sorted(Map.Entry.comparingByKey())
+                .map(e -> e.getKey() + "=" + e.getValue()) // Берем первый элемент из массива параметров
+                .collect(Collectors.joining("\n"));
+
+        // Пункт 2. Создаем HMAC SHA-256 хеш
+        var sha256HMAC = Mac.getInstance("HmacSHA256");
+        var secretKeySpec = new SecretKeySpec(getSecretHashByInitData(), "HmacSHA256");
+        sha256HMAC.init(secretKeySpec);
+
+        byte[] hash2 = sha256HMAC.doFinal(dataString.getBytes());
+
+        // Пункт 3. Преобразуем байты хеша в строку в hex формате
+        var calculatedHash = bytesToHex(hash2);
+
+        // Пункт 4. Сравниваем полученный хеш с тем, что был в запросе
+        return calculatedHash.equals(receivedHash);
+    }
+
+    private byte[] getSecretHashByInitData() throws InvalidKeyException, NoSuchAlgorithmException {
+        var sha256HMAC = Mac.getInstance("HmacSHA256");
+        var secretKeySpec = new SecretKeySpec("WebAppData".getBytes(), "HmacSHA256");
+        sha256HMAC.init(secretKeySpec);
+
+        return sha256HMAC.doFinal(botToken.getBytes());
+    }
+
+    private String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
     }
 }

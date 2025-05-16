@@ -97,6 +97,16 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
+                "https://bordex.online:80",
+                "https://bordex.online:3000",
+                "https://bordex.online:443",
+                "https://bordex.online:5173",
+                "https://bordex.online",
+                "http://bordex.online:80",
+                "http://bordex.online:3000",
+                "http://bordex.online:443",
+                "http://bordex.online:5173",
+                "http://bordex.online",
                 "http://127.0.0.1:5173",
                 "https://127.0.0.1:5173",
                 "http://localhost",

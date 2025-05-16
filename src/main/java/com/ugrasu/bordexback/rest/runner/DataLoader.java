@@ -6,8 +6,8 @@ import com.ugrasu.bordexback.rest.entity.Task;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.entity.enums.*;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
-import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.BoardRolesRepository;
+import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -39,8 +39,8 @@ public class DataLoader implements CommandLineRunner {
         List<User> users = getUsers(20);
         users = userRepository.saveAll(users);
 
-        Board board1 = getBoard(users.get(0), "Доска номер один", "Описание доски номер один");
-        Board board2 = getBoard(users.get(1), "Доска номер два", "Описание доски номер два");
+        Board board1 = getBoard(users.get(0), "Frontend", "Разработка интерфейса сайта bordex");
+        Board board2 = getBoard(users.get(1), "Backend", "Разработка серверной части сайта bordex");
 
         Board savedBoard1 = boardRepository.save(board1);
         Board savedBoard2 = boardRepository.save(board2);
@@ -67,12 +67,14 @@ public class DataLoader implements CommandLineRunner {
         createUserBoardRoles(firstUsers, savedBoard1);
         createUserBoardRoles(secondUsers, savedBoard2);
 
-        List<Task> tasks1 = getTasks(firstUsers, savedBoard1);
-        List<Task> tasks2 = getTasks(secondUsers, savedBoard2);
+        List<Task> tasks1 = getTasks(firstUsers, savedBoard1, tasksName1, tasksDesc1);
+        List<Task> tasks2 = getTasks(secondUsers, savedBoard2, tasksName2, tasksDesc2);
 
         taskRepository.saveAll(tasks1);
         taskRepository.saveAll(tasks2);
 
+        savedBoard1.setProgress(taskRepository.calculateAverageProgressByBoard(savedBoard1));
+        savedBoard2.setProgress(taskRepository.calculateAverageProgressByBoard(savedBoard2));
 
         User me = userRepository.findById(1L).get();
         me.setPassword(encoder.encode("123456"));
@@ -122,7 +124,7 @@ public class DataLoader implements CommandLineRunner {
         boardRolesRepository.saveAll(boardRolesList);
     }
 
-    private List<Task> getTasks(List<User> users, Board board) {
+    private List<Task> getTasks(List<User> users, Board board, List<String> taskNames, List<String> taskDescriptions) {
         List<Task> tasks = new ArrayList<>();
         List<Status> statuses = List.of(Status.NEW, Status.IN_PROGRESS, Status.DONE, Status.REVIEW);
         for (int i = 0; i < 10; i++) {
@@ -132,9 +134,9 @@ public class DataLoader implements CommandLineRunner {
             task.setAssignees(getAssignes(users));
             task.setPriority(getRandomEnum(Priority.class));
             task.setStatus(statuses.get(getRandom(0, statuses.size() - 1)));
-            task.setName("Task " + (i + 1));
+            task.setName(taskNames.get(i));
             task.setDeadline(LocalDateTime.now().plusDays(getRandom(0, 2)));
-            task.setDescription("admin task");
+            task.setDescription(taskDescriptions.get(i));
             task.setTag(getRandomEnum(Tag.class));
             task.setProgress(getRandom(0, 100));
             tasks.add(task);
@@ -145,11 +147,7 @@ public class DataLoader implements CommandLineRunner {
     private Set<BoardRole> getSetOfRoles() {
         Set<BoardRole> boardRoles = new HashSet<>();
         boardRoles.add(BoardRole.VIEWER);
-        BoardRole nextBoardRole;
-        do {
-            nextBoardRole = getRandomEnum(BoardRole.class);
-        } while (boardRoles.contains(nextBoardRole));
-        boardRoles.add(nextBoardRole);
+        boardRoles.add(BoardRole.DEVELOPER);
         return boardRoles;
     }
 
@@ -177,9 +175,9 @@ public class DataLoader implements CommandLineRunner {
         List<User> users = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             User user = new User();
-            user.setUsername("user" + (i + 1));
-            user.setFirstName("firstname" + (i + 1));
-            user.setLastName("lastname" + (i + 1));
+            user.setUsername(usernames.get(i));
+            user.setFirstName(firstNames.get(i));
+            user.setLastName(lastNames.get(i));
             user.setEmail("user" + (i + 1) + "@gmail.com");
             Set<Role> roles = new HashSet<>();
             roles.add(Role.USER);
@@ -198,4 +196,51 @@ public class DataLoader implements CommandLineRunner {
         board.setDescription(description);
         return board;
     }
+
+
+    List<String> usernames = List.of(
+            "alex", "maria", "john", "sophia", "michael",
+            "luna.dev", "charlie99", "olivia_w", "ethan_thewise", "emma_k",
+            "daniel42", "grace_h", "leo.strong", "isabella88", "noah_m",
+            "ava.j", "liam.dev", "mia_rose", "nathan_c", "zoe_l"
+    );
+
+    List<String> firstNames = List.of(
+            "Alexander", "Maria", "John", "Sophia", "Michael",
+            "Luna", "Charlie", "Olivia", "Ethan", "Emma",
+            "Daniel", "Grace", "Leo", "Isabella", "Noah",
+            "Ava", "Liam", "Mia", "Nathan", "Zoe"
+    );
+
+    List<String> lastNames = List.of(
+            "Ivanov", "Petrova", "Doe", "Smith", "Brown",
+            "Taylor", "Johnson", "Williams", "Davis", "Miller",
+            "Wilson", "Moore", "Anderson", "Thomas", "Jackson",
+            "White", "Harris", "Martin", "Thompson", "Lee"
+    );
+
+    List<String> tasksName1 = List.of(
+            "Страница входа", "Форма регистрации", "Панель пользователя", "Редактор профиля", "Панель уведомлений",
+            "Поисковая строка", "Элементы пагинации", "Переключение темы", "Отображение ошибок", "Локализация интерфейса"
+    );
+
+    List<String> tasksName2 = List.of(
+            "JWT-аутентификация", "Сервис пользователей", "Система ролей и прав", "Миграции базы данных", "Уведомления на почту",
+            "API загрузки файлов", "Логирование и мониторинг", "Обработка исключений", "REST API", "Валидация данных"
+    );
+
+    List<String> tasksDesc1 = List.of(
+            "Создание интерфейса входа с валидацией", "Реализация регистрации с проверкой полей", "Разметка панели пользователя с виджетами",
+            "Редактирование профиля с предварительным просмотром", "Вывод уведомлений в реальном времени",
+            "Добавление поиска с задержкой", "Реализация отображения постраничных данных", "Включение светлой и тёмной темы",
+            "Показ понятных сообщений об ошибках", "Поддержка нескольких языков в интерфейсе"
+    );
+
+    List<String> tasksDesc2 = List.of(
+            "Реализация аутентификации через JWT", "Бизнес-логика для работы с пользователями", "Контроль доступа по ролям и правам",
+            "Управление изменениями схемы через Flyway", "Отправка уведомлений по электронной почте",
+            "Создание endpoint для загрузки файлов", "Логирование запросов и сбор метрик", "Унифицированная обработка ошибок",
+            "Создание REST API для CRUD операций", "Проверка входящих данных на корректность"
+    );
+
 }
