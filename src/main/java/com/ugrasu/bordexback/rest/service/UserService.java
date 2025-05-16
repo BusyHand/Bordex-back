@@ -59,4 +59,9 @@ public class UserService {
         eventPublisher.publish(USER_DELETED, userToDelete);
         userRepository.deleteById(id);
     }
+
+    public User findOneByChatId(Long chatId) {
+        return userRepository.findByChatId(chatId)
+                .orElseThrow(() -> new EntityNotFoundException("User with this %s chatId not found".formatted(chatId)));
+    }
 }

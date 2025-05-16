@@ -9,7 +9,6 @@ import com.ugrasu.bordexback.rest.entity.enums.Role;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -59,7 +58,7 @@ public class AuthService {
     }
 
     public Tokens loginTelegram(User user) {
-        return login(new TelegramUserAuthentication(user.getTelegramPasscode()));
+        return login(new TelegramUserAuthentication(user.getTelegramPasscode(), user.getChatId()));
     }
 
     public User register(User user) {

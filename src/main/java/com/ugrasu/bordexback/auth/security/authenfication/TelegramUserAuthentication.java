@@ -9,9 +9,9 @@ public class TelegramUserAuthentication extends AbstractAuthenticationToken {
 
     private final Object principal;
 
-    public TelegramUserAuthentication(String telegramPasscode) {
+    public TelegramUserAuthentication(String telegramPasscode, Long chatId) {
         super(null);
-        this.principal = telegramPasscode;
+        this.principal = telegramPasscode != null ? telegramPasscode : chatId;
         setAuthenticated(false);
     }
 
