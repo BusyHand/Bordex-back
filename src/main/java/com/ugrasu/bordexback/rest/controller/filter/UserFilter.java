@@ -6,11 +6,14 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
-public record UserFilter(String username, String email, Role role, Boolean block, List<Long> boardIds) {
+public record UserFilter(String username, String telegramUsername, String email, Role role, Boolean block,
+                         List<Long> boardIds) {
 
     public Specification<User> filter() {
-        return Specification.where(usernameSpec(username))
-                .and(emailSpec(email))
+        return Specification
+                .where(usernameSpec(username))
+                .or(telegramUsername(telegramUsername))
+                .or(emailSpec(email))
                 .and(roleSpec(role))
                 .and(blockSpec(block))
                 .and(userBoardsIdInSpec(boardIds));
@@ -18,13 +21,19 @@ public record UserFilter(String username, String email, Role role, Boolean block
 
     private Specification<User> usernameSpec(String username) {
         return (root, query, cb) -> username != null
-                ? cb.like(cb.lower(root.get("username")), username.toLowerCase() + "%")
+                ? cb.like(cb.lower(root.get("username")), "%" + username.toLowerCase() + "%")
                 : null;
     }
 
     private Specification<User> emailSpec(String email) {
         return (root, query, cb) -> email != null
-                ? cb.like(cb.lower(root.get("email")), email.toLowerCase() + "%")
+                ? cb.like(cb.lower(root.get("email")), "%" + email.toLowerCase() + "%")
+                : null;
+    }
+
+    private Specification<User> telegramUsername(String telegramUsername) {
+        return (root, query, cb) -> telegramUsername != null
+                ? cb.like(cb.lower(root.get("telegramUsername")), "%" + telegramUsername.toLowerCase() + "%")
                 : null;
     }
 

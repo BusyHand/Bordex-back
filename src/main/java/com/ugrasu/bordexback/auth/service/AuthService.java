@@ -133,6 +133,8 @@ public class AuthService {
             throw new EntityExistsException("User with username or email already exists");
         }
         User loggedUser = userRepository.findById(userId).get();
+        loggedUser.setLastName(user.getUsername());
+        loggedUser.setFirstName(user.getFirstName());
         loggedUser.setUsername(user.getUsername());
         loggedUser.setEmail(user.getEmail());
         loggedUser.setPassword(passwordEncoder.encode(user.getPassword()));

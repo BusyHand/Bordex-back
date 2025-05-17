@@ -3,7 +3,7 @@ package com.ugrasu.bordexback.websocket.listener;
 import com.ugrasu.bordexback.notification.dto.event.ConsumerPayload;
 import com.ugrasu.bordexback.notification.dto.event.NotificationPayload;
 import com.ugrasu.bordexback.notification.dto.web.NotificationDto;
-import com.ugrasu.bordexback.notification.event.NotificationEvent;
+import com.ugrasu.bordexback.notification.event.NotificationSiteEvent;
 import com.ugrasu.bordexback.rest.dto.payload.BoardPayload;
 import com.ugrasu.bordexback.rest.dto.payload.TaskPayload;
 import com.ugrasu.bordexback.rest.dto.payload.UserPayload;
@@ -87,7 +87,7 @@ public class WebSocketServiceListener {
     }
 
     @EventListener
-    public void handleTaskEvent(NotificationEvent notificationEvent) {
+    public void handleTaskEvent(NotificationSiteEvent notificationEvent) {
         NotificationPayload notificationPayload = notificationEvent.getNotificationPayload();
         NotificationDto dto = eventMapper.toDto(notificationPayload);
         Set<Long> consumersUsersId = notificationPayload.getConsumers()

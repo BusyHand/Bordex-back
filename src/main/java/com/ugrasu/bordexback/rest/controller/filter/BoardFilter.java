@@ -23,13 +23,13 @@ public record BoardFilter(Long ownerId, String name, String description, Set<Lon
 
     private Specification<Board> nameSpec(String name) {
         return (root, query, cb) -> name != null && !name.isEmpty()
-                ? cb.like(cb.lower(root.get("name")), name.toLowerCase() + "%")
+                ? cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%")
                 : null;
     }
 
     private Specification<Board> descriptionSpec(String description) {
         return (root, query, cb) -> description != null && !description.isEmpty()
-                ? cb.like(cb.lower(root.get("description")), description.toLowerCase() + "%")
+                ? cb.like(cb.lower(root.get("description")), "%" + description.toLowerCase() + "%")
                 : null;
     }
 

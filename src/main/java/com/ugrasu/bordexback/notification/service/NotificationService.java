@@ -37,7 +37,12 @@ public class NotificationService {
         if (notification.getId() != null) {
             notification.setId(null);
         }
-       return notificationRepository.save(notification);
+        Set<Consumer> collect = notification.getConsumers()
+                .stream()
+                .filter(Consumer::getAllowOnSiteNotifications)
+                .collect(toSet());
+        notification.setConsumers(collect);
+        return notificationRepository.save(notification);
     }
 
     @Transactional

@@ -5,6 +5,7 @@ import com.ugrasu.bordexback.notification.entity.Consumer;
 import com.ugrasu.bordexback.notification.entity.Notification;
 import com.ugrasu.bordexback.notification.event.NotificationEvent;
 import com.ugrasu.bordexback.notification.mapper.NotificationMapper;
+import com.ugrasu.bordexback.notification.publisher.NotificationPublisher;
 import com.ugrasu.bordexback.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -20,6 +21,7 @@ public class SiteNotificationListener {
 
     private final NotificationService notificationService;
     private final NotificationMapper notificationMapper;
+    private final NotificationPublisher notificationPublisher;
 
     @EventListener
     public void handleTaskEvent(NotificationEvent notificationEvent) {
@@ -30,6 +32,7 @@ public class SiteNotificationListener {
                 .filter(Consumer::getAllowOnSiteNotifications)
                 .collect(Collectors.toSet()));
         notificationService.save(notification);
+        notificationPublisher.publishSite(notification);
     }
 
 }

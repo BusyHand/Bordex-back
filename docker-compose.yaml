@@ -23,45 +23,45 @@ services:
     networks:
       - dev
 
-  bordex-back:
-    image: busylefthand2009/bordex-back:1.4
-    restart: "no"
-    ports:
-      - "8080:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      TZ: Asia/Yekaterinburg
-    env_file:
-      - .env
-    networks:
-      - dev
+ #bordex-back:
+ #  image: busylefthand2009/bordex-back:1.4
+ #  restart: "no"
+ #  ports:
+ #    - "8080:8080"
+ #  depends_on:
+ #    postgres:
+ #      condition: service_healthy
+ #  environment:
+ #    TZ: Asia/Yekaterinburg
+ #  env_file:
+ #    - .env
+ #  networks:
+ #    - dev
 
 
-  bordex-front:
-    image: busylefthand2009/bordex-front:1.5
-    restart: "no"
-    expose:
-      - "3000"
-    networks:
-      - dev
+ #bordex-front:
+ #  image: busylefthand2009/bordex-front:1.5
+ #  restart: "no"
+ #  expose:
+ #    - "3000"
+ #  networks:
+ #    - dev
 
-  nginx:
-    image: nginx:stable-alpine
-    restart: "no"
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - bordex-front
-      - bordex-back
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    environment:
-      TZ: Asia/Yekaterinburg
-    networks:
-      - dev
+ #nginx:
+ #  image: nginx:stable-alpine
+ #  restart: "no"
+ #  ports:
+ #    - "80:80"
+ #    - "443:443"
+ #  depends_on:
+ #    - bordex-front
+ #    - bordex-back
+ #  volumes:
+ #    - ./nginx.conf:/etc/nginx/nginx.conf
+ #  environment:
+ #    TZ: Asia/Yekaterinburg
+ #  networks:
+ #    - dev
 
 
 volumes:
