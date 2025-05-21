@@ -23,7 +23,15 @@ public interface BoardMapper extends WebMappable<Board, BoardDto, BoardSlimDto> 
             target = "membersCount",
             expression = "java(countMembers(board))"
     )
+    @Override
     BoardDto toDto(Board board);
+
+    @Override
+    @Mapping(
+            target = "boardColumns",
+            ignore = true
+    )
+    Board toEntity(BoardDto boardDto);
 
     default Long countTasks(Board board) {
         return board.getTasks() != null ? (long) board.getTasks().size() : 0L;

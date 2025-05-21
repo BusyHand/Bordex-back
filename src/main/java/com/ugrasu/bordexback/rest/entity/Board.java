@@ -1,6 +1,7 @@
 package com.ugrasu.bordexback.rest.entity;
 
 import com.ugrasu.bordexback.rest.entity.enums.Scope;
+import com.ugrasu.bordexback.rest.entity.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,6 +9,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -61,6 +63,12 @@ public class Board extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "users_id")
     )
     Set<User> boardMembers = new LinkedHashSet<>();
+
+    @OneToMany(
+            mappedBy = "board",
+            orphanRemoval = true
+    )
+    Set<BoardColumn> boardColumns = new LinkedHashSet<>();
 
     public void addBoardRoles(BoardRoles boardRoles) {
         if (this.boardRoles == null) {

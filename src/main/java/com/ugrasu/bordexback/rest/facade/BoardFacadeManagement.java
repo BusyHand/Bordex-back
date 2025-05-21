@@ -1,11 +1,12 @@
 package com.ugrasu.bordexback.rest.facade;
 
+import com.ugrasu.bordexback.rest.entity.BaseEntity;
 import com.ugrasu.bordexback.rest.entity.Board;
+import com.ugrasu.bordexback.rest.entity.BoardColumn;
 import com.ugrasu.bordexback.rest.entity.User;
 import com.ugrasu.bordexback.rest.entity.enums.BoardRole;
-import com.ugrasu.bordexback.rest.service.BoardRolesService;
-import com.ugrasu.bordexback.rest.service.BoardService;
-import com.ugrasu.bordexback.rest.service.UserService;
+import com.ugrasu.bordexback.rest.publisher.EventPublisher;
+import com.ugrasu.bordexback.rest.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.parameters.P;
@@ -13,6 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.ugrasu.bordexback.rest.event.EventType.BOARD_COLUMN_REMOVE;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +25,8 @@ public class BoardFacadeManagement {
     private final UserService userService;
     private final BoardRolesService boardRolesService;
     private final BoardService boardService;
+    private final BoardColumnService boardColumnService;
+    private final TaskService taskService;
 
     @Transactional
     @PreAuthorize("@bse.isOwner(#boardId)")
@@ -71,5 +77,23 @@ public class BoardFacadeManagement {
     @PreAuthorize("!@bse.isOwner(#boardId)")
     public Board exitFromBoard(@P("boardId") Long boardId, @P("userId") Long userId) {
         return removeUserFromBoard(boardId, userId);
+    }
+
+    public Board addColumn(Long boardId, BoardColumn boardColumn) {
+        Board board = boardService.findOne(boardId);
+        boardColumn.setBoard(board);
+        boardColumnService.save(boardColumn);
+        return board;
+    }
+
+    @Transactional
+    public void deleteColumn(Long columnId) {
+        BoardColumn boardColumn = boardColumnService.find(columnId);
+        Set<Long> tasksIds = taskService.findByStatusAndBoardId(boardColumn.getStatus(), boardColumn.getBoard().getId())
+                .stream()
+                .map(BaseEntity::getId)
+                .collect(Collectors.toSet());
+        taskService.delete(tasksIds);
+        boardColumnService.delete(columnId);
     }
 }

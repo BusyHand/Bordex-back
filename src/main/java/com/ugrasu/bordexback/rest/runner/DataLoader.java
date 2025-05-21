@@ -1,14 +1,12 @@
 package com.ugrasu.bordexback.rest.runner;
 
-import com.ugrasu.bordexback.rest.entity.Board;
-import com.ugrasu.bordexback.rest.entity.BoardRoles;
-import com.ugrasu.bordexback.rest.entity.Task;
-import com.ugrasu.bordexback.rest.entity.User;
+import com.ugrasu.bordexback.rest.entity.*;
 import com.ugrasu.bordexback.rest.entity.enums.*;
 import com.ugrasu.bordexback.rest.repository.BoardRepository;
 import com.ugrasu.bordexback.rest.repository.BoardRolesRepository;
 import com.ugrasu.bordexback.rest.repository.TaskRepository;
 import com.ugrasu.bordexback.rest.repository.UserRepository;
+import com.ugrasu.bordexback.rest.service.BoardColumnService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -23,8 +21,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static com.ugrasu.bordexback.rest.entity.enums.Status.*;
 
-@Profile("dev")
+
 @Component
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
@@ -34,6 +33,7 @@ public class DataLoader implements CommandLineRunner {
     private final TaskRepository taskRepository;
     private final BoardRolesRepository boardRolesRepository;
     private final PasswordEncoder encoder;
+    private final BoardColumnService boardColumnService;
 
     @Override
     @Transactional
@@ -80,7 +80,7 @@ public class DataLoader implements CommandLineRunner {
 
         User me = userRepository.findById(1L).get();
         me.setPassword(encoder.encode("123456"));
-        me.setEmail("cool908yan@yandex.ru");
+        me.setEmail("cool908@yandex.ru");
         userRepository.save(me);
         Board board = boardRepository.findById(2L).get();
         BoardRoles boardRoles = BoardRoles.builder()
@@ -102,6 +102,19 @@ public class DataLoader implements CommandLineRunner {
         board.getBoardMembers().add(me);
         boardRolesRepository.save(boardRoles);
         boardRepository.save(board);
+
+        setColumns(savedBoard1, 1);
+        setColumns(savedBoard2, 1);
+    }
+
+    private void setColumns(Board savedBoard1, long i) {
+        for (Status status : List.of(NEW, IN_PROGRESS, REVIEW, DONE)) {
+            BoardColumn boardColumn1 = new BoardColumn();
+            boardColumn1.setBoard(savedBoard1);
+            boardColumn1.setStatus(status);
+            boardColumn1.setColumnNumber(i++);
+            boardColumnService.save(boardColumn1);
+        }
     }
 
     private void createUserBoardRoles(List<User> users, Board board) {
@@ -128,7 +141,7 @@ public class DataLoader implements CommandLineRunner {
 
     private List<Task> getTasks(List<User> users, Board board, List<String> taskNames, List<String> taskDescriptions) {
         List<Task> tasks = new ArrayList<>();
-        List<Status> statuses = List.of(Status.NEW, Status.IN_PROGRESS, Status.DONE, Status.REVIEW);
+        List<Status> statuses = List.of(NEW, Status.IN_PROGRESS, Status.DONE, Status.REVIEW);
         for (int i = 0; i < 10; i++) {
             Task task = new Task();
             task.setBoard(board);

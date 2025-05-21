@@ -3,15 +3,13 @@ package com.ugrasu.bordexback.rest.publisher;
 import com.ugrasu.bordexback.rest.dto.payload.BoardPayload;
 import com.ugrasu.bordexback.rest.dto.payload.TaskPayload;
 import com.ugrasu.bordexback.rest.dto.payload.UserPayload;
-import com.ugrasu.bordexback.rest.entity.Board;
-import com.ugrasu.bordexback.rest.entity.BoardRoles;
-import com.ugrasu.bordexback.rest.entity.Task;
-import com.ugrasu.bordexback.rest.entity.User;
+import com.ugrasu.bordexback.rest.entity.*;
 import com.ugrasu.bordexback.rest.event.*;
 import com.ugrasu.bordexback.rest.mapper.EventMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 
@@ -28,6 +26,11 @@ public class EventPublisher {
 
     public Task publish(EventType eventType, Task task) {
         return publish(eventType, task, null);
+    }
+
+    @Async
+    public void publish(EventType eventType, BoardColumn boardColumn) {
+        publish(eventType, boardColumn.getBoard(), null);
     }
 
     public Task publish(EventType eventType, Task task, User unassignUser) {

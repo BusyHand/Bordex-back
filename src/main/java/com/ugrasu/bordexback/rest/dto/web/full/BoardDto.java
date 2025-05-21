@@ -7,9 +7,12 @@ import com.ugrasu.bordexback.rest.dto.BaseDto;
 import com.ugrasu.bordexback.rest.dto.web.slim.UserSlimDto;
 import com.ugrasu.bordexback.rest.entity.enums.Scope;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -110,5 +113,8 @@ public class BoardDto extends BaseDto {
             groups = {OnCreate.class, OnUpdate.class}
     )
     Long membersCount;
+
+    @Valid
+    Set<BoardColumnDto> boardColumns;
 
 }

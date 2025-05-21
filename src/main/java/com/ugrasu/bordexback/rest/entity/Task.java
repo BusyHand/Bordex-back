@@ -85,7 +85,6 @@ public class Task extends BaseEntity {
     )
     Set<User> assignees = new LinkedHashSet<>();
 
-
     public void addAssignee(User assignee) {
         this.assignees.add(assignee);
         assignee.getAssigneesTask().add(this);
